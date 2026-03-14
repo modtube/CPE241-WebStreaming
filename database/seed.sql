@@ -1,73 +1,76 @@
 use streamingDB;
 
 -- ########################################################################################################
--- LOGICALLY COMPLETE SAMPLE DATA
+-- LOGICALLY COMPLETE SAMPLE DATA  (EXPANDED — 2–3× ORIGINAL, WITH REALISTIC TIMESTAMPS)
+--
+-- Insertion order respects ALL foreign key dependencies:
+--   Timezone, ContentRating, Genre, LanguageList, Person  (fully independent)
+--   → Country  (needs Timezone)
+--   → AppUser, Content  (both need Country; Content also needs ContentRating)
+--   → everything else
 -- ########################################################################################################
 
+
 -- ══════════════════════════════════════════════════════════════════════
--- 1. INDEPENDENT TABLES
+-- 1. FULLY INDEPENDENT TABLES
 -- ══════════════════════════════════════════════════════════════════════
 
--- RegisterDate logic:
---   Wave 1 (IDs 1–10)  → early adopters, 2021
---   Wave 2 (IDs 11–20) → mid-growth,    2022
---   Wave 3 (IDs 21–30) → expansion,     2023
---   Wave 4 (IDs 31–40) → recent users,  2024
-INSERT INTO AppUser (Username, Email, Password, RegisterDate, UserType) VALUES 
-('Wirachat_Admin',  'wirachat@kmutt.ac.th',    'safe123',      '2021-01-15 09:00:00', 'Admin'),
-('GenshinLover',    'traveler@teyvat.com',      'paimon',       '2021-02-03 14:22:11', 'Premium'),
-('Anya_Fans',       'wakuwaku@spy.com',         'peanuts',      '2021-03-18 08:45:30', 'Free'),
-('Luffy_Pirate',    'luffy@grandline.com',      'meat',         '2021-05-07 20:10:05', 'Premium'),
-('Zoro_Lost',       'zoro@swords.com',          'bushido',      '2021-06-14 11:33:47', 'Free'),
-('Nami_Money',      'nami@berries.com',         'gold',         '2021-07-29 16:55:22', 'Premium'),
-('Sanji_Cook',      'sanji@allblue.com',        'mellorine',    '2021-08-05 07:12:59', 'Free'),
-('Robin_History',   'robin@ohara.com',          'archaeology',  '2021-09-20 13:40:00', 'Premium'),
-('Chopper_Doc',     'chopper@drum.com',         'candy',        '2021-10-11 19:08:34', 'Free'),
-('Franky_Super',    'franky@water7.com',        'cola',         '2021-11-28 10:27:16', 'Premium'),
-('Brook_Soul',      'brook@soul.com',           'laboon',       '2022-01-04 22:15:50', 'Free'),
-('Jimbei_Fish',     'jimbei@sea.com',           'karate',       '2022-02-17 09:03:41', 'Premium'),
-('Usopp_Sniper',    'usopp@brave.com',          'popgreen',     '2022-03-30 15:49:07', 'Free'),
-('Law_Heart',       'law@op.com',               'shambles',     '2022-05-12 18:22:33', 'Premium'),
-('Kid_Metal',       'kid@punk.com',             'magnet',       '2022-06-08 06:57:44', 'Free'),
-('Hancock_Love',    'hancock@kuja.com',         'salome',       '2022-08-01 12:34:19', 'Premium'),
-('Ace_Fire',        'ace@spade.com',            'meramera',     '2022-09-23 21:05:02', 'Free'),
-('Sabo_Dragon',     'sabo@rev.com',             'dragonclaw',   '2022-10-16 17:48:55', 'Premium'),
-('Shanks_Red',      'shanks@yonko.com',         'haki',         '2022-11-07 08:31:28', 'Free'),
-('Buggy_Clown',     'buggy@cross.com',          'flashy',       '2022-12-25 23:59:00', 'Premium'),
--- Wave 3 (2023)
-('Naruto_Uzumaki',  'naruto@konoha.com',        'dattebayo',    '2023-01-09 10:14:37', 'Premium'),
-('Sasuke_Uchiha',   'sasuke@avenger.com',       'chidori',      '2023-02-14 14:00:00', 'Free'),
-('Sakura_Haruno',   'sakura@medic.com',         'shannaro',     '2023-03-22 09:30:15', 'Premium'),
-('Kakashi_Sensei',  'kakashi@sharingan.com',    'copycat',      '2023-04-01 00:00:01', 'Free'),
-('Itachi_Crow',     'itachi@akatsuki.com',      'tsukuyomi',    '2023-05-18 03:33:33', 'Premium'),
-('Goku_Saiyan',     'goku@capsule.com',         'kamehameha',   '2023-06-29 12:00:00', 'Free'),
-('Vegeta_Prince',   'vegeta@saiyan.com',        'finalflash',   '2023-07-04 08:08:08', 'Premium'),
-('Bulma_Genius',    'bulma@brief.com',          'dragonball',   '2023-08-15 16:45:20', 'Free'),
-('Tanjiro_Blade',   'tanjiro@hashira.com',      'hinokami',     '2023-09-03 11:22:44', 'Premium'),
-('Nezuko_Box',      'nezuko@demon.com',         'bamboo',       '2023-10-10 19:55:10', 'Free'),
--- Wave 4 (2024)
-('Edward_Elric',    'edward@alchemy.com',       'equivalent',   '2024-01-07 08:00:00', 'Premium'),
-('Roy_Mustang',     'roy@flame.com',            'colonel',      '2024-02-14 09:14:59', 'Free'),
-('Mikasa_Ackerman', 'mikasa@survey.com',        'scarf',        '2024-03-05 07:30:00', 'Premium'),
-('Armin_Strategist','armin@brain.com',          'colossal',     '2024-04-18 13:13:13', 'Free'),
-('Levi_Captain',    'levi@clean.com',           'HumanitysBest','2024-05-01 05:00:00', 'Premium'),
-('Sasha_Potato',    'sasha@potato.com',         'potatoes',     '2024-06-20 12:30:00', 'Free'),
-('Historia_Queen',  'historia@wall.com',        'reiss',        '2024-07-14 18:00:00', 'Premium'),
-('Erwin_Smith',     'erwin@commander.com',      'chargefwd',    '2024-08-09 06:45:00', 'Free'),
-('Hange_Zoe',       'hange@titan.com',          'experiment',   '2024-09-27 20:20:20', 'Premium'),
-('Reiner_Armor',    'reiner@warrior.com',       'bertholt',     '2024-11-11 11:11:11', 'Free');
+-- ── Timezone ──────────────────────────────────────────────────────────
+-- TimezoneID (by insertion order):
+--   1=UTC               2=Asia/Bangkok      3=Asia/Tokyo
+--   4=Asia/Shanghai     5=Asia/Seoul        6=Europe/Berlin
+--   7=Europe/London     8=Europe/Paris      9=America/New_York
+--  10=America/Chicago  11=America/Los_Angeles  12=Australia/Sydney
+--  13=Pacific/Auckland 14=America/Sao_Paulo 15=America/Mexico_City
+INSERT INTO Timezone (IANA_Name, Current_Offset) VALUES
+('UTC',                 '+00:00'),  -- 1
+('Asia/Bangkok',        '+07:00'),  -- 2
+('Asia/Tokyo',          '+09:00'),  -- 3
+('Asia/Shanghai',       '+08:00'),  -- 4
+('Asia/Seoul',          '+09:00'),  -- 5
+('Europe/Berlin',       '+01:00'),  -- 6
+('Europe/London',       '+00:00'),  -- 7
+('Europe/Paris',        '+01:00'),  -- 8
+('America/New_York',    '-05:00'),  -- 9
+('America/Chicago',     '-06:00'),  -- 10
+('America/Los_Angeles', '-08:00'),  -- 11
+('Australia/Sydney',    '+11:00'),  -- 12
+('Pacific/Auckland',    '+13:00'),  -- 13
+('America/Sao_Paulo',   '-03:00'),  -- 14
+('America/Mexico_City', '-06:00');  -- 15
 
--- No temporal attributes in Genre or LanguageList
+-- ── ContentRating ─────────────────────────────────────────────────────
+-- Using a familiar TV/film-style rating system.
+-- MaturityLevel 1 (youngest) → 5 (adults only).
+-- RatingID (by insertion order):
+--   1=G   2=PG   3=PG-13   4=TV-14   5=R   6=TV-MA   7=NC-17
+INSERT INTO ContentRating (RatingLabel, MaturityLevel, Description) VALUES
+('G',      1, 'General Audiences — suitable for all ages.'),
+('PG',     2, 'Parental Guidance suggested — some material may not suit young children.'),
+('PG-13',  3, 'Parents strongly cautioned — some material may be inappropriate for children under 13.'),
+('TV-14',  4, 'Parents strongly cautioned for children under 14 — contains intense content.'),
+('R',      5, 'Restricted — under 17 requires accompanying parent or adult guardian.'),
+('TV-MA',  5, 'Mature Audiences Only — may be unsuitable for children under 17.'),
+('NC-17',  5, 'Adults Only — no one 17 and under admitted.');
+
+-- ── Genre ─────────────────────────────────────────────────────────────
+-- GenreID: 1=Sci-Fi 2=Anime 3=Comedy 4=Action 5=Mystery 6=Thriller
+--          7=Romance 8=Horror 9=Documentary 10=Fantasy 11=Drama
+--          12=Adventure 13=Crime 14=Historical 15=Psychological
 INSERT INTO Genre (GenreName) VALUES 
 ('Sci-Fi'), ('Anime'), ('Comedy'), ('Action'), ('Mystery'),
 ('Thriller'), ('Romance'), ('Horror'), ('Documentary'), ('Fantasy'),
 ('Drama'), ('Adventure'), ('Crime'), ('Historical'), ('Psychological');
 
+-- ── LanguageList ──────────────────────────────────────────────────────
+-- LanguageID: 1=English 2=Thai 3=Japanese 4=Spanish 5=Korean 6=French
+--             7=German 8=Mandarin 9=Italian 10=Russian
 INSERT INTO LanguageList (langName) VALUES 
 ('English'), ('Thai'), ('Japanese'), ('Spanish'), ('Korean'),
 ('French'), ('German'), ('Mandarin'), ('Italian'), ('Russian'),
 ('Portuguese'), ('Arabic'), ('Hindi'), ('Turkish'), ('Dutch');
 
+-- ── Person ────────────────────────────────────────────────────────────
 INSERT INTO Person (fName, mName, lName, Nationality, BirthDate) VALUES 
 ('Christopher',  NULL,      'Nolan',       'British',      '1970-07-30'), -- 1
 ('Tatsuya',      NULL,      'Endo',        'Japanese',     '1980-07-23'), -- 2
@@ -107,60 +110,198 @@ INSERT INTO Person (fName, mName, lName, Nationality, BirthDate) VALUES
 
 
 -- ══════════════════════════════════════════════════════════════════════
--- 2. CONTENT  (IDs 1–35)
+-- 2. TABLES THAT DEPEND ON Timezone
 -- ══════════════════════════════════════════════════════════════════════
-INSERT INTO Content (Title, Description, ReleaseDate, Price, ContentType) VALUES 
-('Interstellar',                     'Space exploration.',                          '2014-11-07',  9.99,  'Movie'),   -- 1
-('Spy x Family',                     'Spy family.',                                 '2022-04-09',  19.99, 'TV_Show'), -- 2
-('The Office',                       'Paper company.',                              '2005-03-24',  24.99, 'TV_Show'), -- 3
-('Inception',                        'Dream heist.',                                '2010-07-16',  7.99,  'Movie'),   -- 4
-('One Piece',                        'Pirate treasure.',                            '1999-10-20',  49.99, 'TV_Show'), -- 5
-('Breaking Bad',                     'Chemistry teacher.',                          '2008-01-20',  29.99, 'TV_Show'), -- 6
-('Your Name',                        'Star-crossed swap.',                          '2016-08-26',  12.99, 'Movie'),   -- 7
-('Dune',                             'Spice wars.',                                 '2021-10-22',  14.99, 'Movie'),   -- 8
-('Attack on Titan',                  'Giant war.',                                  '2013-04-07',  35.00, 'TV_Show'), -- 9
-('The Mandalorian',                  'Bounty hunter.',                              '2019-11-12',  19.99, 'TV_Show'), -- 10
-('Parasite',                         'Class struggle.',                             '2019-05-30',  9.50,  'Movie'),   -- 11
-('The Dark Knight',                  'Gotham hero.',                                '2008-07-18',  5.99,  'Movie'),   -- 12
-('Tenet',                            'Reverse time.',                               '2020-08-26',  11.99, 'Movie'),   -- 13
-('Everything Everywhere All at Once','Multiverse.',                                 '2022-03-25',  13.50, 'Movie'),   -- 14
-('Jujutsu Kaisen',                   'Curse hunters.',                              '2020-10-03',  25.00, 'TV_Show'), -- 15
-('Better Call Saul',                 'Criminal lawyer.',                            '2015-02-08',  22.00, 'TV_Show'), -- 16
-('Stranger Things',                  'Mysterious girl.',                            '2016-07-15',  18.00, 'TV_Show'), -- 17
-('The Godfather',                    'Crime family.',                               '1972-03-24',  15.00, 'Movie'),   -- 18
-('Spirited Away',                    'Ghost world.',                                '2001-07-20',  10.00, 'Movie'),   -- 19
-('Chernobyl',                        'Power plant.',                                '2019-05-06',  12.00, 'TV_Show'), -- 20
-('Naruto',                           'Ninja who dreams of being Hokage.',           '2002-10-03',  29.99, 'TV_Show'), -- 21
-('Dragon Ball Z',                    'Saiyan warriors protect Earth.',              '1989-04-26',  24.99, 'TV_Show'), -- 22
-('Demon Slayer',                     'Tanjiro fights demons for Nezuko.',           '2019-04-06',  22.00, 'TV_Show'), -- 23
-('Fullmetal Alchemist: Brotherhood', 'Brothers seek the Philosopher Stone.',       '2009-04-05',  26.00, 'TV_Show'), -- 24
-('Dune: Part Two',                   'Paul leads the Fremen to war.',              '2024-03-01',  16.99, 'Movie'),   -- 25
-('Oppenheimer',                      'Father of the atomic bomb.',                 '2023-07-21',  12.99, 'Movie'),   -- 26
-('The Grand Budapest Hotel',         'Legendary concierge in a fading empire.',    '2014-03-07',  8.99,  'Movie'),   -- 27
-('Pulp Fiction',                     'Interconnected crime stories in L.A.',       '1994-10-14',  7.99,  'Movie'),   -- 28
-('Squid Game',                       'Desperate people compete in deadly games.',  '2021-09-17',  18.00, 'TV_Show'), -- 29
-('Arcane',                           'The origins of Vi and Jinx.',                '2021-11-06',  15.00, 'TV_Show'), -- 30
-('Severance',                        'Office workers with severed memories.',       '2022-02-18',  14.99, 'TV_Show'), -- 31
-('Blade Runner 2049',                'A replicant hunter uncovers secrets.',        '2017-10-06',  11.99, 'Movie'),   -- 32
-('Princess Mononoke',                'Humans clash with forest spirits.',           '1997-07-12',  9.99,  'Movie'),   -- 33
-('Goodfellas',                       'Rise and fall of a mob associate.',           '1990-09-19',  8.50,  'Movie'),   -- 34
-('The Bear',                         'A fine-dining chef runs a sandwich shop.',   '2022-06-23',  12.00, 'TV_Show'); -- 35
+
+-- ── Country ───────────────────────────────────────────────────────────
+-- CountryID: 1=Thailand 2=China 3=Germany 4=Japan 5=United States
+--            6=South Korea 7=France 8=United Kingdom 9=Australia 10=Brazil
+--           11=Mexico 12=New Zealand 13=Canada 14=Spain 15=Italy
+INSERT INTO Country (CountryName, PrimaryTimezoneID) VALUES
+('Thailand',         2),   -- 1  → Asia/Bangkok
+('China',            4),   -- 2  → Asia/Shanghai
+('Germany',          6),   -- 3  → Europe/Berlin
+('Japan',            3),   -- 4  → Asia/Tokyo
+('United States',    9),   -- 5  → America/New_York
+('South Korea',      5),   -- 6  → Asia/Seoul
+('France',           8),   -- 7  → Europe/Paris
+('United Kingdom',   7),   -- 8  → Europe/London
+('Australia',       12),   -- 9  → Australia/Sydney
+('Brazil',          14),   -- 10 → America/Sao_Paulo
+('Mexico',          15),   -- 11 → America/Mexico_City
+('New Zealand',     13),   -- 12 → Pacific/Auckland
+('Canada',          10),   -- 13 → America/Chicago
+('Spain',            8),   -- 14 → Europe/Paris (UTC+1, same offset)
+('Italy',            8);   -- 15 → Europe/Paris (UTC+1, same offset)
 
 
 -- ══════════════════════════════════════════════════════════════════════
--- 3. LOGICAL COMPLETENESS — Video Quality, Genres, Languages
+-- 3. TABLES THAT DEPEND ON Country
+-- ══════════════════════════════════════════════════════════════════════
+
+-- ── AppUser (with CountryID) ──────────────────────────────────────────
+-- Country assignment rationale (lore-faithful):
+--   Wirachat_Admin            → Thailand (1)    KMUTT is a Thai university
+--   GenshinLover              → China    (2)    Genshin Impact is a Chinese game
+--   Anya_Fans                 → Germany  (3)    Spy x Family is set in "Berlint"
+--   One Piece crew (10 users) → Japan    (4)    Manga/anime origin country
+--   Law_Heart                 → Spain   (14)    Flevance has a Mediterranean feel
+--   Kid_Metal                 → Australia (9)   Punk / frontier energy
+--   Hancock_Love              → South Korea (6) K-beauty queen vibes
+--   Ace_Fire, Sabo_Dragon     → Brazil  (10)    Tropical / revolutionary spirit
+--   Shanks_Red                → United Kingdom (8) Red-haired European seafarer
+--   Buggy_Clown               → Italy   (15)    Circus / commedia dell'arte flair
+--   Naruto crew (5 users)     → Japan    (4)    Hidden Leaf Village
+--   Goku, Vegeta, Bulma       → United States (5) DBZ English-dub cultural home
+--   Tanjiro, Nezuko           → Japan    (4)    Taisho-era Japan setting
+--   FMA & AoT crews (10 users)→ Germany  (3)    Amestris / the Walls are Central-Europe inspired
+--
+-- RegisterDate waves:
+--   Wave 1 (IDs 1–10)  → early adopters 2021
+--   Wave 2 (IDs 11–20) → mid-growth     2022
+--   Wave 3 (IDs 21–30) → expansion      2023
+--   Wave 4 (IDs 31–40) → recent users   2024
+INSERT INTO AppUser (Username, Email, Password, RegisterDate, CountryID, UserType) VALUES
+('Wirachat_Admin',   'wirachat@kmutt.ac.th',    'safe123',       '2021-01-15 09:00:00',  1,  'Admin'),     -- Thailand
+('GenshinLover',     'traveler@teyvat.com',      'paimon',        '2021-02-03 14:22:11',  2,  'Premium'),   -- China
+('Anya_Fans',        'wakuwaku@spy.com',         'peanuts',       '2021-03-18 08:45:30',  3,  'Free'),      -- Germany
+('Luffy_Pirate',     'luffy@grandline.com',      'meat',          '2021-05-07 20:10:05',  4,  'Premium'),   -- Japan
+('Zoro_Lost',        'zoro@swords.com',          'bushido',       '2021-06-14 11:33:47',  4,  'Free'),      -- Japan
+('Nami_Money',       'nami@berries.com',         'gold',          '2021-07-29 16:55:22',  4,  'Premium'),   -- Japan
+('Sanji_Cook',       'sanji@allblue.com',        'mellorine',     '2021-08-05 07:12:59',  4,  'Free'),      -- Japan
+('Robin_History',    'robin@ohara.com',          'archaeology',   '2021-09-20 13:40:00',  4,  'Premium'),   -- Japan
+('Chopper_Doc',      'chopper@drum.com',         'candy',         '2021-10-11 19:08:34',  4,  'Free'),      -- Japan
+('Franky_Super',     'franky@water7.com',        'cola',          '2021-11-28 10:27:16',  4,  'Premium'),   -- Japan
+-- Wave 2
+('Brook_Soul',       'brook@soul.com',           'laboon',        '2022-01-04 22:15:50',  4,  'Free'),      -- Japan
+('Jimbei_Fish',      'jimbei@sea.com',           'karate',        '2022-02-17 09:03:41',  4,  'Premium'),   -- Japan
+('Usopp_Sniper',     'usopp@brave.com',          'popgreen',      '2022-03-30 15:49:07',  4,  'Free'),      -- Japan
+('Law_Heart',        'law@op.com',               'shambles',      '2022-05-12 18:22:33', 14,  'Premium'),   -- Spain
+('Kid_Metal',        'kid@punk.com',             'magnet',        '2022-06-08 06:57:44',  9,  'Free'),      -- Australia
+('Hancock_Love',     'hancock@kuja.com',         'salome',        '2022-08-01 12:34:19',  6,  'Premium'),   -- South Korea
+('Ace_Fire',         'ace@spade.com',            'meramera',      '2022-09-23 21:05:02', 10,  'Free'),      -- Brazil
+('Sabo_Dragon',      'sabo@rev.com',             'dragonclaw',    '2022-10-16 17:48:55', 10,  'Premium'),   -- Brazil
+('Shanks_Red',       'shanks@yonko.com',         'haki',          '2022-11-07 08:31:28',  8,  'Free'),      -- United Kingdom
+('Buggy_Clown',      'buggy@cross.com',          'flashy',        '2022-12-25 23:59:00', 15,  'Premium'),   -- Italy
+-- Wave 3
+('Naruto_Uzumaki',   'naruto@konoha.com',        'dattebayo',     '2023-01-09 10:14:37',  4,  'Premium'),   -- Japan
+('Sasuke_Uchiha',    'sasuke@avenger.com',       'chidori',       '2023-02-14 14:00:00',  4,  'Free'),      -- Japan
+('Sakura_Haruno',    'sakura@medic.com',         'shannaro',      '2023-03-22 09:30:15',  4,  'Premium'),   -- Japan
+('Kakashi_Sensei',   'kakashi@sharingan.com',    'copycat',       '2023-04-01 00:00:01',  4,  'Free'),      -- Japan
+('Itachi_Crow',      'itachi@akatsuki.com',      'tsukuyomi',     '2023-05-18 03:33:33',  4,  'Premium'),   -- Japan
+('Goku_Saiyan',      'goku@capsule.com',         'kamehameha',    '2023-06-29 12:00:00',  5,  'Free'),      -- United States
+('Vegeta_Prince',    'vegeta@saiyan.com',        'finalflash',    '2023-07-04 08:08:08',  5,  'Premium'),   -- United States
+('Bulma_Genius',     'bulma@brief.com',          'dragonball',    '2023-08-15 16:45:20',  5,  'Free'),      -- United States
+('Tanjiro_Blade',    'tanjiro@hashira.com',      'hinokami',      '2023-09-03 11:22:44',  4,  'Premium'),   -- Japan
+('Nezuko_Box',       'nezuko@demon.com',         'bamboo',        '2023-10-10 19:55:10',  4,  'Free'),      -- Japan
+-- Wave 4
+('Edward_Elric',     'edward@alchemy.com',       'equivalent',    '2024-01-07 08:00:00',  3,  'Premium'),   -- Germany
+('Roy_Mustang',      'roy@flame.com',            'colonel',       '2024-02-14 09:14:59',  3,  'Free'),      -- Germany
+('Mikasa_Ackerman',  'mikasa@survey.com',        'scarf',         '2024-03-05 07:30:00',  3,  'Premium'),   -- Germany
+('Armin_Strategist', 'armin@brain.com',          'colossal',      '2024-04-18 13:13:13',  3,  'Free'),      -- Germany
+('Levi_Captain',     'levi@clean.com',           'HumanitysBest', '2024-05-01 05:00:00',  3,  'Premium'),   -- Germany
+('Sasha_Potato',     'sasha@potato.com',         'potatoes',      '2024-06-20 12:30:00',  3,  'Free'),      -- Germany
+('Historia_Queen',   'historia@wall.com',        'reiss',         '2024-07-14 18:00:00',  3,  'Premium'),   -- Germany
+('Erwin_Smith',      'erwin@commander.com',      'chargefwd',     '2024-08-09 06:45:00',  3,  'Free'),      -- Germany
+('Hange_Zoe',        'hange@titan.com',          'experiment',    '2024-09-27 20:20:20',  3,  'Premium'),   -- Germany
+('Reiner_Armor',     'reiner@warrior.com',       'bertholt',      '2024-11-11 11:11:11',  3,  'Free');      -- Germany
+
+
+-- ══════════════════════════════════════════════════════════════════════
+-- 4. CONTENT (IDs 1–35, with RatingID + CountryID)
+-- ══════════════════════════════════════════════════════════════════════
+-- RatingID reference:
+--   1=G      → All ages, no concerning content
+--   2=PG     → Mild themes, suitable with parental guidance
+--   3=PG-13  → Moderate intensity, fine for teens
+--   4=TV-14  → Intense themes, violence, or language for 14+
+--   5=R      → Mature theatrical film (strong violence/language)
+--   6=TV-MA  → Mature TV series (explicit content)
+--   7=NC-17  → Adults only (not used here; no content warrants it)
+--
+-- Rating assignment reasoning per title:
+--   G      : Spirited Away, Princess Mononoke (family friendly Ghibli)
+--   PG     : Dragon Ball Z, Naruto (action for kids/teens, mild violence)
+--   PG-13  : Interstellar, Inception, Dune 1&2, Oppenheimer, Your Name,
+--             Blade Runner 2049, Grand Budapest Hotel, Everything Everywhere,
+--             Demon Slayer, FMA Brotherhood, Arcane, Spy x Family, One Piece
+--   TV-14  : Attack on Titan, Jujutsu Kaisen, Stranger Things, Mandalorian,
+--             Severance, The Bear, Better Call Saul, Chernobyl, Squid Game
+--   R      : The Dark Knight, Tenet, Parasite, The Godfather, Goodfellas,
+--             Pulp Fiction, Dune Part Two
+--   TV-MA  : Breaking Bad, Better Call Saul (note: listed as TV-14 above
+--             for BCS early seasons; Breaking Bad clearly TV-MA),
+--             Squid Game, Chernobyl, The Office (TV-14 fits better actually)
+--
+-- Final clean mapping (one rating per title, no contradictions):
+--   G(1):     19, 33
+--   PG(2):    21, 22
+--   PG-13(3): 1, 2, 4, 5, 7, 8, 14, 23, 24, 25, 27, 30, 32
+--   TV-14(4): 3, 9, 10, 15, 17, 20, 26, 31, 35
+--   R(5):     11, 12, 13, 18, 28, 34
+--   TV-MA(6): 6, 16, 29
+--
+-- CountryID (production country):
+--   Nolan films     → United Kingdom (8)
+--   Villeneuve films→ Canada (13)
+--   US productions  → United States (5)
+--   Japanese anime  → Japan (4)
+--   Korean originals→ South Korea (6)
+--   Arcane          → France (7)   (Fortiche Production, Paris)
+--   Chernobyl       → United Kingdom (8)  (HBO/Sky UK co-production)
+--   Grand Budapest  → Germany (3)  (Babelsberg Studios co-production)
+INSERT INTO Content (Title, Description, ReleaseDate, Price, ContentType, RatingID, CountryID) VALUES
+('Interstellar',                     'Space exploration.',                          '2014-11-07',  9.99,  'Movie',    3,  8),  -- 1
+('Spy x Family',                     'Spy family.',                                 '2022-04-09',  19.99, 'TV_Show',  3,  4),  -- 2
+('The Office',                       'Paper company.',                              '2005-03-24',  24.99, 'TV_Show',  4,  5),  -- 3
+('Inception',                        'Dream heist.',                                '2010-07-16',  7.99,  'Movie',    3,  8),  -- 4
+('One Piece',                        'Pirate treasure.',                            '1999-10-20',  49.99, 'TV_Show',  3,  4),  -- 5
+('Breaking Bad',                     'Chemistry teacher.',                          '2008-01-20',  29.99, 'TV_Show',  6,  5),  -- 6
+('Your Name',                        'Star-crossed swap.',                          '2016-08-26',  12.99, 'Movie',    3,  4),  -- 7
+('Dune',                             'Spice wars.',                                 '2021-10-22',  14.99, 'Movie',    3, 13),  -- 8
+('Attack on Titan',                  'Giant war.',                                  '2013-04-07',  35.00, 'TV_Show',  4,  4),  -- 9
+('The Mandalorian',                  'Bounty hunter.',                              '2019-11-12',  19.99, 'TV_Show',  4,  5),  -- 10
+('Parasite',                         'Class struggle.',                             '2019-05-30',  9.50,  'Movie',    5,  6),  -- 11
+('The Dark Knight',                  'Gotham hero.',                                '2008-07-18',  5.99,  'Movie',    5,  8),  -- 12
+('Tenet',                            'Reverse time.',                               '2020-08-26',  11.99, 'Movie',    5,  8),  -- 13
+('Everything Everywhere All at Once','Multiverse.',                                 '2022-03-25',  13.50, 'Movie',    3,  5),  -- 14
+('Jujutsu Kaisen',                   'Curse hunters.',                              '2020-10-03',  25.00, 'TV_Show',  4,  4),  -- 15
+('Better Call Saul',                 'Criminal lawyer.',                            '2015-02-08',  22.00, 'TV_Show',  6,  5),  -- 16
+('Stranger Things',                  'Mysterious girl.',                            '2016-07-15',  18.00, 'TV_Show',  4,  5),  -- 17
+('The Godfather',                    'Crime family.',                               '1972-03-24',  15.00, 'Movie',    5,  5),  -- 18
+('Spirited Away',                    'Ghost world.',                                '2001-07-20',  10.00, 'Movie',    1,  4),  -- 19
+('Chernobyl',                        'Power plant.',                                '2019-05-06',  12.00, 'TV_Show',  4,  8),  -- 20
+('Naruto',                           'Ninja who dreams of being Hokage.',           '2002-10-03',  29.99, 'TV_Show',  2,  4),  -- 21
+('Dragon Ball Z',                    'Saiyan warriors protect Earth.',              '1989-04-26',  24.99, 'TV_Show',  2,  4),  -- 22
+('Demon Slayer',                     'Tanjiro fights demons for Nezuko.',           '2019-04-06',  22.00, 'TV_Show',  3,  4),  -- 23
+('Fullmetal Alchemist: Brotherhood', 'Brothers seek the Philosopher Stone.',       '2009-04-05',  26.00, 'TV_Show',  3,  4),  -- 24
+('Dune: Part Two',                   'Paul leads the Fremen to war.',              '2024-03-01',  16.99, 'Movie',    5, 13),  -- 25
+('Oppenheimer',                      'Father of the atomic bomb.',                 '2023-07-21',  12.99, 'Movie',    3,  8),  -- 26
+('The Grand Budapest Hotel',         'Legendary concierge in a fading empire.',    '2014-03-07',  8.99,  'Movie',    3,  3),  -- 27
+('Pulp Fiction',                     'Interconnected crime stories in L.A.',       '1994-10-14',  7.99,  'Movie',    5,  5),  -- 28
+('Squid Game',                       'Desperate people compete in deadly games.',  '2021-09-17',  18.00, 'TV_Show',  6,  6),  -- 29
+('Arcane',                           'The origins of Vi and Jinx.',                '2021-11-06',  15.00, 'TV_Show',  3,  7),  -- 30
+('Severance',                        'Office workers with severed memories.',       '2022-02-18',  14.99, 'TV_Show',  4,  5),  -- 31
+('Blade Runner 2049',                'A replicant hunter uncovers secrets.',        '2017-10-06',  11.99, 'Movie',    3, 13),  -- 32
+('Princess Mononoke',                'Humans clash with forest spirits.',           '1997-07-12',  9.99,  'Movie',    1,  4),  -- 33
+('Goodfellas',                       'Rise and fall of a mob associate.',           '1990-09-19',  8.50,  'Movie',    5,  5),  -- 34
+('The Bear',                         'A fine-dining chef runs a sandwich shop.',   '2022-06-23',  12.00, 'TV_Show',  4,  5);  -- 35
+
+
+-- ══════════════════════════════════════════════════════════════════════
+-- 5. LOGICAL COMPLETENESS — VideoQuality, Genres, Languages
 -- ══════════════════════════════════════════════════════════════════════
 
 INSERT INTO VideoQuality (ContentID, Quality) VALUES 
 (1,  '4K'), (1,  '1080p'), (1,  '720p'),
-(2,  '1080p'), (2, '720p'),
+(2,  '1080p'), (2,  '720p'),
 (3,  '720p'),
 (4,  '4K'), (4,  '1080p'),
-(5,  '1080p'), (5, '720p'),
+(5,  '1080p'), (5,  '720p'),
 (6,  '4K'), (6,  '1080p'),
-(7,  '1080p'), (7, '720p'),
+(7,  '1080p'), (7,  '720p'),
 (8,  '4K'), (8,  '1080p'), (8,  '720p'),
-(9,  '1080p'), (9, '720p'),
+(9,  '1080p'), (9,  '720p'),
 (10, '4K'), (10, '1080p'),
 (11, '1080p'),
 (12, '4K'), (12, '1080p'), (12, '720p'),
@@ -190,39 +331,39 @@ INSERT INTO VideoQuality (ContentID, Quality) VALUES
 
 INSERT INTO Content_Genre (ContentID, GenreID) VALUES 
 (1,  1), (1,  11),
-(2,  2), (2,  3), (2,  7),
+(2,  2), (2,  3),  (2,  7),
 (3,  3), (3,  11),
 (4,  1), (4,  15), (4,  6),
-(5,  2), (5,  4), (5,  12),
+(5,  2), (5,  4),  (5,  12),
 (6,  6), (6,  11), (6,  13),
-(7,  7), (7,  2), (7,  11),
-(8,  1), (8,  4), (8,  12),
-(9,  2), (9,  4), (9,  11),
-(10, 10),(10, 4), (10, 12),
-(11, 6), (11, 11),(11, 13),
-(12, 4), (12, 13),(12, 6),
-(13, 1), (13, 6), (13, 15),
-(14, 10),(14, 3), (14, 11),
-(15, 2), (15, 4), (15, 6),
-(16, 13),(16, 11),(16, 6),
-(17, 10),(17, 8), (17, 6),
-(18, 13),(18, 11),(18, 14),
-(19, 10),(19, 2), (19, 11),
-(20, 9), (20, 11),(20, 14),
-(21, 2), (21, 4), (21, 12),
-(22, 2), (22, 4), (22, 12),
-(23, 2), (23, 4), (23, 6),
-(24, 2), (24, 4), (24, 11),
-(25, 1), (25, 4), (25, 12),
-(26, 14),(26, 11),(26, 9),
-(27, 3), (27, 13),(27, 11),
-(28, 13),(28, 6), (28, 11),
-(29, 6), (29, 11),(29, 15),
-(30, 10),(30, 4), (30, 11),
-(31, 1), (31, 15),(31, 6),
-(32, 1), (32, 11),(32, 15),
-(33, 10),(33, 4), (33, 11),
-(34, 13),(34, 11),(34, 6),
+(7,  7), (7,  2),  (7,  11),
+(8,  1), (8,  4),  (8,  12),
+(9,  2), (9,  4),  (9,  11),
+(10, 10),(10, 4),  (10, 12),
+(11, 6), (11, 11), (11, 13),
+(12, 4), (12, 13), (12, 6),
+(13, 1), (13, 6),  (13, 15),
+(14, 10),(14, 3),  (14, 11),
+(15, 2), (15, 4),  (15, 6),
+(16, 13),(16, 11), (16, 6),
+(17, 10),(17, 8),  (17, 6),
+(18, 13),(18, 11), (18, 14),
+(19, 10),(19, 2),  (19, 11),
+(20, 9), (20, 11), (20, 14),
+(21, 2), (21, 4),  (21, 12),
+(22, 2), (22, 4),  (22, 12),
+(23, 2), (23, 4),  (23, 6),
+(24, 2), (24, 4),  (24, 11),
+(25, 1), (25, 4),  (25, 12),
+(26, 14),(26, 11), (26, 9),
+(27, 3), (27, 13), (27, 11),
+(28, 13),(28, 6),  (28, 11),
+(29, 6), (29, 11), (29, 15),
+(30, 10),(30, 4),  (30, 11),
+(31, 1), (31, 15), (31, 6),
+(32, 1), (32, 11), (32, 15),
+(33, 10),(33, 4),  (33, 11),
+(34, 13),(34, 11), (34, 6),
 (35, 11),(35, 3);
 
 INSERT INTO Content_Language (ContentID, LanguageID, LangType) VALUES 
@@ -264,7 +405,7 @@ INSERT INTO Content_Language (ContentID, LanguageID, LangType) VALUES
 
 
 -- ══════════════════════════════════════════════════════════════════════
--- 4. SUBCLASSES, HIERARCHY & ROLES
+-- 6. SUBCLASSES, HIERARCHY & ROLES
 -- ══════════════════════════════════════════════════════════════════════
 
 INSERT INTO Movie (ContentID, RunTime) VALUES 
@@ -397,78 +538,78 @@ INSERT INTO Episode (ContentID, SeasonNum, EpisodeNum, Title, RunTime) VALUES
 (35, 2, 2, 'Pasta',                                                  27);
 
 INSERT INTO Content_Role (ContentID, PersonID, RoleType, CharacterName) VALUES 
-(1,  1,  'Director',   NULL),
-(1,  7,  'Actor',      'Amelia Brand'),
-(2,  2,  'Creator',    NULL),
-(3,  3,  'Lead',       'Michael Scott'),
-(5,  5,  'Creator',    NULL),
-(6,  6,  'Lead',       'Walter White'),
-(6,  25, 'Actor',      'Jesse Pinkman'),
-(6,  26, 'Actor',      'Skyler White'),
-(7,  15, 'Director',   NULL),
-(8,  14, 'Director',   NULL),
-(8,  31, 'Actor',      'Paul Atreides'),
-(8,  9,  'Actor',      'Stilgar'),
-(9,  11, 'Creator',    NULL),
-(10, 9,  'Lead',       'Din Djarin'),
-(11, 8,  'Director',   NULL),
-(12, 4,  'Actor',      'Joker'),
-(12, 1,  'Director',   NULL),
-(17, 27, 'Actor',      'Eleven'),
-(17, 28, 'Actor',      'Joyce Byers'),
-(18, 29, 'Actor',      'Michael Corleone'),
-(18, 30, 'Lead',       'Vito Corleone'),
-(19, 16, 'Director',   NULL),
-(20, 18, 'Director',   NULL),
-(21, 21, 'Creator',    NULL),
-(22, 22, 'Creator',    NULL),
-(23, 23, 'Creator',    NULL),
-(24, 24, 'Creator',    NULL),
-(25, 14, 'Director',   NULL),
-(25, 31, 'Actor',      'Paul Atreides'),
-(26, 1,  'Director',   NULL),
-(27, 18, 'Director',   NULL),
-(28, 12, 'Director',   NULL),
-(32, 14, 'Director',   NULL),
-(33, 16, 'Director',   NULL),
-(34, 13, 'Director',   NULL);
+(1,  1,  'Director',  NULL),
+(1,  7,  'Actor',     'Amelia Brand'),
+(2,  2,  'Creator',   NULL),
+(3,  3,  'Lead',      'Michael Scott'),
+(5,  5,  'Creator',   NULL),
+(6,  6,  'Lead',      'Walter White'),
+(6,  25, 'Actor',     'Jesse Pinkman'),
+(6,  26, 'Actor',     'Skyler White'),
+(7,  15, 'Director',  NULL),
+(8,  14, 'Director',  NULL),
+(8,  31, 'Actor',     'Paul Atreides'),
+(8,  9,  'Actor',     'Stilgar'),
+(9,  11, 'Creator',   NULL),
+(10, 9,  'Lead',      'Din Djarin'),
+(11, 8,  'Director',  NULL),
+(12, 4,  'Actor',     'Joker'),
+(12, 1,  'Director',  NULL),
+(17, 27, 'Actor',     'Eleven'),
+(17, 28, 'Actor',     'Joyce Byers'),
+(18, 29, 'Actor',     'Michael Corleone'),
+(18, 30, 'Lead',      'Vito Corleone'),
+(19, 16, 'Director',  NULL),
+(20, 18, 'Director',  NULL),
+(21, 21, 'Creator',   NULL),
+(22, 22, 'Creator',   NULL),
+(23, 23, 'Creator',   NULL),
+(24, 24, 'Creator',   NULL),
+(25, 14, 'Director',  NULL),
+(25, 31, 'Actor',     'Paul Atreides'),
+(26, 1,  'Director',  NULL),
+(27, 18, 'Director',  NULL),
+(28, 12, 'Director',  NULL),
+(32, 14, 'Director',  NULL),
+(33, 16, 'Director',  NULL),
+(34, 13, 'Director',  NULL);
 
 
 -- ══════════════════════════════════════════════════════════════════════
--- 5. ACTIVITY — Transactions, Reviews, Playlists, User_Content
+-- 7. ACTIVITY — Transactions, Reviews, Playlists, User_Content
 -- ══════════════════════════════════════════════════════════════════════
 
--- TransactionDate rules applied:
+-- TransactionDate rules:
 --   (a) AFTER the user's RegisterDate
 --   (b) AFTER the content's ReleaseDate
 --   (c) Spread organically across 2021–2024
 INSERT INTO TransactionList (UserID, TransactionDate, TotalAmount) VALUES 
 (2,  '2021-03-10 20:15:00', 9.99),   -- T1  GenshinLover → Interstellar
-(3,  '2022-05-20 11:30:00', 19.99),  -- T2  Anya_Fans → Spy x Family  (after Apr 2022 release)
+(3,  '2022-05-20 11:30:00', 19.99),  -- T2  Anya_Fans → Spy x Family
 (4,  '2021-08-01 18:45:00', 7.99),   -- T3  Luffy_Pirate → Inception
 (5,  '2021-10-05 09:00:00', 49.99),  -- T4  Zoro_Lost → One Piece
 (6,  '2021-09-14 14:22:00', 15.99),  -- T5  Nami_Money → The Office
 (7,  '2021-10-30 21:00:00', 12.99),  -- T6  Sanji_Cook → Your Name
 (8,  '2021-11-01 16:05:00', 29.99),  -- T7  Robin_History → Breaking Bad
-(9,  '2021-11-05 10:10:00', 14.99),  -- T8  Chopper_Doc → Dune  (after Oct 2021 release)
+(9,  '2021-11-05 10:10:00', 14.99),  -- T8  Chopper_Doc → Dune
 (10, '2022-01-07 08:30:00', 11.99),  -- T9  Franky_Super → Tenet
 (11, '2022-02-14 19:45:00', 35.00),  -- T10 Brook_Soul → Attack on Titan
 (12, '2022-03-05 13:20:00', 19.99),  -- T11 Jimbei_Fish → The Mandalorian
 (13, '2022-04-11 17:55:00', 9.50),   -- T12 Usopp_Sniper → Parasite
 (14, '2022-06-19 22:10:00', 5.99),   -- T13 Law_Heart → The Dark Knight
 (15, '2022-07-04 15:40:00', 11.99),  -- T14 Kid_Metal → Tenet
-(16, '2022-09-01 09:05:00', 13.50),  -- T15 Hancock_Love → EEAAO  (after Mar 2022 release)
+(16, '2022-09-01 09:05:00', 13.50),  -- T15 Hancock_Love → EEAAO
 (17, '2022-10-28 20:30:00', 25.00),  -- T16 Ace_Fire → Jujutsu Kaisen
 (18, '2022-11-15 11:00:00', 22.00),  -- T17 Sabo_Dragon → Better Call Saul
 (19, '2022-12-03 14:15:00', 18.00),  -- T18 Shanks_Red → Stranger Things
 (20, '2023-01-20 16:00:00', 15.00),  -- T19 Buggy_Clown → The Godfather
-(2,  '2023-02-08 10:45:00', 10.00),  -- T20 GenshinLover → Spirited Away  (2nd purchase)
+(2,  '2023-02-08 10:45:00', 10.00),  -- T20 GenshinLover → Spirited Away (2nd purchase)
 (21, '2023-03-12 19:00:00', 29.99),  -- T21 Naruto_Uzumaki → Naruto
 (22, '2023-04-05 08:20:00', 24.99),  -- T22 Sasuke_Uchiha → Dragon Ball Z
 (23, '2023-05-19 13:45:00', 22.00),  -- T23 Sakura_Haruno → Demon Slayer
 (24, '2023-06-30 21:10:00', 26.00),  -- T24 Kakashi_Sensei → FMA Brotherhood
-(25, '2024-04-02 12:00:00', 16.99),  -- T25 Itachi_Crow → Dune Part Two  (after Mar 2024 release)
-(26, '2023-09-14 17:30:00', 12.99),  -- T26 Goku_Saiyan → Oppenheimer  (after Jul 2023 release)
+(25, '2024-04-02 12:00:00', 16.99),  -- T25 Itachi_Crow → Dune Part Two
+(26, '2023-09-14 17:30:00', 12.99),  -- T26 Goku_Saiyan → Oppenheimer
 (27, '2023-10-01 09:50:00', 8.99),   -- T27 Vegeta_Prince → Grand Budapest Hotel
 (28, '2023-11-11 22:22:00', 7.99),   -- T28 Bulma_Genius → Pulp Fiction
 (29, '2023-12-25 15:00:00', 18.00),  -- T29 Tanjiro_Blade → Squid Game
@@ -526,48 +667,48 @@ INSERT INTO Transaction_Detail (TransactionID, ContentID, ContentName, SoldPrice
 (39, 9,  'Attack on Titan',                  35.00),
 (40, 15, 'Jujutsu Kaisen',                   25.00);
 
--- PostTime rules: always AFTER the corresponding transaction date, typically a few days to a few weeks later
+-- PostTime: always AFTER the corresponding TransactionDate
 INSERT INTO Reviews (UserID, ContentID, Rating, CommentText, PostTime) VALUES 
-(2,  1,  5.0, 'A masterpiece of visual storytelling.',                  '2021-03-17 22:10:00'),
-(3,  2,  4.5, 'So cute and funny, Anya is adorable!',                   '2022-05-28 14:00:00'),
-(4,  4,  4.8, 'Dreams within dreams — blew my mind.',                   '2021-08-10 19:30:00'),
-(5,  5,  5.0, 'Legendary. The only show that keeps going and stays great.', '2021-10-15 09:45:00'),
-(6,  3,  4.2, 'Michael Scott is pure comedy gold.',                     '2021-09-25 20:00:00'),
-(7,  7,  4.7, 'Beautiful and heartbreaking at the same time.',          '2021-11-12 17:20:00'),
-(8,  6,  5.0, 'The best TV drama ever made.',                           '2021-11-20 21:55:00'),
-(9,  8,  4.3, 'Epic world-building, stunning visuals.',                 '2021-11-19 10:30:00'),
-(10, 13, 3.8, 'Wait... what direction did that bullet go?',             '2022-01-18 23:05:00'),
-(11, 9,  4.9, 'Cried three times. No regrets.',                         '2022-02-28 18:40:00'),
-(12, 10, 4.6, 'Baby Yoda alone is worth the price.',                    '2022-03-19 13:10:00'),
-(13, 11, 4.8, 'Bong Joon-ho is a genius.',                             '2022-04-24 16:50:00'),
-(14, 12, 5.0, 'Heath Ledger''s Joker is untouchable.',                  '2022-07-01 20:15:00'),
-(15, 13, 3.5, 'Visually amazing but hard to follow.',                   '2022-07-22 11:00:00'),
-(16, 14, 4.7, 'So wild, yet so emotionally resonant.',                  '2022-09-15 08:30:00'),
-(17, 15, 4.5, 'The animation during Domain Expansions is insane.',      '2022-11-08 22:45:00'),
-(18, 16, 4.9, 'Better than Breaking Bad? Dare I say yes.',              '2022-11-30 19:00:00'),
-(19, 17, 4.4, 'Season 1 is flawless.',                                  '2022-12-20 14:25:00'),
-(20, 18, 5.0, 'Leave the gun. Take the cannoli.',                       '2023-02-01 21:00:00'),
-(2,  19, 4.9, 'Miyazaki''s greatest work.',                             '2023-02-20 16:30:00'),
-(21, 21, 5.0, 'Believe it! Naruto is my all-time favourite.',           '2023-03-25 10:00:00'),
-(22, 22, 4.8, 'Over 9000/10. Timeless classic.',                        '2023-04-18 07:30:00'),
-(23, 23, 4.9, 'The Mugen Train arc made me sob.',                       '2023-06-01 20:10:00'),
-(24, 24, 5.0, 'Brotherhood is peak anime storytelling.',                '2023-07-14 15:55:00'),
-(25, 25, 4.7, 'Denis did it again — Dune Part Two is a war epic.',      '2024-04-20 18:00:00'),
-(26, 26, 4.9, 'Cillian Murphy deserved every award.',                   '2023-09-30 22:30:00'),
-(27, 27, 4.5, 'Wes Anderson is in a league of his own.',                '2023-10-15 12:40:00'),
-(28, 28, 5.0, 'Cool, cool, cool. Tarantino''s magnum opus.',            '2023-11-25 20:00:00'),
-(29, 29, 4.8, 'Red light green light will haunt me forever.',           '2024-01-05 09:15:00'),
-(30, 30, 5.0, 'The animation quality is absolutely stunning.',          '2024-01-22 17:45:00'),
-(31, 31, 4.6, 'The most unsettling office drama since The Office.',     '2024-03-04 11:30:00'),
-(32, 32, 4.4, 'Atmospheric and visually breathtaking.',                 '2024-03-28 14:00:00'),
-(33, 33, 4.8, 'San and Ashitaka''s story is timeless.',                 '2024-05-09 19:20:00'),
-(34, 34, 4.7, 'Scorsese at his most electrifying.',                     '2024-05-24 21:10:00'),
-(35, 35, 4.9, 'The kitchen chaos is so real it gives me anxiety.',      '2024-06-18 08:50:00'),
-(36, 8,  4.3, 'Dune is a slow burn done perfectly.',                    '2024-08-05 16:00:00'),
-(37, 1,  4.8, 'Interstellar made me call my dad.',                      '2024-08-29 20:30:00'),
-(38, 6,  5.0, 'Mr. White... I am the danger.',                          '2024-10-14 13:45:00'),
-(39, 9,  4.9, 'Season 3 of AoT broke me completely.',                   '2024-11-02 22:00:00'),
-(40, 15, 4.6, 'Gojo Satoru is the most iconic character in anime.',     '2024-12-10 18:20:00');
+(2,  1,  5.0, 'A masterpiece of visual storytelling.',                   '2021-03-17 22:10:00'),
+(3,  2,  4.5, 'So cute and funny, Anya is adorable!',                    '2022-05-28 14:00:00'),
+(4,  4,  4.8, 'Dreams within dreams — blew my mind.',                    '2021-08-10 19:30:00'),
+(5,  5,  5.0, 'Legendary. The only show that keeps going and stays great.','2021-10-15 09:45:00'),
+(6,  3,  4.2, 'Michael Scott is pure comedy gold.',                      '2021-09-25 20:00:00'),
+(7,  7,  4.7, 'Beautiful and heartbreaking at the same time.',           '2021-11-12 17:20:00'),
+(8,  6,  5.0, 'The best TV drama ever made.',                            '2021-11-20 21:55:00'),
+(9,  8,  4.3, 'Epic world-building, stunning visuals.',                  '2021-11-19 10:30:00'),
+(10, 13, 3.8, 'Wait... what direction did that bullet go?',              '2022-01-18 23:05:00'),
+(11, 9,  4.9, 'Cried three times. No regrets.',                          '2022-02-28 18:40:00'),
+(12, 10, 4.6, 'Baby Yoda alone is worth the price.',                     '2022-03-19 13:10:00'),
+(13, 11, 4.8, 'Bong Joon-ho is a genius.',                              '2022-04-24 16:50:00'),
+(14, 12, 5.0, 'Heath Ledger''s Joker is untouchable.',                   '2022-07-01 20:15:00'),
+(15, 13, 3.5, 'Visually amazing but hard to follow.',                    '2022-07-22 11:00:00'),
+(16, 14, 4.7, 'So wild, yet so emotionally resonant.',                   '2022-09-15 08:30:00'),
+(17, 15, 4.5, 'The animation during Domain Expansions is insane.',       '2022-11-08 22:45:00'),
+(18, 16, 4.9, 'Better than Breaking Bad? Dare I say yes.',               '2022-11-30 19:00:00'),
+(19, 17, 4.4, 'Season 1 is flawless.',                                   '2022-12-20 14:25:00'),
+(20, 18, 5.0, 'Leave the gun. Take the cannoli.',                        '2023-02-01 21:00:00'),
+(2,  19, 4.9, 'Miyazaki''s greatest work.',                              '2023-02-20 16:30:00'),
+(21, 21, 5.0, 'Believe it! Naruto is my all-time favourite.',            '2023-03-25 10:00:00'),
+(22, 22, 4.8, 'Over 9000/10. Timeless classic.',                         '2023-04-18 07:30:00'),
+(23, 23, 4.9, 'The Mugen Train arc made me sob.',                        '2023-06-01 20:10:00'),
+(24, 24, 5.0, 'Brotherhood is peak anime storytelling.',                 '2023-07-14 15:55:00'),
+(25, 25, 4.7, 'Denis did it again — Dune Part Two is a war epic.',       '2024-04-20 18:00:00'),
+(26, 26, 4.9, 'Cillian Murphy deserved every award.',                    '2023-09-30 22:30:00'),
+(27, 27, 4.5, 'Wes Anderson is in a league of his own.',                 '2023-10-15 12:40:00'),
+(28, 28, 5.0, 'Cool, cool, cool. Tarantino''s magnum opus.',             '2023-11-25 20:00:00'),
+(29, 29, 4.8, 'Red light green light will haunt me forever.',            '2024-01-05 09:15:00'),
+(30, 30, 5.0, 'The animation quality is absolutely stunning.',           '2024-01-22 17:45:00'),
+(31, 31, 4.6, 'The most unsettling office drama since The Office.',      '2024-03-04 11:30:00'),
+(32, 32, 4.4, 'Atmospheric and visually breathtaking.',                  '2024-03-28 14:00:00'),
+(33, 33, 4.8, 'San and Ashitaka''s story is timeless.',                  '2024-05-09 19:20:00'),
+(34, 34, 4.7, 'Scorsese at his most electrifying.',                      '2024-05-24 21:10:00'),
+(35, 35, 4.9, 'The kitchen chaos is so real it gives me anxiety.',       '2024-06-18 08:50:00'),
+(36, 8,  4.3, 'Dune is a slow burn done perfectly.',                     '2024-08-05 16:00:00'),
+(37, 1,  4.8, 'Interstellar made me call my dad.',                       '2024-08-29 20:30:00'),
+(38, 6,  5.0, 'Mr. White... I am the danger.',                           '2024-10-14 13:45:00'),
+(39, 9,  4.9, 'Season 3 of AoT broke me completely.',                    '2024-11-02 22:00:00'),
+(40, 15, 4.6, 'Gojo Satoru is the most iconic character in anime.',      '2024-12-10 18:20:00');
 
 INSERT INTO User_Content (UserID, ContentID) VALUES 
 (2,  1),  (3,  2),  (4,  4),  (5,  5),  (6,  3),
@@ -584,7 +725,7 @@ INSERT INTO User_Content (UserID, ContentID) VALUES
 (17, 17), (17, 29), (17, 31),
 (4,  14), (4,  27);
 
--- CreateDate rules: after the user's RegisterDate; after owning at least some of the content in the playlist
+-- CreateDate: after user RegisterDate, after owning relevant content
 INSERT INTO Playlist (PlaylistID, UserID, PlaylistName, CreateDate) VALUES 
 (1, 2,  'Sci-Fi Favourites',  '2021-04-15 18:00:00'),
 (2, 2,  'Anime Watchlist',    '2021-07-20 21:30:00'),
@@ -599,57 +740,57 @@ INSERT INTO Playlist (PlaylistID, UserID, PlaylistName, CreateDate) VALUES
 (1, 29, 'K-Drama & K-Film',   '2024-01-15 09:00:00'),
 (1, 35, 'Chef''s Table Picks','2024-07-01 12:00:00');
 
--- AddDate rules: always AFTER the playlist CreateDate AND after the content's ReleaseDate
+-- AddDate: always AFTER playlist CreateDate AND after content ReleaseDate
 INSERT INTO Playlist_Item (PlaylistID, UserID, ContentID, AddDate) VALUES 
--- GenshinLover Sci-Fi (playlist created 2021-04-15)
-(1, 2, 1,  '2021-04-15 18:05:00'),  -- Interstellar: added on day-of
-(1, 2, 4,  '2021-08-05 10:30:00'),  -- Inception: added after T3 purchase
-(1, 2, 8,  '2021-11-10 19:00:00'),  -- Dune: added after Oct 2021 release
-(1, 2, 25, '2024-03-10 14:00:00'),  -- Dune Part Two: added after Mar 2024 release
-(1, 2, 32, '2024-04-01 20:00:00'),  -- Blade Runner 2049
-(1, 2, 31, '2024-03-01 11:30:00'),  -- Severance
--- GenshinLover Anime (playlist created 2021-07-20)
-(2, 2, 2,  '2022-05-25 20:00:00'),  -- Spy x Family: after Apr 2022 release
-(2, 2, 9,  '2022-03-01 17:45:00'),  -- Attack on Titan
-(2, 2, 15, '2022-11-10 22:00:00'),  -- Jujutsu Kaisen
-(2, 2, 19, '2023-02-22 13:15:00'),  -- Spirited Away: after T20 purchase
--- GenshinLover Nolan Universe (playlist created 2022-01-01)
-(3, 2, 1,  '2022-01-01 00:05:00'),  -- Interstellar
-(3, 2, 4,  '2022-01-01 00:10:00'),  -- Inception
-(3, 2, 12, '2022-01-02 09:00:00'),  -- The Dark Knight
-(3, 2, 13, '2022-01-03 11:30:00'),  -- Tenet
--- Luffy Mind-Bending (playlist created 2021-08-25)
-(1, 4, 4,  '2021-08-25 15:50:00'),  -- Inception: on day-of
-(1, 4, 14, '2022-10-01 18:00:00'),  -- EEAAO: after Mar 2022 release
-(1, 4, 13, '2022-09-01 21:00:00'),  -- Tenet
--- Nami Comedy Night (playlist created 2021-10-03)
-(1, 6, 3,  '2021-10-03 20:15:00'),  -- The Office: on day-of
--- Luffy Pirate & Adventure (playlist created 2021-11-14)
-(1, 5, 5,  '2021-11-14 19:10:00'),  -- One Piece: on day-of
-(1, 5, 8,  '2021-12-05 20:30:00'),  -- Dune: after Oct 2021 release
-(1, 5, 21, '2023-03-20 10:00:00'),  -- Naruto: after T21 purchase
-(1, 5, 22, '2023-04-10 15:00:00'),  -- Dragon Ball Z: after T22 purchase
--- Robin Prestige Drama (playlist created 2022-02-28)
-(1, 8, 6,  '2022-02-28 14:35:00'),  -- Breaking Bad: on day-of
-(1, 8, 11, '2022-04-15 16:00:00'),  -- Parasite
-(1, 8, 18, '2022-06-10 19:30:00'),  -- The Godfather
-(1, 8, 34, '2024-06-01 21:00:00'),  -- Goodfellas
--- Ace_Fire Thriller & Horror (playlist created 2022-10-31)
-(1, 17, 17, '2022-10-31 22:05:00'), -- Stranger Things: on day-of
-(1, 17, 29, '2022-11-20 20:00:00'), -- Squid Game
-(1, 17, 31, '2024-02-25 19:30:00'), -- Severance: after Feb 2022 release
--- Naruto_Uzumaki Anime Classics (playlist created 2023-04-10)
-(1, 21, 21, '2023-04-10 11:25:00'), -- Naruto: on day-of
-(1, 21, 22, '2023-04-10 11:30:00'), -- Dragon Ball Z: on day-of
-(1, 21, 23, '2023-06-05 18:00:00'), -- Demon Slayer
-(1, 21, 24, '2023-07-20 14:30:00'), -- FMA Brotherhood
-(1, 21, 5,  '2023-08-01 09:00:00'), -- One Piece
-(1, 21, 9,  '2023-09-15 20:45:00'), -- Attack on Titan
--- Naruto_Uzumaki Adventure Picks (playlist created 2023-06-18)
-(2, 21, 8,  '2023-06-18 16:50:00'), -- Dune: on day-of
-(2, 21, 10, '2023-07-02 10:00:00'), -- The Mandalorian
--- Tanjiro K-Drama & K-Film (playlist created 2024-01-15)
-(1, 29, 11, '2024-01-15 09:10:00'), -- Parasite: on day-of
-(1, 29, 29, '2024-01-28 21:30:00'), -- Squid Game
--- Levi Chef's Table Picks (playlist created 2024-07-01)
-(1, 35, 35, '2024-07-01 12:05:00'); -- The Bear: on day-of
+-- GenshinLover Sci-Fi (created 2021-04-15)
+(1, 2, 1,  '2021-04-15 18:05:00'),
+(1, 2, 4,  '2021-08-05 10:30:00'),
+(1, 2, 8,  '2021-11-10 19:00:00'),
+(1, 2, 25, '2024-03-10 14:00:00'),
+(1, 2, 32, '2024-04-01 20:00:00'),
+(1, 2, 31, '2024-03-01 11:30:00'),
+-- GenshinLover Anime (created 2021-07-20)
+(2, 2, 2,  '2022-05-25 20:00:00'),
+(2, 2, 9,  '2022-03-01 17:45:00'),
+(2, 2, 15, '2022-11-10 22:00:00'),
+(2, 2, 19, '2023-02-22 13:15:00'),
+-- GenshinLover Nolan Universe (created 2022-01-01)
+(3, 2, 1,  '2022-01-01 00:05:00'),
+(3, 2, 4,  '2022-01-01 00:10:00'),
+(3, 2, 12, '2022-01-02 09:00:00'),
+(3, 2, 13, '2022-01-03 11:30:00'),
+-- Luffy Mind-Bending (created 2021-08-25)
+(1, 4, 4,  '2021-08-25 15:50:00'),
+(1, 4, 14, '2022-10-01 18:00:00'),
+(1, 4, 13, '2022-09-01 21:00:00'),
+-- Nami Comedy Night (created 2021-10-03)
+(1, 6, 3,  '2021-10-03 20:15:00'),
+-- Luffy Pirate & Adventure (created 2021-11-14)
+(1, 5, 5,  '2021-11-14 19:10:00'),
+(1, 5, 8,  '2021-12-05 20:30:00'),
+(1, 5, 21, '2023-03-20 10:00:00'),
+(1, 5, 22, '2023-04-10 15:00:00'),
+-- Robin Prestige Drama (created 2022-02-28)
+(1, 8, 6,  '2022-02-28 14:35:00'),
+(1, 8, 11, '2022-04-15 16:00:00'),
+(1, 8, 18, '2022-06-10 19:30:00'),
+(1, 8, 34, '2024-06-01 21:00:00'),
+-- Ace_Fire Thriller & Horror (created 2022-10-31)
+(1, 17, 17, '2022-10-31 22:05:00'),
+(1, 17, 29, '2022-11-20 20:00:00'),
+(1, 17, 31, '2024-02-25 19:30:00'),
+-- Naruto_Uzumaki Anime Classics (created 2023-04-10)
+(1, 21, 21, '2023-04-10 11:25:00'),
+(1, 21, 22, '2023-04-10 11:30:00'),
+(1, 21, 23, '2023-06-05 18:00:00'),
+(1, 21, 24, '2023-07-20 14:30:00'),
+(1, 21, 5,  '2023-08-01 09:00:00'),
+(1, 21, 9,  '2023-09-15 20:45:00'),
+-- Naruto_Uzumaki Adventure Picks (created 2023-06-18)
+(2, 21, 8,  '2023-06-18 16:50:00'),
+(2, 21, 10, '2023-07-02 10:00:00'),
+-- Tanjiro K-Drama & K-Film (created 2024-01-15)
+(1, 29, 11, '2024-01-15 09:10:00'),
+(1, 29, 29, '2024-01-28 21:30:00'),
+-- Levi Chef's Table Picks (created 2024-07-01)
+(1, 35, 35, '2024-07-01 12:05:00');

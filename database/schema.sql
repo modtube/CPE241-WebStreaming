@@ -4,25 +4,6 @@ CREATE DATABASE IF NOT EXISTS streamingDB;
 use streamingDB;
 
 -- STRONG & FULLY INDEPENDENT ENTITIES #######################
-CREATE TABLE IF NOT EXISTS AppUser (
-	UserID INTEGER AUTO_INCREMENT PRIMARY KEY, -- auto-incrementing integer
-    Username VARCHAR(50) NOT NULL UNIQUE,
-    Email VARCHAR(255) NOT NULL UNIQUE,
-    Password VARCHAR(255) NOT NULL,
-    RegisterDate DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UserType VARCHAR(50) NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS Content (
-	ContentID INTEGER AUTO_INCREMENT PRIMARY KEY, -- auto-incrementing integer
-    Title VARCHAR(255) NOT NULL,
-    Description TEXT,
-    ReleaseDate DATE,
-    Price DECIMAL(10, 2) NOT NULL DEFAULT 0.0,
-    ContentType VARCHAR(50) NOT NULL,
-    CONSTRAINT ValidContentPrice CHECK (Price >= 0.0)
-);
-
 CREATE TABLE IF NOT EXISTS Genre (
 	GenreID INTEGER AUTO_INCREMENT PRIMARY KEY, -- auto-incrementing integer
     GenreName VARCHAR(50) NOT NULL UNIQUE
@@ -41,10 +22,57 @@ CREATE TABLE IF NOT EXISTS LanguageList (
 	LanguageID INTEGER AUTO_INCREMENT PRIMARY KEY, -- auto-incrementing integer
     langName VARCHAR(100) NOT NULL UNIQUE
 );
+
+CREATE TABLE IF NOT EXISTS Timezone (
+    TimezoneID INTEGER AUTO_INCREMENT PRIMARY KEY,
+    IANA_Name VARCHAR(50) NOT NULL UNIQUE, -- e.g., 'Asia/Bangkok'
+    Current_Offset VARCHAR(10) NOT NULL    -- e.g., '+07:00'
+);
+
+CREATE TABLE IF NOT EXISTS ContentRating (
+    RatingID INTEGER AUTO_INCREMENT PRIMARY KEY,
+    RatingLabel VARCHAR(10) NOT NULL UNIQUE,
+    MaturityLevel INTEGER NOT NULL, -- 1 to 5 scale
+    Description TEXT
+);
 -- #############################################
 
 
 -- STRONG BUT USING REFERENCES #######################################################################
+CREATE TABLE IF NOT EXISTS Country (
+    CountryID INTEGER AUTO_INCREMENT PRIMARY KEY,
+    CountryName VARCHAR(100) NOT NULL UNIQUE,
+    PrimaryTimezoneID INT,
+    FOREIGN KEY (PrimaryTimezoneID) REFERENCES Timezone(TimezoneID)
+);
+
+CREATE TABLE IF NOT EXISTS AppUser (
+	UserID INTEGER AUTO_INCREMENT PRIMARY KEY, -- auto-incrementing integer
+    Username VARCHAR(50) NOT NULL UNIQUE,
+    Email VARCHAR(255) NOT NULL UNIQUE,
+    Password VARCHAR(255) NOT NULL,
+    RegisterDate DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CountryID INTEGER,
+    UserType VARCHAR(50) NOT NULL,
+    
+    FOREIGN KEY (CountryID) REFERENCES Country(CountryID) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS Content (
+	ContentID INTEGER AUTO_INCREMENT PRIMARY KEY, -- auto-incrementing integer
+    Title VARCHAR(255) NOT NULL,
+    Description TEXT,
+    ReleaseDate DATE,
+    Price DECIMAL(10, 2) NOT NULL DEFAULT 0.0,
+    ContentType VARCHAR(50) NOT NULL,
+    RatingID INTEGER NOT NULL,
+	CountryID INTEGER,
+    
+    CONSTRAINT ValidContentPrice CHECK (Price >= 0.0),
+    FOREIGN KEY (RatingID) REFERENCES ContentRating(RatingID),
+    FOREIGN KEY (CountryID) REFERENCES Country(CountryID) ON DELETE SET NULL
+);
+
 CREATE TABLE IF NOT EXISTS TransactionList (
 	TransactionID INTEGER AUTO_INCREMENT PRIMARY KEY,
     UserID INTEGER, -- Can't put "NOT NULL" due to a contradiction to "ON DELETE SET NULL"

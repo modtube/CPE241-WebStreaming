@@ -1,7 +1,10 @@
 use streamingDB;
-
 -- TESTING ################################################################################################
+
 -- ########## CORE INDEPENDENT DATA ##########
+SELECT * FROM Timezone;
+SELECT * FROM ContentRating;
+SELECT * FROM Country;
 SELECT * FROM AppUser;
 SELECT * FROM Content;
 SELECT * FROM Genre;
@@ -29,4 +32,5 @@ SELECT * FROM Episode;
 SELECT * FROM Content_Genre;
 SELECT * FROM Content_Role;
 SELECT * FROM Content_Language;
+
 -- ########################################################################################################
