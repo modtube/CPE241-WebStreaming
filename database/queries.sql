@@ -1,6 +1,11 @@
+<<<<<<< HEAD
 -- PostgreSQL compatible: no "use streamingDB;" — connect to the DB externally
 -- e.g. via: psql -U postgres -d streamingdb
 -- or set the search_path: SET search_path TO public;
+=======
+use streamingDB;
+-- TESTING ################################################################################################
+>>>>>>> 4f119e1c4ecc0ed959df4554e9f6c70528707a9a
 
 -- ########## CORE INDEPENDENT DATA ##########
 SELECT * FROM Timezone;
@@ -33,3 +38,8 @@ SELECT * FROM Episode;
 SELECT * FROM Content_Genre;
 SELECT * FROM Content_Role;
 SELECT * FROM Content_Language;
+<<<<<<< HEAD
+=======
+
+-- ########################################################################################################
+>>>>>>> 4f119e1c4ecc0ed959df4554e9f6c70528707a9a
