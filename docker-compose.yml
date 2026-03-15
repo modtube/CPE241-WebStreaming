@@ -1,0 +1,17 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: streaming_db_container
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: cpe@38Final
+      POSTGRES_DB: streamingDB
+    ports:
+      - "5432:5432"
+    volumes:
+      # This maps the local SQL files to the Postgres auto-init folder
+      - ./database/01_schema.sql:/docker-entrypoint-initdb.d/01_schema.sql
+      - ./database/02_seed.sql:/docker-entrypoint-initdb.d/02_seed.sql
+      # Mount the full database folder elsewhere for easy access within the container
+      - ./database:/home/database_scripts
