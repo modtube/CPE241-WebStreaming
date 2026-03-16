@@ -15,3 +15,18 @@ services:
       - ./database/02_seed.sql:/docker-entrypoint-initdb.d/02_seed.sql
       # Mount the full database folder elsewhere for easy access within the container
       - ./database:/home/database_scripts
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin_gui
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
