@@ -13,6 +13,7 @@ services:
       # This maps the local SQL files to the Postgres auto-init folder
       - ./database/01_schema.sql:/docker-entrypoint-initdb.d/01_schema.sql
       - ./database/02_seed.sql:/docker-entrypoint-initdb.d/02_seed.sql
+      - postgres_data:/var/lib/postgresql/data
       # Mount the full database folder elsewhere for easy access within the container
       - ./database:/home/database_scripts
 
@@ -25,8 +26,11 @@ services:
       PGADMIN_DEFAULT_PASSWORD: admin
     ports:
       - "8080:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
     depends_on:
       - db
 
 volumes:
   postgres_data:
+  pgadmin_data:
