@@ -1,4 +1,3 @@
-
 -- CREATE DATABASE IF NOT EXISTS streamingdb; -- Remove this line if creating the DB externally (e.g. via Docker / psql)
 -- -- \c streamingdb  -- Uncomment if running via psql to switch into the new DB
 -- Docker-Compose already defined the DB. Don't have to use CREATE DATABASE unless you are running it on the IDE itself.
@@ -7,36 +6,36 @@
 -- STRONG & FULLY INDEPENDENT ENTITIES
 -- ============================================================
 
-CREATE TABLE IF NOT EXISTS Genre (
-    GenreID   SERIAL PRIMARY KEY,
-    GenreName VARCHAR(50) NOT NULL UNIQUE
+CREATE TABLE IF NOT EXISTS genre (
+    genre_id   SERIAL PRIMARY KEY,
+    genre_name VARCHAR(50) NOT NULL UNIQUE
 );
 
-CREATE TABLE IF NOT EXISTS Person (
-    PersonID    SERIAL PRIMARY KEY,
-    fName       VARCHAR(100) NOT NULL,
-    mName       VARCHAR(100),
-    lName       VARCHAR(100) NOT NULL,
-    Nationality VARCHAR(100) NOT NULL,
-    BirthDate   DATE NOT NULL
+CREATE TABLE IF NOT EXISTS person (
+    person_id   SERIAL PRIMARY KEY,
+    first_name  VARCHAR(100) NOT NULL,
+    middle_name VARCHAR(100),
+    last_name   VARCHAR(100) NOT NULL,
+    nationality VARCHAR(100) NOT NULL,
+    birth_date  DATE NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS LanguageList (
-    LanguageID SERIAL PRIMARY KEY,
-    langName   VARCHAR(100) NOT NULL UNIQUE
+CREATE TABLE IF NOT EXISTS language_list (
+    language_id     SERIAL PRIMARY KEY,
+    language_name   VARCHAR(100) NOT NULL UNIQUE
 );
 
-CREATE TABLE IF NOT EXISTS Timezone (
-    TimezoneID     SERIAL PRIMARY KEY,
-    IANA_Name      VARCHAR(50)  NOT NULL UNIQUE,  -- e.g. 'Asia/Bangkok'
-    Current_Offset VARCHAR(10)  NOT NULL           -- e.g. '+07:00'
+CREATE TABLE IF NOT EXISTS timezone (
+    timezone_id     SERIAL PRIMARY KEY,
+    iana_name       VARCHAR(50)  NOT NULL UNIQUE,  -- e.g. 'Asia/Bangkok'
+    current_offset  VARCHAR(10)  NOT NULL          -- e.g. '+07:00'
 );
 
-CREATE TABLE IF NOT EXISTS ContentRating (
-    RatingID      SERIAL PRIMARY KEY,
-    RatingLabel   VARCHAR(10) NOT NULL UNIQUE,
-    MaturityLevel INTEGER     NOT NULL,            -- 1–5 scale
-    Description   TEXT
+CREATE TABLE IF NOT EXISTS content_rating (
+    rating_id           SERIAL PRIMARY KEY,
+    rating_label        VARCHAR(10) NOT NULL UNIQUE,
+    maturity_level      INTEGER     NOT NULL,            -- 1–5 scale
+    rating_description  TEXT
 );
 
 
@@ -44,74 +43,74 @@ CREATE TABLE IF NOT EXISTS ContentRating (
 -- STRONG BUT USING REFERENCES
 -- ============================================================
 
-CREATE TABLE IF NOT EXISTS Country (
-    CountryID        SERIAL PRIMARY KEY,
-    CountryName      VARCHAR(100) NOT NULL UNIQUE,
-    PrimaryTimezoneID INT,
-    FOREIGN KEY (PrimaryTimezoneID) REFERENCES Timezone(TimezoneID)
+CREATE TABLE IF NOT EXISTS country (
+    country_id          SERIAL PRIMARY KEY,
+    country_name        VARCHAR(100) NOT NULL UNIQUE,
+    primary_timezone_id INT,
+    FOREIGN KEY (primary_timezone_id) REFERENCES timezone(timezone_id)
 );
 
-CREATE TABLE IF NOT EXISTS AppUser (
-    UserID       SERIAL PRIMARY KEY,
-    Username     VARCHAR(50)  NOT NULL UNIQUE,
-    Email        VARCHAR(255) NOT NULL UNIQUE,
-    Password     VARCHAR(255) NOT NULL,
-    RegisterDate TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CountryID    INTEGER,
-    UserType     VARCHAR(50)  NOT NULL,
+CREATE TABLE IF NOT EXISTS app_user (
+    user_id         SERIAL PRIMARY KEY,
+    username        VARCHAR(50)  NOT NULL UNIQUE,
+    email           VARCHAR(255) NOT NULL UNIQUE,
+    user_password   VARCHAR(255) NOT NULL,
+    register_date   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    country_id      INTEGER,
+    user_type       VARCHAR(50)  NOT NULL,
 
-    FOREIGN KEY (CountryID) REFERENCES Country(CountryID) ON DELETE SET NULL
+    FOREIGN KEY (country_id) REFERENCES country(country_id) ON DELETE SET NULL
 );
 
-CREATE TABLE IF NOT EXISTS Content (
-    ContentID   SERIAL PRIMARY KEY,
-    Title       VARCHAR(255) NOT NULL,
-    Description TEXT,
-    ReleaseDate DATE,
-    Price       NUMERIC(10, 2) NOT NULL DEFAULT 0.0,
-    ContentType VARCHAR(50)  NOT NULL,
-    RatingID    INTEGER      NOT NULL,
-    CountryID   INTEGER,
+CREATE TABLE IF NOT EXISTS content (
+    content_id          SERIAL PRIMARY KEY,
+    title               VARCHAR(255) NOT NULL,
+    content_description TEXT,
+    release_date        DATE,
+    price               NUMERIC(10, 2) NOT NULL DEFAULT 0.0,
+    content_type        VARCHAR(50)  NOT NULL,
+    rating_id           INTEGER      NOT NULL,
+    country_id          INTEGER,
 
-    CONSTRAINT ValidContentPrice CHECK (Price >= 0.0),
-    FOREIGN KEY (RatingID)  REFERENCES ContentRating(RatingID),
-    FOREIGN KEY (CountryID) REFERENCES Country(CountryID) ON DELETE SET NULL
+    CONSTRAINT valid_content_price CHECK (price >= 0.0),
+    FOREIGN KEY (rating_id)  REFERENCES content_rating(rating_id),
+    FOREIGN KEY (country_id) REFERENCES country(country_id) ON DELETE SET NULL
 );
 
-CREATE TABLE IF NOT EXISTS TransactionList (
-    TransactionID   SERIAL PRIMARY KEY,
-    UserID          INTEGER,                                    -- Nullable: ON DELETE SET NULL
-    TransactionDate TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    TotalAmount     NUMERIC(10, 3) NOT NULL DEFAULT 0.0,
+CREATE TABLE IF NOT EXISTS transaction_list (
+    transaction_id      SERIAL PRIMARY KEY,
+    user_id             INTEGER,                                    -- Nullable: ON DELETE SET NULL
+    transaction_date    TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    total_amount        NUMERIC(10, 3) NOT NULL DEFAULT 0.0,
 
-    FOREIGN KEY (UserID) REFERENCES AppUser(UserID) ON DELETE SET NULL,
-    CONSTRAINT ValidTransactionPrice CHECK (TotalAmount >= 0.0)
+    FOREIGN KEY (user_id) REFERENCES app_user(user_id) ON DELETE SET NULL,
+    CONSTRAINT valid_transaction_price CHECK (total_amount >= 0.0)
 );
 
-CREATE TABLE IF NOT EXISTS Transaction_Detail (
-    DetailID      SERIAL PRIMARY KEY,
-    TransactionID INTEGER        NOT NULL,
-    ContentID     INTEGER,
-    ContentName   VARCHAR(255)   NOT NULL,  -- Retained even if content is deleted
-    SoldPrice     NUMERIC(10, 3) NOT NULL DEFAULT 0.0,
+CREATE TABLE IF NOT EXISTS transaction_detail (
+    detail_id      SERIAL PRIMARY KEY,
+    transaction_id INTEGER        NOT NULL,
+    content_id     INTEGER,
+    content_name   VARCHAR(255)   NOT NULL,  -- Retained even if content is deleted
+    sold_price     NUMERIC(10, 3) NOT NULL DEFAULT 0.0,
 
-    FOREIGN KEY (TransactionID) REFERENCES TransactionList(TransactionID) ON DELETE CASCADE,
-    FOREIGN KEY (ContentID)     REFERENCES Content(ContentID)             ON DELETE SET NULL
+    FOREIGN KEY (transaction_id) REFERENCES transaction_list(transaction_id) ON DELETE CASCADE,
+    FOREIGN KEY (content_id)     REFERENCES content(content_id)             ON DELETE SET NULL
 );
 
-CREATE TABLE IF NOT EXISTS Reviews (
-    ReviewID    SERIAL PRIMARY KEY,
-    UserID      INTEGER,
-    ContentID   INTEGER        NOT NULL,
-    Rating      NUMERIC(2, 1)  NOT NULL,
-    CommentText TEXT,
-    PostTime    TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+CREATE TABLE IF NOT EXISTS reviews (
+    review_id       SERIAL PRIMARY KEY,
+    user_id         INTEGER,
+    content_id      INTEGER        NOT NULL,
+    rating          NUMERIC(2, 1)  NOT NULL,
+    comment_text    TEXT,
+    post_time       TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    UNIQUE (UserID, ContentID),
+    UNIQUE (user_id, content_id),
 
-    FOREIGN KEY (UserID)    REFERENCES AppUser(UserID)   ON DELETE SET NULL,
-    FOREIGN KEY (ContentID) REFERENCES Content(ContentID) ON DELETE CASCADE,
-    CONSTRAINT validRating CHECK (Rating >= 1.0 AND Rating <= 5.0)
+    FOREIGN KEY (user_id)    REFERENCES app_user(user_id)   ON DELETE SET NULL,
+    FOREIGN KEY (content_id) REFERENCES content(content_id) ON DELETE CASCADE,
+    CONSTRAINT valid_rating CHECK (rating >= 1.0 AND rating <= 5.0)
 );
 
 
@@ -120,111 +119,111 @@ CREATE TABLE IF NOT EXISTS Reviews (
 -- ============================================================
 
 -- ── Playlist ──────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS Playlist (
-    PlaylistID   INTEGER      NOT NULL,
-    UserID       INTEGER      NOT NULL,
-    PlaylistName VARCHAR(100) NOT NULL,
-    CreateDate   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+CREATE TABLE IF NOT EXISTS playlist (
+    playlist_id   INTEGER      NOT NULL,
+    user_id       INTEGER      NOT NULL,
+    playlist_name VARCHAR(100) NOT NULL,
+    create_date   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    PRIMARY KEY (UserID, PlaylistID),
-    FOREIGN KEY (UserID) REFERENCES AppUser(UserID) ON DELETE CASCADE
+    PRIMARY KEY (user_id, playlist_id),
+    FOREIGN KEY (user_id) REFERENCES app_user(user_id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS Playlist_Item (
-    PlaylistID INTEGER   NOT NULL,
-    UserID     INTEGER   NOT NULL,
-    ContentID  INTEGER   NOT NULL,
-    AddDate    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+CREATE TABLE IF NOT EXISTS playlist_item (
+    playlist_id INTEGER   NOT NULL,
+    user_id     INTEGER   NOT NULL,
+    content_id  INTEGER   NOT NULL,
+    add_date    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    PRIMARY KEY (UserID, PlaylistID, ContentID),
-    FOREIGN KEY (UserID, PlaylistID) REFERENCES Playlist(UserID, PlaylistID) ON DELETE CASCADE,
-    FOREIGN KEY (ContentID)          REFERENCES Content(ContentID)           ON DELETE CASCADE
+    PRIMARY KEY (user_id, playlist_id, content_id),
+    FOREIGN KEY (user_id, playlist_id) REFERENCES playlist(user_id, playlist_id) ON DELETE CASCADE,
+    FOREIGN KEY (content_id)           REFERENCES content(content_id)           ON DELETE CASCADE
 );
 
 -- ── User Inventory ────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS User_Content (
-    UserID    INTEGER NOT NULL,
-    ContentID INTEGER NOT NULL,
+CREATE TABLE IF NOT EXISTS user_content (
+    user_id    INTEGER NOT NULL,
+    content_id INTEGER NOT NULL,
 
-    PRIMARY KEY (UserID, ContentID),
-    FOREIGN KEY (UserID)    REFERENCES AppUser(UserID)    ON DELETE CASCADE,
-    FOREIGN KEY (ContentID) REFERENCES Content(ContentID) ON DELETE CASCADE
+    PRIMARY KEY (user_id, content_id),
+    FOREIGN KEY (user_id)    REFERENCES app_user(user_id)    ON DELETE CASCADE,
+    FOREIGN KEY (content_id) REFERENCES content(content_id) ON DELETE CASCADE
 );
 
 -- ── Video Quality ─────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS VideoQuality (
-    ContentID INTEGER     NOT NULL,
-    Quality   VARCHAR(50) NOT NULL,
+CREATE TABLE IF NOT EXISTS video_quality (
+    content_id INTEGER     NOT NULL,
+    quality   VARCHAR(50) NOT NULL,
 
-    PRIMARY KEY (ContentID, Quality),
-    FOREIGN KEY (ContentID) REFERENCES Content(ContentID) ON DELETE CASCADE
+    PRIMARY KEY (content_id, quality),
+    FOREIGN KEY (content_id) REFERENCES content(content_id) ON DELETE CASCADE
 );
 
 -- ── Content Subclasses ────────────────────────────────────
-CREATE TABLE IF NOT EXISTS TV_Show (
-    ContentID   INTEGER     PRIMARY KEY,
-    currStatus  VARCHAR(100) NOT NULL,
+CREATE TABLE IF NOT EXISTS tv_show (
+    content_id   INTEGER     PRIMARY KEY,
+    curr_status  VARCHAR(100) NOT NULL,
 
-    FOREIGN KEY (ContentID) REFERENCES Content(ContentID) ON DELETE CASCADE
+    FOREIGN KEY (content_id) REFERENCES content(content_id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS Movie (
-    ContentID INTEGER PRIMARY KEY,
-    RunTime   INTEGER NOT NULL,  -- Minutes
+CREATE TABLE IF NOT EXISTS movie (
+    content_id INTEGER PRIMARY KEY,
+    run_time   INTEGER NOT NULL,  -- Minutes
 
-    FOREIGN KEY (ContentID) REFERENCES Content(ContentID) ON DELETE CASCADE
+    FOREIGN KEY (content_id) REFERENCES content(content_id) ON DELETE CASCADE
 );
 
 -- ── Seasons & Episodes ────────────────────────────────────
-CREATE TABLE IF NOT EXISTS Season (
-    ContentID INTEGER,
-    SeasonNum INTEGER,
-    AirDate   DATE NOT NULL,
-    Sypnosis  TEXT,
+CREATE TABLE IF NOT EXISTS season (
+    content_id  INTEGER,
+    season_num  INTEGER,
+    air_date    DATE NOT NULL,
+    sypnosis    TEXT,
 
-    PRIMARY KEY (ContentID, SeasonNum),
-    FOREIGN KEY (ContentID) REFERENCES Content(ContentID) ON DELETE CASCADE
+    PRIMARY KEY (content_id, season_num),
+    FOREIGN KEY (content_id) REFERENCES content(content_id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS Episode (
-    ContentID  INTEGER,
-    SeasonNum  INTEGER,
-    EpisodeNum INTEGER,
-    Title      VARCHAR(150) NOT NULL,
-    Sypnosis   TEXT,
-    RunTime    INTEGER,  -- Minutes
+CREATE TABLE IF NOT EXISTS episode (
+    content_id  INTEGER,
+    season_num  INTEGER,
+    episode_num INTEGER,
+    title       VARCHAR(150) NOT NULL,
+    sypnosis    TEXT,
+    run_time    INTEGER,  -- Minutes
 
-    PRIMARY KEY (ContentID, SeasonNum, EpisodeNum),
-    FOREIGN KEY (ContentID, SeasonNum) REFERENCES Season(ContentID, SeasonNum) ON DELETE CASCADE
+    PRIMARY KEY (content_id, season_num, episode_num),
+    FOREIGN KEY (content_id, season_num) REFERENCES season(content_id, season_num) ON DELETE CASCADE
 );
 
 -- ── Content Details ───────────────────────────────────────
-CREATE TABLE IF NOT EXISTS Content_Genre (
-    ContentID INTEGER,
-    GenreID   INTEGER,
+CREATE TABLE IF NOT EXISTS content_genre (
+    content_id INTEGER,
+    genre_id   INTEGER,
 
-    PRIMARY KEY (ContentID, GenreID),
-    FOREIGN KEY (ContentID) REFERENCES Content(ContentID) ON DELETE CASCADE,
-    FOREIGN KEY (GenreID)   REFERENCES Genre(GenreID)     ON DELETE CASCADE
+    PRIMARY KEY (content_id, genre_id),
+    FOREIGN KEY (content_id) REFERENCES content(content_id) ON DELETE CASCADE,
+    FOREIGN KEY (genre_id)   REFERENCES genre(genre_id)     ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS Content_Role (
-    ContentID     INTEGER,
-    PersonID      INTEGER,
-    RoleType      VARCHAR(100) NOT NULL,
-    CharacterName VARCHAR(200),
+CREATE TABLE IF NOT EXISTS content_role (
+    content_id     INTEGER,
+    person_id      INTEGER,
+    role_type      VARCHAR(100) NOT NULL,
+    character_name VARCHAR(200),
 
-    PRIMARY KEY (ContentID, PersonID),
-    FOREIGN KEY (ContentID) REFERENCES Content(ContentID) ON DELETE CASCADE,
-    FOREIGN KEY (PersonID)  REFERENCES Person(PersonID)   ON DELETE CASCADE
+    PRIMARY KEY (content_id, person_id),
+    FOREIGN KEY (content_id) REFERENCES content(content_id) ON DELETE CASCADE,
+    FOREIGN KEY (person_id)  REFERENCES person(person_id)   ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS Content_Language (
-    ContentID  INTEGER,
-    LanguageID INTEGER,
-    LangType   VARCHAR(100),
+CREATE TABLE IF NOT EXISTS content_language (
+    content_id  INTEGER,
+    language_id INTEGER,
+    lang_type   VARCHAR(100),
 
-    PRIMARY KEY (ContentID, LanguageID, LangType),
-    FOREIGN KEY (ContentID)  REFERENCES Content(ContentID)      ON DELETE CASCADE,
-    FOREIGN KEY (LanguageID) REFERENCES LanguageList(LanguageID) ON DELETE CASCADE
+    PRIMARY KEY (content_id, language_id, lang_type),
+    FOREIGN KEY (content_id)  REFERENCES content(content_id)      ON DELETE CASCADE,
+    FOREIGN KEY (language_id) REFERENCES language_list(language_id) ON DELETE CASCADE
 );
