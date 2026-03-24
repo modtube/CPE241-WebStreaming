@@ -8,7 +8,7 @@
 --   → person           (needs app_user for create_by)
 --   → content          (needs app_user, content_rating, country)
 --   → tv_show, movie, season, episode, media_path, content_genre,
---     content_language, content_role
+--     content_resource, content_role
 --   → transaction_list, transaction_detail, reviews,
 --     user_content, playlist, playlist_item
 -- ########################################################################################################
@@ -76,22 +76,22 @@ INSERT INTO language_list (language_name, native_name) VALUES
 -- ══════════════════════════════════════════════════════════════════════
 
 -- ── country ───────────────────────────────────────────────────────────
-INSERT INTO country (country_name, primary_timezone_id) VALUES
-('Thailand',         2),   -- 1
-('China',            4),   -- 2
-('Germany',          6),   -- 3
-('Japan',            3),   -- 4
-('United States',    9),   -- 5
-('South Korea',      5),   -- 6
-('France',           8),   -- 7
-('United Kingdom',   7),   -- 8
-('Australia',       12),   -- 9
-('Brazil',          14),   -- 10
-('Mexico',          15),   -- 11
-('New Zealand',     13),   -- 12
-('Canada',          10),   -- 13
-('Spain',            8),   -- 14
-('Italy',            8);   -- 15
+INSERT INTO country (country_name, country_code, primary_timezone_id) VALUES -- country_code must be the ISO format
+('Thailand',       'TH', 2),
+('China',          'CN', 4),
+('Germany',        'DE', 6),
+('Japan',          'JP', 3),
+('United States',  'US', 9),
+('South Korea',    'KR', 5),
+('France',         'FR', 8),
+('United Kingdom', 'GB', 7),
+('Australia',      'AU', 12),
+('Brazil',         'BR', 14),
+('Mexico',         'MX', 15),
+('New Zealand',    'NZ', 13),
+('Canada',         'CA', 10),
+('Spain',          'ES', 8),
+('Italy',          'IT', 8);
 
 
 -- ══════════════════════════════════════════════════════════════════════
@@ -101,92 +101,94 @@ INSERT INTO country (country_name, primary_timezone_id) VALUES
 -- ── app_user ──────────────────────────────────────────────────────────
 -- NOTE: app_user must be inserted before person, because person.create_by
 --       references app_user(user_id).
-INSERT INTO app_user (username, email, user_password, register_date, country_id, user_type, user_status) VALUES
-('Wirachat_Admin',   'wirachat@kmutt.ac.th',    'safe123',       '2021-01-15 09:00:00',  1,  'Admin',    'active'),   -- 1
-('GenshinLover',     'traveler@teyvat.com',      'paimon',        '2021-02-03 14:22:11',  2,  'Premium',  'active'),   -- 2
-('Anya_Fans',        'wakuwaku@spy.com',         'peanuts',       '2021-03-18 08:45:30',  3,  'Free',     'active'),   -- 3
-('Luffy_Pirate',     'luffy@grandline.com',      'meat',          '2021-05-07 20:10:05',  4,  'Premium',  'active'),   -- 4
-('Zoro_Lost',        'zoro@swords.com',          'bushido',       '2021-06-14 11:33:47',  4,  'Free',     'active'),   -- 5
-('Nami_Money',       'nami@berries.com',         'gold',          '2021-07-29 16:55:22',  4,  'Premium',  'active'),   -- 6
-('Sanji_Cook',       'sanji@allblue.com',        'mellorine',     '2021-08-05 07:12:59',  4,  'Free',     'active'),   -- 7
-('Robin_History',    'robin@ohara.com',          'archaeology',   '2021-09-20 13:40:00',  4,  'Premium',  'active'),   -- 8
-('Chopper_Doc',      'chopper@drum.com',         'candy',         '2021-10-11 19:08:34',  4,  'Free',     'active'),   -- 9
-('Franky_Super',     'franky@water7.com',        'cola',          '2021-11-28 10:27:16',  4,  'Premium',  'active'),   -- 10
-('Brook_Soul',       'brook@soul.com',           'laboon',        '2022-01-04 22:15:50',  4,  'Free',     'active'),   -- 11
-('Jimbei_Fish',      'jimbei@sea.com',           'karate',        '2022-02-17 09:03:41',  4,  'Premium',  'active'),   -- 12
-('Usopp_Sniper',     'usopp@brave.com',          'popgreen',      '2022-03-30 15:49:07',  4,  'Free',     'active'),   -- 13
-('Law_Heart',        'law@op.com',               'shambles',      '2022-05-12 18:22:33', 14,  'Premium',  'active'),   -- 14
-('Kid_Metal',        'kid@punk.com',             'magnet',        '2022-06-08 06:57:44',  9,  'Free',     'active'),   -- 15
-('Hancock_Love',     'hancock@kuja.com',         'salome',        '2022-08-01 12:34:19',  6,  'Premium',  'active'),   -- 16
-('Ace_Fire',         'ace@spade.com',            'meramera',      '2022-09-23 21:05:02', 10,  'Free',     'suspended'),-- 17
-('Sabo_Dragon',      'sabo@rev.com',             'dragonclaw',    '2022-10-16 17:48:55', 10,  'Premium',  'active'),   -- 18
-('Shanks_Red',       'shanks@yonko.com',         'haki',          '2022-11-07 08:31:28',  8,  'Free',     'active'),   -- 19
-('Buggy_Clown',      'buggy@cross.com',          'flashy',        '2022-12-25 23:59:00', 15,  'Premium',  'active'),   -- 20
-('Naruto_Uzumaki',   'naruto@konoha.com',        'dattebayo',     '2023-01-09 10:14:37',  4,  'Premium',  'active'),   -- 21
-('Sasuke_Uchiha',    'sasuke@avenger.com',       'chidori',       '2023-02-14 14:00:00',  4,  'Free',     'active'),   -- 22
-('Sakura_Haruno',    'sakura@medic.com',         'shannaro',      '2023-03-22 09:30:15',  4,  'Premium',  'active'),   -- 23
-('Kakashi_Sensei',   'kakashi@sharingan.com',    'copycat',       '2023-04-01 00:00:01',  4,  'Free',     'active'),   -- 24
-('Itachi_Crow',      'itachi@akatsuki.com',      'tsukuyomi',     '2023-05-18 03:33:33',  4,  'Premium',  'active'),   -- 25
-('Goku_Saiyan',      'goku@capsule.com',         'kamehameha',    '2023-06-29 12:00:00',  5,  'Free',     'active'),   -- 26
-('Vegeta_Prince',    'vegeta@saiyan.com',        'finalflash',    '2023-07-04 08:08:08',  5,  'Premium',  'active'),   -- 27
-('Bulma_Genius',     'bulma@brief.com',          'dragonball',    '2023-08-15 16:45:20',  5,  'Free',     'active'),   -- 28
-('Tanjiro_Blade',    'tanjiro@hashira.com',      'hinokami',      '2023-09-03 11:22:44',  4,  'Premium',  'active'),   -- 29
-('Nezuko_Box',       'nezuko@demon.com',         'bamboo',        '2023-10-10 19:55:10',  4,  'Free',     'active'),   -- 30
-('Edward_Elric',     'edward@alchemy.com',       'equivalent',    '2024-01-07 08:00:00',  3,  'Premium',  'active'),   -- 31
-('Roy_Mustang',      'roy@flame.com',            'colonel',       '2024-02-14 09:14:59',  3,  'Free',     'active'),   -- 32
-('Mikasa_Ackerman',  'mikasa@survey.com',        'scarf',         '2024-03-05 07:30:00',  3,  'Premium',  'active'),   -- 33
-('Armin_Strategist', 'armin@brain.com',          'colossal',      '2024-04-18 13:13:13',  3,  'Free',     'active'),   -- 34
-('Levi_Captain',     'levi@clean.com',           'HumanitysBest', '2024-05-01 05:00:00',  3,  'Premium',  'active'),   -- 35
-('Sasha_Potato',     'sasha@potato.com',         'potatoes',      '2024-06-20 12:30:00',  3,  'Free',     'active'),   -- 36
-('Historia_Queen',   'historia@wall.com',        'reiss',         '2024-07-14 18:00:00',  3,  'Premium',  'active'),   -- 37
-('Erwin_Smith',      'erwin@commander.com',      'chargefwd',     '2024-08-09 06:45:00',  3,  'Free',     'active'),   -- 38
-('Hange_Zoe',        'hange@titan.com',          'experiment',    '2024-09-27 20:20:20',  3,  'Premium',  'active'),   -- 39
-('Reiner_Armor',     'reiner@warrior.com',       'bertholt',      '2024-11-11 11:11:11',  3,  'Free',     'active');   -- 40
+INSERT INTO app_user (username, email, img_path, user_password, register_date, country_id, user_type, user_status) VALUES
+('Wirachat_Admin',   'wirachat.thon@kmutt.ac.th',   NULL, 'safe123',       '2021-01-15 09:00:00',  1,  'Admin',    'active'),   -- 1
+('GenshinLover',     'traveler@teyvat.com',         NULL, 'paimon',        '2021-02-03 14:22:11',  2,  'Premium',  'active'),   -- 2
+('Anya_Fans',        'wakuwaku@spy.com',            NULL, 'peanuts',       '2021-03-18 08:45:30',  3,  'Free',     'active'),   -- 3
+('Luffy_Pirate',     'luffy@grandline.com',         NULL, 'meat',          '2021-05-07 20:10:05',  4,  'Premium',  'active'),   -- 4
+('Zoro_Lost',        'zoro@swords.com',             NULL, 'bushido',       '2021-06-14 11:33:47',  4,  'Free',     'active'),   -- 5
+('Nami_Money',       'nami@berries.com',            NULL, 'gold',          '2021-07-29 16:55:22',  4,  'Premium',  'active'),   -- 6
+('Sanji_Cook',       'sanji@allblue.com',           NULL, 'mellorine',     '2021-08-05 07:12:59',  4,  'Free',     'active'),   -- 7
+('Robin_History',    'robin@ohara.com',             NULL, 'archaeology',   '2021-09-20 13:40:00',  4,  'Premium',  'active'),   -- 8
+('Chopper_Doc',      'chopper@drum.com',            NULL, 'candy',         '2021-10-11 19:08:34',  4,  'Free',     'active'),   -- 9
+('Franky_Super',     'franky@water7.com',           NULL, 'cola',          '2021-11-28 10:27:16',  4,  'Premium',  'active'),   -- 10
+('Brook_Soul',       'brook@soul.com',              NULL, 'laboon',        '2022-01-04 22:15:50',  4,  'Free',     'active'),   -- 11
+('Jimbei_Fish',      'jimbei@sea.com',              NULL, 'karate',        '2022-02-17 09:03:41',  4,  'Premium',  'active'),   -- 12
+('Usopp_Sniper',     'usopp@brave.com',             NULL, 'popgreen',      '2022-03-30 15:49:07',  4,  'Free',     'active'),   -- 13
+('Law_Heart',        'law@op.com',                  NULL, 'shambles',      '2022-05-12 18:22:33', 14,  'Premium',  'active'),   -- 14
+('Kid_Metal',        'kid@punk.com',                NULL, 'magnet',        '2022-06-08 06:57:44',  9,  'Free',     'active'),   -- 15
+('Hancock_Love',     'hancock@kuja.com',            NULL, 'salome',        '2022-08-01 12:34:19',  6,  'Premium',  'active'),   -- 16
+('Ace_Fire',         'ace@spade.com',               NULL, 'meramera',      '2022-09-23 21:05:02', 10,  'Free',     'suspended'),-- 17
+('Sabo_Dragon',      'sabo@rev.com',                NULL, 'dragonclaw',    '2022-10-16 17:48:55', 10,  'Premium',  'active'),   -- 18
+('Whitebeard_Goat', 'newgate@yonko.com',            NULL, 'guranogura',    '2022-11-20 12:00:00',  4,  'Premium',  'active'), -- 19
+('Shanks_Red',       'shanks@yonko.com',            NULL, 'haki',          '2022-12-25 23:59:00', 15,  'Premium',  'active'),   -- 20
+('Naruto_Uzumaki',   'naruto@konoha.com',           NULL, 'dattebayo',     '2023-01-09 10:14:37',  4,  'Premium',  'active'),   -- 21
+('Sasuke_Uchiha',    'sasuke@avenger.com',          NULL, 'chidori',       '2023-02-14 14:00:00',  4,  'Free',     'active'),   -- 22
+('Sakura_Haruno',    'sakura@medic.com',            NULL, 'shannaro',      '2023-03-22 09:30:15',  4,  'Premium',  'active'),   -- 23
+('Kakashi_Sensei',   'kakashi@sharingan.com',       NULL, 'copycat',       '2023-04-01 00:00:01',  4,  'Free',     'active'),   -- 24
+('Itachi_Crow',      'itachi@akatsuki.com',         NULL, 'tsukuyomi',     '2023-05-18 03:33:33',  4,  'Premium',  'active'),   -- 25
+('Goku_Saiyan',      'goku@capsule.com',            NULL, 'kamehameha',    '2023-06-29 12:00:00',  5,  'Free',     'active'),   -- 26
+('Vegeta_Prince',    'vegeta@saiyan.com',           NULL, 'finalflash',    '2023-07-04 08:08:08',  5,  'Premium',  'active'),   -- 27
+('Bulma_Genius',     'bulma@brief.com',             NULL, 'dragonball',    '2023-08-15 16:45:20',  5,  'Free',     'active'),   -- 28
+('Tanjiro_Blade',    'tanjiro@hashira.com',         NULL, 'hinokami',      '2023-09-03 11:22:44',  4,  'Premium',  'active'),   -- 29
+('Nezuko_Box',       'nezuko@demon.com',            NULL, 'bamboo',        '2023-10-10 19:55:10',  4,  'Free',     'active'),   -- 30
+('Edward_Elric',     'edward@alchemy.com',          NULL, 'equivalent',    '2024-01-07 08:00:00',  3,  'Premium',  'active'),   -- 31
+('Roy_Mustang',      'roy@flame.com',               NULL, 'colonel',       '2024-02-14 09:14:59',  3,  'Free',     'active'),   -- 32
+('Mikasa_Ackerman',  'mikasa@survey.com',           NULL, 'scarf',         '2024-03-05 07:30:00',  3,  'Premium',  'active'),   -- 33
+('Armin_Strategist', 'armin@brain.com',             NULL, 'colossal',      '2024-04-18 13:13:13',  3,  'Free',     'active'),   -- 34
+('Levi_Captain',     'levi@clean.com',              NULL, 'HumanitysBest', '2024-05-01 05:00:00',  3,  'Premium',  'active'),   -- 35
+('Sasha_Potato',     'sasha@potato.com',            NULL, 'potatoes',      '2024-06-20 12:30:00',  3,  'Free',     'active'),   -- 36
+('Historia_Queen',   'historia@wall.com',           NULL, 'reiss',         '2024-07-14 18:00:00',  3,  'Premium',  'active'),   -- 37
+('Erwin_Smith',      'erwin@commander.com',         NULL, 'chargefwd',     '2024-08-09 06:45:00',  3,  'Free',     'active'),   -- 38
+('Hange_Zoe',        'hange@titan.com',             NULL, 'experiment',    '2024-09-27 20:20:20',  3,  'Premium',  'active'),   -- 39
+('Reiner_Armor',     'reiner@warrior.com',          NULL, 'bertholt',      '2024-11-11 11:11:11',  3,  'Free',     'active');   -- 40
 
 
 -- ══════════════════════════════════════════════════════════════════════
 -- 4. TABLES THAT DEPEND ON app_user
 -- ══════════════════════════════════════════════════════════════════════
 
--- ── person ────────────────────────────────────────────────────────────
--- create_by = 1 (Wirachat_Admin) for all persons; update_by = NULL (never modified)
-INSERT INTO person (first_name, middle_name, last_name, nationality, birth_date, create_by, update_by) VALUES
-('Christopher',  NULL,      'Nolan',       'British',      '1970-07-30', 1, NULL),  -- 1
-('Tatsuya',      NULL,      'Endo',        'Japanese',     '1980-07-23', 1, NULL),  -- 2
-('Steve',        NULL,      'Carell',      'American',     '1962-08-16', 1, NULL),  -- 3
-('Heath',        NULL,      'Ledger',      'Australian',   '1979-04-04', 1, NULL),  -- 4
-('Eiichiro',     NULL,      'Oda',         'Japanese',     '1975-01-01', 1, NULL),  -- 5
-('Bryan',        NULL,      'Cranston',    'American',     '1956-03-07', 1, NULL),  -- 6
-('Zendaya',      NULL,      'Coleman',     'American',     '1996-09-01', 1, NULL),  -- 7
-('Bong',         NULL,      'Joon-ho',     'Korean',       '1969-09-14', 1, NULL),  -- 8
-('Pedro',        NULL,      'Pascal',      'Chilean',      '1975-04-02', 1, NULL),  -- 9
-('Michelle',     NULL,      'Yeoh',        'Malaysian',    '1962-08-06', 1, NULL),  -- 10
-('Hajime',       NULL,      'Isayama',     'Japanese',     '1986-08-29', 1, NULL),  -- 11
-('Quentin',      NULL,      'Tarantino',   'American',     '1963-03-27', 1, NULL),  -- 12
-('Martin',       NULL,      'Scorsese',    'American',     '1942-11-17', 1, NULL),  -- 13
-('Denis',        NULL,      'Villeneuve',  'Canadian',     '1967-10-03', 1, NULL),  -- 14
-('Makoto',       NULL,      'Shinkai',     'Japanese',     '1973-02-09', 1, NULL),  -- 15
-('Hayao',        NULL,      'Miyazaki',    'Japanese',     '1941-01-05', 1, NULL),  -- 16
-('Greta',        NULL,      'Gerwig',      'American',     '1983-08-04', 1, NULL),  -- 17
-('Wes',          NULL,      'Anderson',    'American',     '1969-05-01', 1, NULL),  -- 18
-('Guillermo',    NULL,      'del Toro',    'Mexican',      '1964-10-09', 1, NULL),  -- 19
-('Taika',        NULL,      'Waititi',     'New Zealand',  '1975-08-16', 1, NULL),  -- 20
-('Masashi',      NULL,      'Kishimoto',   'Japanese',     '1974-11-08', 1, NULL),  -- 21
-('Akira',        NULL,      'Toriyama',    'Japanese',     '1955-05-05', 1, NULL),  -- 22
-('Koyoharu',     NULL,      'Gotouge',     'Japanese',     '1989-05-05', 1, NULL),  -- 23
-('Hiromu',       NULL,      'Arakawa',     'Japanese',     '1973-05-08', 1, NULL),  -- 24
-('Aaron',        NULL,      'Paul',        'American',     '1979-08-27', 1, NULL),  -- 25
-('Anna',         NULL,      'Gunn',        'American',     '1968-08-11', 1, NULL),  -- 26
-('Millie',       'Bobby',   'Brown',       'British',      '2004-02-19', 1, NULL),  -- 27
-('Winona',       NULL,      'Ryder',       'American',     '1971-10-29', 1, NULL),  -- 28
-('Al',           NULL,      'Pacino',      'American',     '1940-04-25', 1, NULL),  -- 29
-('Marlon',       NULL,      'Brando',      'American',     '1924-04-03', 1, NULL),  -- 30
-('Timothee',     NULL,      'Chalamet',    'American',     '1995-12-27', 1, NULL),  -- 31
-('Zoe',          NULL,      'Saldana',     'American',     '1978-06-19', 1, NULL),  -- 32
-('Ryan',         NULL,      'Gosling',     'Canadian',     '1980-11-12', 1, NULL),  -- 33
-('Cate',         NULL,      'Blanchett',   'Australian',   '1969-05-14', 1, NULL),  -- 34
-('Tom',          NULL,      'Hanks',       'American',     '1956-07-09', 1, NULL);  -- 35
+-- ── person (create_by = 1 refers to Wirachat_Admin) ──────────────────
+-- We use OVERRIDING SYSTEM VALUE so we can keep the IDs 1-35 consistent 
+-- with your content_role table.
 
+INSERT INTO person (person_id, first_name, middle_name, last_name, nationality, birth_date, birth_place, biography, create_by) 
+OVERRIDING SYSTEM VALUE VALUES
+(1,  'Christopher', NULL,    'Nolan',      'British',    '1970-07-30', 'London, UK', 'Visionary director known for non-linear storytelling and epics like Interstellar.', 1),
+(2,  'Tatsuya',     NULL,    'Endo',       'Japanese',   '1980-07-23', 'Ibaraki, Japan', 'Manga artist and creator of the global hit series Spy x Family.', 1),
+(3,  'Steve',       NULL,    'Carell',     'American',   '1962-08-16', 'Concord, MA, USA', 'Award-winning comedic actor famous for portraying Michael Scott in The Office.', 1),
+(4,  'Heath',       NULL,    'Ledger',     'Australian', '1979-04-04', 'Perth, Australia', 'Acclaimed actor known for his legendary performance as The Joker.', 1),
+(5,  'Eiichiro',    NULL,    'Oda',        'Japanese',   '1975-01-01', 'Kumamoto, Japan', 'World-renowned manga artist and creator of the long-running One Piece.', 1),
+(6,  'Bryan',       NULL,    'Cranston',   'American',   '1956-03-07', 'Hollywood, CA, USA', 'Critically acclaimed actor famous for playing Walter White in Breaking Bad.', 1),
+(7,  'Zendaya',     NULL,    'Coleman',    'American',   '1996-09-01', 'Oakland, CA, USA', 'Versatile actress and singer known for Euphoria and Dune.', 1),
+(8,  'Bong',        NULL,    'Joon-ho',    'Korean',     '1969-09-14', 'Daegu, South Korea', 'Director of the Oscar-winning film Parasite.', 1),
+(9,  'Pedro',       NULL,    'Pascal',     'Chilean',    '1975-04-02', 'Santiago, Chile', 'Leading actor in The Mandalorian and The Last of Us.', 1),
+(10, 'Michelle',    NULL,    'Yeoh',       'Malaysian',  '1962-08-06', 'Ipoh, Malaysia', 'First Asian woman to win an Oscar for Best Actress.', 1),
+(11, 'Hajime',      NULL,    'Isayama',    'Japanese',   '1986-08-29', 'Oyama, Japan', 'Manga artist famous for creating the dark fantasy series Attack on Titan.', 1),
+(12, 'Quentin',     NULL,    'Tarantino',  'American',   '1963-03-27', 'Knoxville, TN, USA', 'Director known for stylized violence and sharp dialogue in Pulp Fiction.', 1),
+(13, 'Martin',      NULL,    'Scorsese',   'American',   '1942-11-17', 'Queens, NY, USA', 'Legendary director focused on crime and religious themes.', 1),
+(14, 'Denis',       NULL,    'Villeneuve', 'Canadian',   '1967-10-03', 'Gentilly, Canada', 'Visionary director of sci-fi films like Dune and Blade Runner 2049.', 1),
+(15, 'Makoto',      NULL,    'Shinkai',    'Japanese',   '1973-02-09', 'Koumi, Japan', 'Director of beautiful anime films including Your Name.', 1),
+(16, 'Hayao',       NULL,    'Miyazaki',   'Japanese',   '1941-01-05', 'Tokyo, Japan', 'Co-founder of Studio Ghibli and legendary animator.', 1),
+(17, 'Greta',       NULL,    'Gerwig',     'American',   '1983-08-04', 'Sacramento, CA, USA', 'Director of Lady Bird, Little Women, and Barbie.', 1),
+(18, 'Wes',         NULL,    'Anderson',   'American',   '1969-05-01', 'Houston, TX, USA', 'Director known for his unique visual and narrative styles.', 1),
+(19, 'Guillermo',   NULL,    'del Toro',   'Mexican',    '1964-10-09', 'Guadalajara, Mexico', 'Famed director of dark fantasy and horror films.', 1),
+(20, 'Taika',       NULL,    'Waititi',    'New Zealand','1975-08-16', 'Raukokore, NZ', 'Quirky director known for Hunt for the Wilderpeople and Thor: Ragnarok.', 1),
+(21, 'Masashi',     NULL,    'Kishimoto',  'Japanese',   '1974-11-08', 'Nagi, Japan', 'Manga artist and creator of the massive Naruto series.', 1),
+(22, 'Akira',       NULL,    'Toriyama',   'Japanese',   '1955-05-05', 'Nagoya, Japan', 'Legendary creator of Dragon Ball and character designer for Chrono Trigger.', 1),
+(23, 'Koyoharu',    NULL,    'Gotouge',    'Japanese',   '1989-05-05', 'Fukuoka, Japan', 'The mysterious author behind the hit Demon Slayer series.', 1),
+(24, 'Hiromu',      NULL,    'Arakawa',    'Japanese',   '1973-05-08', 'Makubetsu, Japan', 'Creator of the critically acclaimed Fullmetal Alchemist.', 1),
+(25, 'Aaron',       NULL,    'Paul',       'American',   '1979-08-27', 'Emmett, ID, USA', 'Best known for playing Jesse Pinkman in Breaking Bad.', 1),
+(26, 'Anna',        NULL,    'Gunn',       'American',   '1968-08-11', 'Cleveland, OH, USA', 'Emmy-winning actress who played Skyler White in Breaking Bad.', 1),
+(27, 'Millie',      'Bobby', 'Brown',      'British',    '2004-02-19', 'Marbella, Spain', 'Breakout star of Stranger Things and Enola Holmes.', 1),
+(28, 'Winona',      NULL,    'Ryder',      'American',   '1971-10-29', 'Winona, MN, USA', 'Iconic actress known for Beetlejuice and Stranger Things.', 1),
+(29, 'Al',          NULL,    'Pacino',     'American',   '1940-04-25', 'Manhattan, NY, USA', 'Acting legend famous for The Godfather and Scarface.', 1),
+(30, 'Marlon',      NULL,    'Brando',     'American',   '1924-04-03', 'Omaha, NE, USA', 'Considered one of the greatest actors of all time.', 1),
+(31, 'Timothée',    NULL,    'Chalamet',   'American',   '1995-12-27', 'Manhattan, NY, USA', 'Rising star known for Call Me by Your Name and Dune.', 1),
+(32, 'Zoe',         NULL,    'Saldaña',    'American',   '1978-06-19', 'Passaic, NJ, USA', 'Star of the three highest-grossing films of all time.', 1),
+(33, 'Ryan',        NULL,    'Gosling',    'Canadian',   '1980-11-12', 'London, Canada', 'Known for Drive, La La Land, and Barbie.', 1),
+(34, 'Cate',        NULL,    'Blanchett',  'Australian', '1969-05-14', 'Melbourne, Australia', 'Award-winning actress known for Tár and Carol.', 1),
+(35, 'Tom',         NULL,    'Hanks',      'American',   '1956-07-09', 'Concord, CA, USA', 'Beloved actor famous for Forrest Gump and Toy Story.', 1);
 
 -- ══════════════════════════════════════════════════════════════════════
 -- 5. CONTENT
@@ -235,24 +237,24 @@ INSERT INTO content (title, content_description, release_date, price, content_ty
 -- 6. CONTENT SUBCLASSES — movie, tv_show, season, episode
 -- ══════════════════════════════════════════════════════════════════════
 
-INSERT INTO movie (content_id, run_time) VALUES
-(1,  169),
-(4,  148),
-(7,  106),
-(8,  155),
-(11, 132),
-(12, 152),
-(13, 150),
-(14, 139),
-(18, 175),
-(19, 125),
-(25, 166),
-(26, 180),
-(27,  99),
-(28, 154),
-(32, 164),
-(33, 133),
-(34, 146);
+INSERT INTO movie (content_id, curr_status, run_time) VALUES
+(1, 'Released',  169),
+(4, 'Released',  148),
+(7, 'Released',  106),
+(8, 'Released',  155),
+(11, 'Released', 132),
+(12, 'Released', 152),
+(13, 'Released', 150),
+(14, 'Released', 139),
+(18, 'Released', 175),
+(19, 'Released', 125),
+(25, 'Released', 166),
+(26, 'Released', 180),
+(27, 'Released', 99),
+(28, 'Released', 154),
+(32, 'Released', 164),
+(33, 'Released', 133),
+(34, 'Released', 146);
 
 INSERT INTO tv_show (content_id, curr_status) VALUES
 (2,  'On-going'),
@@ -681,42 +683,430 @@ INSERT INTO content_genre (content_id, genre_id) VALUES
 (34, 13),(34, 11), (34, 6),
 (35, 11),(35, 3);
 
-INSERT INTO content_language (content_id, language_id, lang_type) VALUES
-(1,  1, 'Audio'),  (1,  2, 'Subtitle'), (1,  6, 'Subtitle'), (1,  7, 'Subtitle'),
-(2,  3, 'Audio'),  (2,  1, 'Subtitle'), (2,  2, 'Subtitle'),
-(3,  1, 'Audio'),  (3,  2, 'Subtitle'), (3,  4, 'Subtitle'),
-(4,  1, 'Audio'),  (4,  2, 'Subtitle'), (4,  6, 'Subtitle'),
-(5,  3, 'Audio'),  (5,  1, 'Subtitle'), (5,  2, 'Subtitle'), (5,  4, 'Subtitle'),
-(6,  1, 'Audio'),  (6,  2, 'Subtitle'), (6,  4, 'Subtitle'),
-(7,  3, 'Audio'),  (7,  1, 'Subtitle'), (7,  2, 'Subtitle'), (7,  5, 'Subtitle'),
-(8,  1, 'Audio'),  (8,  3, 'Subtitle'), (8,  6, 'Subtitle'), (8,  4, 'Subtitle'),
-(9,  3, 'Audio'),  (9,  2, 'Subtitle'), (9,  1, 'Subtitle'),
-(10, 1, 'Audio'),  (10, 1, 'Subtitle'), (10, 2, 'Subtitle'),
-(11, 5, 'Audio'),  (11, 1, 'Subtitle'), (11, 2, 'Subtitle'), (11, 8, 'Subtitle'),
-(12, 1, 'Audio'),  (12, 2, 'Subtitle'), (12, 4, 'Subtitle'),
-(13, 1, 'Audio'),  (13, 2, 'Subtitle'), (13, 7, 'Subtitle'),
-(14, 1, 'Audio'),  (14, 2, 'Subtitle'), (14, 4, 'Subtitle'),
-(15, 3, 'Audio'),  (15, 1, 'Subtitle'), (15, 2, 'Subtitle'),
-(16, 1, 'Audio'),  (16, 2, 'Subtitle'), (16, 4, 'Subtitle'),
-(17, 1, 'Audio'),  (17, 2, 'Subtitle'), (17, 4, 'Subtitle'), (17, 6, 'Subtitle'),
-(18, 1, 'Audio'),  (18, 2, 'Subtitle'), (18, 9, 'Subtitle'),
-(19, 3, 'Audio'),  (19, 1, 'Subtitle'), (19, 2, 'Subtitle'),
-(20, 1, 'Audio'),  (20, 2, 'Subtitle'), (20, 10, 'Subtitle'),
-(21, 3, 'Audio'),  (21, 1, 'Subtitle'), (21, 2, 'Subtitle'),
-(22, 3, 'Audio'),  (22, 1, 'Subtitle'), (22, 2, 'Subtitle'),
-(23, 3, 'Audio'),  (23, 1, 'Subtitle'), (23, 2, 'Subtitle'),
-(24, 3, 'Audio'),  (24, 1, 'Subtitle'), (24, 2, 'Subtitle'),
-(25, 1, 'Audio'),  (25, 2, 'Subtitle'), (25, 6, 'Subtitle'), (25, 4, 'Subtitle'),
-(26, 1, 'Audio'),  (26, 2, 'Subtitle'), (26, 7, 'Subtitle'),
-(27, 1, 'Audio'),  (27, 6, 'Subtitle'), (27, 7, 'Subtitle'),
-(28, 1, 'Audio'),  (28, 2, 'Subtitle'), (28, 4, 'Subtitle'),
-(29, 5, 'Audio'),  (29, 1, 'Subtitle'), (29, 2, 'Subtitle'), (29, 3, 'Subtitle'),
-(30, 1, 'Audio'),  (30, 6, 'Subtitle'), (30, 2, 'Subtitle'),
-(31, 1, 'Audio'),  (31, 2, 'Subtitle'), (31, 4, 'Subtitle'),
-(32, 1, 'Audio'),  (32, 2, 'Subtitle'), (32, 6, 'Subtitle'),
-(33, 3, 'Audio'),  (33, 1, 'Subtitle'), (33, 2, 'Subtitle'),
-(34, 1, 'Audio'),  (34, 2, 'Subtitle'), (34, 9, 'Subtitle'),
-(35, 1, 'Audio'),  (35, 2, 'Subtitle'), (35, 4, 'Subtitle');
+-- ══════════════════════════════════════════════════════════════════════
+-- content_resource seed
+-- Replaces: content_language
+--
+-- File-path convention:
+--   Movies  → /media/movies/{content_id}/{audio|subtitles}/{lang}.{mp4|srt}
+--   TV Shows → /media/shows/{content_id}/ep_{episode_id}/{audio|subtitles}/{lang}.{mp4|srt}
+--
+-- Language codes used in paths:
+--   1=en  2=th  3=ja  4=es  5=ko  6=fr  7=de  8=zh  9=it  10=ru
+--
+-- episode_id reference (from episode table, assigned by IDENTITY):
+--   content 2  (Spy x Family)              → ep_id  1– 5
+--   content 3  (The Office)                → ep_id  6–11
+--   content 5  (One Piece)                 → ep_id 12–15
+--   content 6  (Breaking Bad)              → ep_id 16–21
+--   content 9  (Attack on Titan)           → ep_id 22–27
+--   content 10 (The Mandalorian)           → ep_id 28–31
+--   content 15 (Jujutsu Kaisen)            → ep_id 32–35
+--   content 16 (Better Call Saul)          → ep_id 36–39
+--   content 17 (Stranger Things)           → ep_id 40–45
+--   content 20 (Chernobyl)                 → ep_id 46–47
+--   content 21 (Naruto)                    → ep_id 48–51
+--   content 22 (Dragon Ball Z)             → ep_id 52–55
+--   content 23 (Demon Slayer)              → ep_id 56–59
+--   content 24 (FMA: Brotherhood)          → ep_id 60–63
+--   content 29 (Squid Game)                → ep_id 64–65
+--   content 30 (Arcane)                    → ep_id 66–67
+--   content 31 (Severance)                 → ep_id 68–71
+--   content 35 (The Bear)                  → ep_id 72–75
+-- ══════════════════════════════════════════════════════════════════════
+
+INSERT INTO content_resource (content_id, episode_id, language_id, lang_type, file_path, priority) VALUES
+
+-- ══════════════════════════════════════════════════════════════════════
+-- MOVIES  (episode_id = NULL)
+-- ══════════════════════════════════════════════════════════════════════
+
+-- ── 1 · Interstellar ─────────────────────────────────────────────────
+(1, NULL, 1, 'Audio',    '/media/movies/1/audio/en.mp4', 1),
+(1, NULL, 2, 'Subtitle', '/media/movies/1/subtitles/th.srt', 1),
+(1, NULL, 6, 'Subtitle', '/media/movies/1/subtitles/fr.srt', 1),
+(1, NULL, 7, 'Subtitle', '/media/movies/1/subtitles/de.srt', 1),
+
+-- ── 4 · Inception ────────────────────────────────────────────────────
+(4, NULL, 1, 'Audio',    '/media/movies/4/audio/en.mp4', 1),
+(4, NULL, 2, 'Subtitle', '/media/movies/4/subtitles/th.srt', 1),
+(4, NULL, 6, 'Subtitle', '/media/movies/4/subtitles/fr.srt', 1),
+
+-- ── 7 · Your Name ────────────────────────────────────────────────────
+(7, NULL, 3, 'Audio',    '/media/movies/7/audio/ja.mp4', 1),
+(7, NULL, 1, 'Subtitle', '/media/movies/7/subtitles/en.srt', 1),
+(7, NULL, 2, 'Subtitle', '/media/movies/7/subtitles/th.srt', 1),
+(7, NULL, 5, 'Subtitle', '/media/movies/7/subtitles/ko.srt', 1),
+
+-- ── 8 · Dune ─────────────────────────────────────────────────────────
+(8, NULL, 1, 'Audio',    '/media/movies/8/audio/en.mp4', 1),
+(8, NULL, 3, 'Subtitle', '/media/movies/8/subtitles/ja.srt', 1),
+(8, NULL, 6, 'Subtitle', '/media/movies/8/subtitles/fr.srt', 1),
+(8, NULL, 4, 'Subtitle', '/media/movies/8/subtitles/es.srt', 1),
+
+-- ── 11 · Parasite ────────────────────────────────────────────────────
+(11, NULL, 5, 'Audio',    '/media/movies/11/audio/ko.mp4', 1),
+(11, NULL, 1, 'Subtitle', '/media/movies/11/subtitles/en.srt', 1),
+(11, NULL, 2, 'Subtitle', '/media/movies/11/subtitles/th.srt', 1),
+(11, NULL, 8, 'Subtitle', '/media/movies/11/subtitles/zh.srt', 1),
+
+-- ── 12 · The Dark Knight ─────────────────────────────────────────────
+(12, NULL, 1, 'Audio',    '/media/movies/12/audio/en.mp4', 1),
+(12, NULL, 2, 'Subtitle', '/media/movies/12/subtitles/th.srt', 1),
+(12, NULL, 4, 'Subtitle', '/media/movies/12/subtitles/es.srt', 1),
+
+-- ── 13 · Tenet ───────────────────────────────────────────────────────
+(13, NULL, 1, 'Audio',    '/media/movies/13/audio/en.mp4', 1),
+(13, NULL, 2, 'Subtitle', '/media/movies/13/subtitles/th.srt', 1),
+(13, NULL, 7, 'Subtitle', '/media/movies/13/subtitles/de.srt', 1),
+
+-- ── 14 · Everything Everywhere All at Once ───────────────────────────
+(14, NULL, 1, 'Audio',    '/media/movies/14/audio/en.mp4', 1),
+(14, NULL, 2, 'Subtitle', '/media/movies/14/subtitles/th.srt', 1),
+(14, NULL, 4, 'Subtitle', '/media/movies/14/subtitles/es.srt', 1),
+
+-- ── 18 · The Godfather ───────────────────────────────────────────────
+(18, NULL, 1, 'Audio',    '/media/movies/18/audio/en.mp4', 1),
+(18, NULL, 2, 'Subtitle', '/media/movies/18/subtitles/th.srt', 1),
+(18, NULL, 9, 'Subtitle', '/media/movies/18/subtitles/it.srt', 1),
+
+-- ── 19 · Spirited Away ───────────────────────────────────────────────
+(19, NULL, 3, 'Audio',    '/media/movies/19/audio/ja.mp4', 1),
+(19, NULL, 1, 'Subtitle', '/media/movies/19/subtitles/en.srt', 1),
+(19, NULL, 2, 'Subtitle', '/media/movies/19/subtitles/th.srt', 1),
+
+-- ── 25 · Dune: Part Two ──────────────────────────────────────────────
+(25, NULL, 1, 'Audio',    '/media/movies/25/audio/en.mp4', 1),
+(25, NULL, 2, 'Subtitle', '/media/movies/25/subtitles/th.srt', 1),
+(25, NULL, 6, 'Subtitle', '/media/movies/25/subtitles/fr.srt', 1),
+(25, NULL, 4, 'Subtitle', '/media/movies/25/subtitles/es.srt', 1),
+
+-- ── 26 · Oppenheimer ─────────────────────────────────────────────────
+(26, NULL, 1, 'Audio',    '/media/movies/26/audio/en.mp4', 1),
+(26, NULL, 2, 'Subtitle', '/media/movies/26/subtitles/th.srt', 1),
+(26, NULL, 7, 'Subtitle', '/media/movies/26/subtitles/de.srt', 1),
+
+-- ── 27 · The Grand Budapest Hotel ────────────────────────────────────
+(27, NULL, 1, 'Audio',    '/media/movies/27/audio/en.mp4', 1),
+(27, NULL, 6, 'Subtitle', '/media/movies/27/subtitles/fr.srt', 1),
+(27, NULL, 7, 'Subtitle', '/media/movies/27/subtitles/de.srt', 1),
+
+-- ── 28 · Pulp Fiction ────────────────────────────────────────────────
+(28, NULL, 1, 'Audio',    '/media/movies/28/audio/en.mp4', 1),
+(28, NULL, 2, 'Subtitle', '/media/movies/28/subtitles/th.srt', 1),
+(28, NULL, 4, 'Subtitle', '/media/movies/28/subtitles/es.srt', 1),
+
+-- ── 32 · Blade Runner 2049 ───────────────────────────────────────────
+(32, NULL, 1, 'Audio',    '/media/movies/32/audio/en.mp4', 1),
+(32, NULL, 2, 'Subtitle', '/media/movies/32/subtitles/th.srt', 1),
+(32, NULL, 6, 'Subtitle', '/media/movies/32/subtitles/fr.srt', 1),
+
+-- ── 33 · Princess Mononoke ───────────────────────────────────────────
+(33, NULL, 3, 'Audio',    '/media/movies/33/audio/ja.mp4', 1),
+(33, NULL, 1, 'Subtitle', '/media/movies/33/subtitles/en.srt', 1),
+(33, NULL, 2, 'Subtitle', '/media/movies/33/subtitles/th.srt', 1),
+
+-- ── 34 · Goodfellas ──────────────────────────────────────────────────
+(34, NULL, 1, 'Audio',    '/media/movies/34/audio/en.mp4', 1),
+(34, NULL, 2, 'Subtitle', '/media/movies/34/subtitles/th.srt', 1),
+(34, NULL, 9, 'Subtitle', '/media/movies/34/subtitles/it.srt', 1),
+
+
+-- ══════════════════════════════════════════════════════════════════════
+-- TV SHOWS  (one row per episode × language/type)
+-- ══════════════════════════════════════════════════════════════════════
+
+-- ── content 2 · Spy x Family  (ep_id 1–5) ────────────────────────────
+-- Languages: ja Audio | en Subtitle | th Subtitle
+(2,  1, 3, 'Audio',    '/media/shows/2/ep_1/audio/ja.mp4', 1),
+(2,  1, 1, 'Subtitle', '/media/shows/2/ep_1/subtitles/en.srt', 1),
+(2,  1, 2, 'Subtitle', '/media/shows/2/ep_1/subtitles/th.srt', 1),
+(2,  2, 3, 'Audio',    '/media/shows/2/ep_2/audio/ja.mp4', 1),
+(2,  2, 1, 'Subtitle', '/media/shows/2/ep_2/subtitles/en.srt', 1),
+(2,  2, 2, 'Subtitle', '/media/shows/2/ep_2/subtitles/th.srt', 1),
+(2,  3, 3, 'Audio',    '/media/shows/2/ep_3/audio/ja.mp4', 1),
+(2,  3, 1, 'Subtitle', '/media/shows/2/ep_3/subtitles/en.srt', 1),
+(2,  3, 2, 'Subtitle', '/media/shows/2/ep_3/subtitles/th.srt', 1),
+(2,  4, 3, 'Audio',    '/media/shows/2/ep_4/audio/ja.mp4', 1),
+(2,  4, 1, 'Subtitle', '/media/shows/2/ep_4/subtitles/en.srt', 1),
+(2,  4, 2, 'Subtitle', '/media/shows/2/ep_4/subtitles/th.srt', 1),
+(2,  5, 3, 'Audio',    '/media/shows/2/ep_5/audio/ja.mp4', 1),
+(2,  5, 1, 'Subtitle', '/media/shows/2/ep_5/subtitles/en.srt', 1),
+(2,  5, 2, 'Subtitle', '/media/shows/2/ep_5/subtitles/th.srt', 1),
+
+-- ── content 3 · The Office  (ep_id 6–11) ─────────────────────────────
+-- Languages: en Audio | th Subtitle | es Subtitle
+(3,  6,  1, 'Audio',    '/media/shows/3/ep_6/audio/en.mp4', 1),
+(3,  6,  2, 'Subtitle', '/media/shows/3/ep_6/subtitles/th.srt', 1),
+(3,  6,  4, 'Subtitle', '/media/shows/3/ep_6/subtitles/es.srt', 1),
+(3,  7,  1, 'Audio',    '/media/shows/3/ep_7/audio/en.mp4', 1),
+(3,  7,  2, 'Subtitle', '/media/shows/3/ep_7/subtitles/th.srt', 1),
+(3,  7,  4, 'Subtitle', '/media/shows/3/ep_7/subtitles/es.srt', 1),
+(3,  8,  1, 'Audio',    '/media/shows/3/ep_8/audio/en.mp4', 1),
+(3,  8,  2, 'Subtitle', '/media/shows/3/ep_8/subtitles/th.srt', 1),
+(3,  8,  4, 'Subtitle', '/media/shows/3/ep_8/subtitles/es.srt', 1),
+(3,  9,  1, 'Audio',    '/media/shows/3/ep_9/audio/en.mp4', 1),
+(3,  9,  2, 'Subtitle', '/media/shows/3/ep_9/subtitles/th.srt', 1),
+(3,  9,  4, 'Subtitle', '/media/shows/3/ep_9/subtitles/es.srt', 1),
+(3,  10, 1, 'Audio',    '/media/shows/3/ep_10/audio/en.mp4', 1),
+(3,  10, 2, 'Subtitle', '/media/shows/3/ep_10/subtitles/th.srt', 1),
+(3,  10, 4, 'Subtitle', '/media/shows/3/ep_10/subtitles/es.srt', 1),
+(3,  11, 1, 'Audio',    '/media/shows/3/ep_11/audio/en.mp4', 1),
+(3,  11, 2, 'Subtitle', '/media/shows/3/ep_11/subtitles/th.srt', 1),
+(3,  11, 4, 'Subtitle', '/media/shows/3/ep_11/subtitles/es.srt', 1),
+
+-- ── content 5 · One Piece  (ep_id 12–15) ─────────────────────────────
+-- Languages: ja Audio | en Subtitle | th Subtitle | es Subtitle
+(5,  12, 3, 'Audio',    '/media/shows/5/ep_12/audio/ja.mp4', 1),
+(5,  12, 1, 'Subtitle', '/media/shows/5/ep_12/subtitles/en.srt', 1),
+(5,  12, 2, 'Subtitle', '/media/shows/5/ep_12/subtitles/th.srt', 1),
+(5,  12, 4, 'Subtitle', '/media/shows/5/ep_12/subtitles/es.srt', 1),
+(5,  13, 3, 'Audio',    '/media/shows/5/ep_13/audio/ja.mp4', 1),
+(5,  13, 1, 'Subtitle', '/media/shows/5/ep_13/subtitles/en.srt', 1),
+(5,  13, 2, 'Subtitle', '/media/shows/5/ep_13/subtitles/th.srt', 1),
+(5,  13, 4, 'Subtitle', '/media/shows/5/ep_13/subtitles/es.srt', 1),
+(5,  14, 3, 'Audio',    '/media/shows/5/ep_14/audio/ja.mp4', 1),
+(5,  14, 1, 'Subtitle', '/media/shows/5/ep_14/subtitles/en.srt', 1),
+(5,  14, 2, 'Subtitle', '/media/shows/5/ep_14/subtitles/th.srt', 1),
+(5,  14, 4, 'Subtitle', '/media/shows/5/ep_14/subtitles/es.srt', 1),
+(5,  15, 3, 'Audio',    '/media/shows/5/ep_15/audio/ja.mp4', 1),
+(5,  15, 1, 'Subtitle', '/media/shows/5/ep_15/subtitles/en.srt', 1),
+(5,  15, 2, 'Subtitle', '/media/shows/5/ep_15/subtitles/th.srt', 1),
+(5,  15, 4, 'Subtitle', '/media/shows/5/ep_15/subtitles/es.srt', 1),
+
+-- ── content 6 · Breaking Bad  (ep_id 16–21) ──────────────────────────
+-- Languages: en Audio | th Subtitle | es Subtitle
+(6,  16, 1, 'Audio',    '/media/shows/6/ep_16/audio/en.mp4', 1),
+(6,  16, 2, 'Subtitle', '/media/shows/6/ep_16/subtitles/th.srt', 1),
+(6,  16, 4, 'Subtitle', '/media/shows/6/ep_16/subtitles/es.srt', 1),
+(6,  17, 1, 'Audio',    '/media/shows/6/ep_17/audio/en.mp4', 1),
+(6,  17, 2, 'Subtitle', '/media/shows/6/ep_17/subtitles/th.srt', 1),
+(6,  17, 4, 'Subtitle', '/media/shows/6/ep_17/subtitles/es.srt', 1),
+(6,  18, 1, 'Audio',    '/media/shows/6/ep_18/audio/en.mp4', 1),
+(6,  18, 2, 'Subtitle', '/media/shows/6/ep_18/subtitles/th.srt', 1),
+(6,  18, 4, 'Subtitle', '/media/shows/6/ep_18/subtitles/es.srt', 1),
+(6,  19, 1, 'Audio',    '/media/shows/6/ep_19/audio/en.mp4', 1),
+(6,  19, 2, 'Subtitle', '/media/shows/6/ep_19/subtitles/th.srt', 1),
+(6,  19, 4, 'Subtitle', '/media/shows/6/ep_19/subtitles/es.srt', 1),
+(6,  20, 1, 'Audio',    '/media/shows/6/ep_20/audio/en.mp4', 1),
+(6,  20, 2, 'Subtitle', '/media/shows/6/ep_20/subtitles/th.srt', 1),
+(6,  20, 4, 'Subtitle', '/media/shows/6/ep_20/subtitles/es.srt', 1),
+(6,  21, 1, 'Audio',    '/media/shows/6/ep_21/audio/en.mp4', 1),
+(6,  21, 2, 'Subtitle', '/media/shows/6/ep_21/subtitles/th.srt', 1),
+(6,  21, 4, 'Subtitle', '/media/shows/6/ep_21/subtitles/es.srt', 1),
+
+-- ── content 9 · Attack on Titan  (ep_id 22–27) ───────────────────────
+-- Languages: ja Audio | th Subtitle | en Subtitle
+(9,  22, 3, 'Audio',    '/media/shows/9/ep_22/audio/ja.mp4', 1),
+(9,  22, 2, 'Subtitle', '/media/shows/9/ep_22/subtitles/th.srt', 1),
+(9,  22, 1, 'Subtitle', '/media/shows/9/ep_22/subtitles/en.srt', 1),
+(9,  23, 3, 'Audio',    '/media/shows/9/ep_23/audio/ja.mp4', 1),
+(9,  23, 2, 'Subtitle', '/media/shows/9/ep_23/subtitles/th.srt', 1),
+(9,  23, 1, 'Subtitle', '/media/shows/9/ep_23/subtitles/en.srt', 1),
+(9,  24, 3, 'Audio',    '/media/shows/9/ep_24/audio/ja.mp4', 1),
+(9,  24, 2, 'Subtitle', '/media/shows/9/ep_24/subtitles/th.srt', 1),
+(9,  24, 1, 'Subtitle', '/media/shows/9/ep_24/subtitles/en.srt', 1),
+(9,  25, 3, 'Audio',    '/media/shows/9/ep_25/audio/ja.mp4', 1),
+(9,  25, 2, 'Subtitle', '/media/shows/9/ep_25/subtitles/th.srt', 1),
+(9,  25, 1, 'Subtitle', '/media/shows/9/ep_25/subtitles/en.srt', 1),
+(9,  26, 3, 'Audio',    '/media/shows/9/ep_26/audio/ja.mp4', 1),
+(9,  26, 2, 'Subtitle', '/media/shows/9/ep_26/subtitles/th.srt', 1),
+(9,  26, 1, 'Subtitle', '/media/shows/9/ep_26/subtitles/en.srt', 1),
+(9,  27, 3, 'Audio',    '/media/shows/9/ep_27/audio/ja.mp4', 1),
+(9,  27, 2, 'Subtitle', '/media/shows/9/ep_27/subtitles/th.srt', 1),
+(9,  27, 1, 'Subtitle', '/media/shows/9/ep_27/subtitles/en.srt', 1),
+
+-- ── content 10 · The Mandalorian  (ep_id 28–31) ──────────────────────
+-- Languages: en Audio | en Subtitle (SDH) | th Subtitle
+-- (language_id=1 appears twice; UNIQUE holds because lang_type differs)
+(10, 28, 1, 'Audio',    '/media/shows/10/ep_28/audio/en.mp4', 1),
+(10, 28, 1, 'Subtitle', '/media/shows/10/ep_28/subtitles/en.srt', 1),
+(10, 28, 2, 'Subtitle', '/media/shows/10/ep_28/subtitles/th.srt', 1),
+(10, 29, 1, 'Audio',    '/media/shows/10/ep_29/audio/en.mp4', 1),
+(10, 29, 1, 'Subtitle', '/media/shows/10/ep_29/subtitles/en.srt', 1),
+(10, 29, 2, 'Subtitle', '/media/shows/10/ep_29/subtitles/th.srt', 1),
+(10, 30, 1, 'Audio',    '/media/shows/10/ep_30/audio/en.mp4', 1),
+(10, 30, 1, 'Subtitle', '/media/shows/10/ep_30/subtitles/en.srt', 1),
+(10, 30, 2, 'Subtitle', '/media/shows/10/ep_30/subtitles/th.srt', 1),
+(10, 31, 1, 'Audio',    '/media/shows/10/ep_31/audio/en.mp4', 1),
+(10, 31, 1, 'Subtitle', '/media/shows/10/ep_31/subtitles/en.srt', 1),
+(10, 31, 2, 'Subtitle', '/media/shows/10/ep_31/subtitles/th.srt', 1),
+
+-- ── content 15 · Jujutsu Kaisen  (ep_id 32–35) ───────────────────────
+-- Languages: ja Audio | en Subtitle | th Subtitle
+(15, 32, 3, 'Audio',    '/media/shows/15/ep_32/audio/ja.mp4', 1),
+(15, 32, 1, 'Subtitle', '/media/shows/15/ep_32/subtitles/en.srt', 1),
+(15, 32, 2, 'Subtitle', '/media/shows/15/ep_32/subtitles/th.srt', 1),
+(15, 33, 3, 'Audio',    '/media/shows/15/ep_33/audio/ja.mp4', 1),
+(15, 33, 1, 'Subtitle', '/media/shows/15/ep_33/subtitles/en.srt', 1),
+(15, 33, 2, 'Subtitle', '/media/shows/15/ep_33/subtitles/th.srt', 1),
+(15, 34, 3, 'Audio',    '/media/shows/15/ep_34/audio/ja.mp4', 1),
+(15, 34, 1, 'Subtitle', '/media/shows/15/ep_34/subtitles/en.srt', 1),
+(15, 34, 2, 'Subtitle', '/media/shows/15/ep_34/subtitles/th.srt', 1),
+(15, 35, 3, 'Audio',    '/media/shows/15/ep_35/audio/ja.mp4', 1),
+(15, 35, 1, 'Subtitle', '/media/shows/15/ep_35/subtitles/en.srt', 1),
+(15, 35, 2, 'Subtitle', '/media/shows/15/ep_35/subtitles/th.srt', 1),
+
+-- ── content 16 · Better Call Saul  (ep_id 36–39) ─────────────────────
+-- Languages: en Audio | th Subtitle | es Subtitle
+(16, 36, 1, 'Audio',    '/media/shows/16/ep_36/audio/en.mp4', 1),
+(16, 36, 2, 'Subtitle', '/media/shows/16/ep_36/subtitles/th.srt', 1),
+(16, 36, 4, 'Subtitle', '/media/shows/16/ep_36/subtitles/es.srt', 1),
+(16, 37, 1, 'Audio',    '/media/shows/16/ep_37/audio/en.mp4', 1),
+(16, 37, 2, 'Subtitle', '/media/shows/16/ep_37/subtitles/th.srt', 1),
+(16, 37, 4, 'Subtitle', '/media/shows/16/ep_37/subtitles/es.srt', 1),
+(16, 38, 1, 'Audio',    '/media/shows/16/ep_38/audio/en.mp4', 1),
+(16, 38, 2, 'Subtitle', '/media/shows/16/ep_38/subtitles/th.srt', 1),
+(16, 38, 4, 'Subtitle', '/media/shows/16/ep_38/subtitles/es.srt', 1),
+(16, 39, 1, 'Audio',    '/media/shows/16/ep_39/audio/en.mp4', 1),
+(16, 39, 2, 'Subtitle', '/media/shows/16/ep_39/subtitles/th.srt', 1),
+(16, 39, 4, 'Subtitle', '/media/shows/16/ep_39/subtitles/es.srt', 1),
+
+-- ── content 17 · Stranger Things  (ep_id 40–45) ──────────────────────
+-- Languages: en Audio | th Subtitle | es Subtitle | fr Subtitle
+(17, 40, 1, 'Audio',    '/media/shows/17/ep_40/audio/en.mp4', 1),
+(17, 40, 2, 'Subtitle', '/media/shows/17/ep_40/subtitles/th.srt', 1),
+(17, 40, 4, 'Subtitle', '/media/shows/17/ep_40/subtitles/es.srt', 1),
+(17, 40, 6, 'Subtitle', '/media/shows/17/ep_40/subtitles/fr.srt', 1),
+(17, 41, 1, 'Audio',    '/media/shows/17/ep_41/audio/en.mp4', 1),
+(17, 41, 2, 'Subtitle', '/media/shows/17/ep_41/subtitles/th.srt', 1),
+(17, 41, 4, 'Subtitle', '/media/shows/17/ep_41/subtitles/es.srt', 1),
+(17, 41, 6, 'Subtitle', '/media/shows/17/ep_41/subtitles/fr.srt', 1),
+(17, 42, 1, 'Audio',    '/media/shows/17/ep_42/audio/en.mp4', 1),
+(17, 42, 2, 'Subtitle', '/media/shows/17/ep_42/subtitles/th.srt', 1),
+(17, 42, 4, 'Subtitle', '/media/shows/17/ep_42/subtitles/es.srt', 1),
+(17, 42, 6, 'Subtitle', '/media/shows/17/ep_42/subtitles/fr.srt', 1),
+(17, 43, 1, 'Audio',    '/media/shows/17/ep_43/audio/en.mp4', 1),
+(17, 43, 2, 'Subtitle', '/media/shows/17/ep_43/subtitles/th.srt', 1),
+(17, 43, 4, 'Subtitle', '/media/shows/17/ep_43/subtitles/es.srt', 1),
+(17, 43, 6, 'Subtitle', '/media/shows/17/ep_43/subtitles/fr.srt', 1),
+(17, 44, 1, 'Audio',    '/media/shows/17/ep_44/audio/en.mp4', 1),
+(17, 44, 2, 'Subtitle', '/media/shows/17/ep_44/subtitles/th.srt', 1),
+(17, 44, 4, 'Subtitle', '/media/shows/17/ep_44/subtitles/es.srt', 1),
+(17, 44, 6, 'Subtitle', '/media/shows/17/ep_44/subtitles/fr.srt', 1),
+(17, 45, 1, 'Audio',    '/media/shows/17/ep_45/audio/en.mp4', 1),
+(17, 45, 2, 'Subtitle', '/media/shows/17/ep_45/subtitles/th.srt', 1),
+(17, 45, 4, 'Subtitle', '/media/shows/17/ep_45/subtitles/es.srt', 1),
+(17, 45, 6, 'Subtitle', '/media/shows/17/ep_45/subtitles/fr.srt', 1),
+
+-- ── content 20 · Chernobyl  (ep_id 46–47) ────────────────────────────
+-- Languages: en Audio | th Subtitle | ru Subtitle
+(20, 46, 1, 'Audio',    '/media/shows/20/ep_46/audio/en.mp4', 1),
+(20, 46, 2, 'Subtitle', '/media/shows/20/ep_46/subtitles/th.srt', 1),
+(20, 46, 10,'Subtitle', '/media/shows/20/ep_46/subtitles/ru.srt', 1),
+(20, 47, 1, 'Audio',    '/media/shows/20/ep_47/audio/en.mp4', 1),
+(20, 47, 2, 'Subtitle', '/media/shows/20/ep_47/subtitles/th.srt', 1),
+(20, 47, 10,'Subtitle', '/media/shows/20/ep_47/subtitles/ru.srt', 1),
+
+-- ── content 21 · Naruto  (ep_id 48–51) ───────────────────────────────
+-- Languages: ja Audio | en Subtitle | th Subtitle
+(21, 48, 3, 'Audio',    '/media/shows/21/ep_48/audio/ja.mp4', 1),
+(21, 48, 1, 'Subtitle', '/media/shows/21/ep_48/subtitles/en.srt', 1),
+(21, 48, 2, 'Subtitle', '/media/shows/21/ep_48/subtitles/th.srt', 1),
+(21, 49, 3, 'Audio',    '/media/shows/21/ep_49/audio/ja.mp4', 1),
+(21, 49, 1, 'Subtitle', '/media/shows/21/ep_49/subtitles/en.srt', 1),
+(21, 49, 2, 'Subtitle', '/media/shows/21/ep_49/subtitles/th.srt', 1),
+(21, 50, 3, 'Audio',    '/media/shows/21/ep_50/audio/ja.mp4', 1),
+(21, 50, 1, 'Subtitle', '/media/shows/21/ep_50/subtitles/en.srt', 1),
+(21, 50, 2, 'Subtitle', '/media/shows/21/ep_50/subtitles/th.srt', 1),
+(21, 51, 3, 'Audio',    '/media/shows/21/ep_51/audio/ja.mp4', 1),
+(21, 51, 1, 'Subtitle', '/media/shows/21/ep_51/subtitles/en.srt', 1),
+(21, 51, 2, 'Subtitle', '/media/shows/21/ep_51/subtitles/th.srt', 1),
+
+-- ── content 22 · Dragon Ball Z  (ep_id 52–55) ────────────────────────
+-- Languages: ja Audio | en Subtitle | th Subtitle
+(22, 52, 3, 'Audio',    '/media/shows/22/ep_52/audio/ja.mp4', 1),
+(22, 52, 1, 'Subtitle', '/media/shows/22/ep_52/subtitles/en.srt', 1),
+(22, 52, 2, 'Subtitle', '/media/shows/22/ep_52/subtitles/th.srt', 1),
+(22, 53, 3, 'Audio',    '/media/shows/22/ep_53/audio/ja.mp4', 1),
+(22, 53, 1, 'Subtitle', '/media/shows/22/ep_53/subtitles/en.srt', 1),
+(22, 53, 2, 'Subtitle', '/media/shows/22/ep_53/subtitles/th.srt', 1),
+(22, 54, 3, 'Audio',    '/media/shows/22/ep_54/audio/ja.mp4', 1),
+(22, 54, 1, 'Subtitle', '/media/shows/22/ep_54/subtitles/en.srt', 1),
+(22, 54, 2, 'Subtitle', '/media/shows/22/ep_54/subtitles/th.srt', 1),
+(22, 55, 3, 'Audio',    '/media/shows/22/ep_55/audio/ja.mp4', 1),
+(22, 55, 1, 'Subtitle', '/media/shows/22/ep_55/subtitles/en.srt', 1),
+(22, 55, 2, 'Subtitle', '/media/shows/22/ep_55/subtitles/th.srt', 1),
+
+-- ── content 23 · Demon Slayer  (ep_id 56–59) ─────────────────────────
+-- Languages: ja Audio | en Subtitle | th Subtitle
+(23, 56, 3, 'Audio',    '/media/shows/23/ep_56/audio/ja.mp4', 1),
+(23, 56, 1, 'Subtitle', '/media/shows/23/ep_56/subtitles/en.srt', 1),
+(23, 56, 2, 'Subtitle', '/media/shows/23/ep_56/subtitles/th.srt', 1),
+(23, 57, 3, 'Audio',    '/media/shows/23/ep_57/audio/ja.mp4', 1),
+(23, 57, 1, 'Subtitle', '/media/shows/23/ep_57/subtitles/en.srt', 1),
+(23, 57, 2, 'Subtitle', '/media/shows/23/ep_57/subtitles/th.srt', 1),
+(23, 58, 3, 'Audio',    '/media/shows/23/ep_58/audio/ja.mp4', 1),
+(23, 58, 1, 'Subtitle', '/media/shows/23/ep_58/subtitles/en.srt', 1),
+(23, 58, 2, 'Subtitle', '/media/shows/23/ep_58/subtitles/th.srt', 1),
+(23, 59, 3, 'Audio',    '/media/shows/23/ep_59/audio/ja.mp4', 1),
+(23, 59, 1, 'Subtitle', '/media/shows/23/ep_59/subtitles/en.srt', 1),
+(23, 59, 2, 'Subtitle', '/media/shows/23/ep_59/subtitles/th.srt', 1),
+
+-- ── content 24 · FMA: Brotherhood  (ep_id 60–63) ─────────────────────
+-- Languages: ja Audio | en Subtitle | th Subtitle
+(24, 60, 3, 'Audio',    '/media/shows/24/ep_60/audio/ja.mp4', 1),
+(24, 60, 1, 'Subtitle', '/media/shows/24/ep_60/subtitles/en.srt', 1),
+(24, 60, 2, 'Subtitle', '/media/shows/24/ep_60/subtitles/th.srt', 1),
+(24, 61, 3, 'Audio',    '/media/shows/24/ep_61/audio/ja.mp4', 1),
+(24, 61, 1, 'Subtitle', '/media/shows/24/ep_61/subtitles/en.srt', 1),
+(24, 61, 2, 'Subtitle', '/media/shows/24/ep_61/subtitles/th.srt', 1),
+(24, 62, 3, 'Audio',    '/media/shows/24/ep_62/audio/ja.mp4', 1),
+(24, 62, 1, 'Subtitle', '/media/shows/24/ep_62/subtitles/en.srt', 1),
+(24, 62, 2, 'Subtitle', '/media/shows/24/ep_62/subtitles/th.srt', 1),
+(24, 63, 3, 'Audio',    '/media/shows/24/ep_63/audio/ja.mp4', 1),
+(24, 63, 1, 'Subtitle', '/media/shows/24/ep_63/subtitles/en.srt', 1),
+(24, 63, 2, 'Subtitle', '/media/shows/24/ep_63/subtitles/th.srt', 1),
+
+-- ── content 29 · Squid Game  (ep_id 64–65) ───────────────────────────
+-- Languages: ko Audio | en Subtitle | th Subtitle | ja Subtitle
+(29, 64, 5, 'Audio',    '/media/shows/29/ep_64/audio/ko.mp4', 1),
+(29, 64, 1, 'Subtitle', '/media/shows/29/ep_64/subtitles/en.srt', 1),
+(29, 64, 2, 'Subtitle', '/media/shows/29/ep_64/subtitles/th.srt', 1),
+(29, 64, 3, 'Subtitle', '/media/shows/29/ep_64/subtitles/ja.srt', 1),
+(29, 65, 5, 'Audio',    '/media/shows/29/ep_65/audio/ko.mp4', 1),
+(29, 65, 1, 'Subtitle', '/media/shows/29/ep_65/subtitles/en.srt', 1),
+(29, 65, 2, 'Subtitle', '/media/shows/29/ep_65/subtitles/th.srt', 1),
+(29, 65, 3, 'Subtitle', '/media/shows/29/ep_65/subtitles/ja.srt', 1),
+
+-- ── content 30 · Arcane  (ep_id 66–67) ───────────────────────────────
+-- Languages: en Audio | fr Subtitle | th Subtitle
+(30, 66, 1, 'Audio',    '/media/shows/30/ep_66/audio/en.mp4', 1),
+(30, 66, 6, 'Subtitle', '/media/shows/30/ep_66/subtitles/fr.srt', 1),
+(30, 66, 2, 'Subtitle', '/media/shows/30/ep_66/subtitles/th.srt', 1),
+(30, 67, 1, 'Audio',    '/media/shows/30/ep_67/audio/en.mp4', 1),
+(30, 67, 6, 'Subtitle', '/media/shows/30/ep_67/subtitles/fr.srt', 1),
+(30, 67, 2, 'Subtitle', '/media/shows/30/ep_67/subtitles/th.srt', 1),
+
+-- ── content 31 · Severance  (ep_id 68–71) ────────────────────────────
+-- Languages: en Audio | th Subtitle | es Subtitle
+(31, 68, 1, 'Audio',    '/media/shows/31/ep_68/audio/en.mp4', 1),
+(31, 68, 2, 'Subtitle', '/media/shows/31/ep_68/subtitles/th.srt', 1),
+(31, 68, 4, 'Subtitle', '/media/shows/31/ep_68/subtitles/es.srt', 1),
+(31, 69, 1, 'Audio',    '/media/shows/31/ep_69/audio/en.mp4', 1),
+(31, 69, 2, 'Subtitle', '/media/shows/31/ep_69/subtitles/th.srt', 1),
+(31, 69, 4, 'Subtitle', '/media/shows/31/ep_69/subtitles/es.srt', 1),
+(31, 70, 1, 'Audio',    '/media/shows/31/ep_70/audio/en.mp4', 1),
+(31, 70, 2, 'Subtitle', '/media/shows/31/ep_70/subtitles/th.srt', 1),
+(31, 70, 4, 'Subtitle', '/media/shows/31/ep_70/subtitles/es.srt', 1),
+(31, 71, 1, 'Audio',    '/media/shows/31/ep_71/audio/en.mp4', 1),
+(31, 71, 2, 'Subtitle', '/media/shows/31/ep_71/subtitles/th.srt', 1),
+(31, 71, 4, 'Subtitle', '/media/shows/31/ep_71/subtitles/es.srt', 1),
+
+-- ── content 35 · The Bear  (ep_id 72–75) ─────────────────────────────
+-- Languages: en Audio | th Subtitle | es Subtitle
+(35, 72, 1, 'Audio',    '/media/shows/35/ep_72/audio/en.mp4', 1),
+(35, 72, 2, 'Subtitle', '/media/shows/35/ep_72/subtitles/th.srt', 1),
+(35, 72, 4, 'Subtitle', '/media/shows/35/ep_72/subtitles/es.srt', 1),
+(35, 73, 1, 'Audio',    '/media/shows/35/ep_73/audio/en.mp4', 1),
+(35, 73, 2, 'Subtitle', '/media/shows/35/ep_73/subtitles/th.srt', 1),
+(35, 73, 4, 'Subtitle', '/media/shows/35/ep_73/subtitles/es.srt', 1),
+(35, 74, 1, 'Audio',    '/media/shows/35/ep_74/audio/en.mp4', 1),
+(35, 74, 2, 'Subtitle', '/media/shows/35/ep_74/subtitles/th.srt', 1),
+(35, 74, 4, 'Subtitle', '/media/shows/35/ep_74/subtitles/es.srt', 1),
+(35, 75, 1, 'Audio',    '/media/shows/35/ep_75/audio/en.mp4', 1),
+(35, 75, 2, 'Subtitle', '/media/shows/35/ep_75/subtitles/th.srt', 1),
+(35, 75, 4, 'Subtitle', '/media/shows/35/ep_75/subtitles/es.srt', 1);
 
 -- NOTE: content_role PK is (content_id, person_id) — one role per person per title.
 -- Fixes applied vs. the original seed:
@@ -765,47 +1155,47 @@ INSERT INTO content_role (content_id, person_id, role_type, character_name) VALU
 -- 9. ACTIVITY — transactions, reviews, user_content, playlists
 -- ══════════════════════════════════════════════════════════════════════
 
-INSERT INTO transaction_list (user_id, transaction_date, total_amount, payment_method) VALUES
-(2,  '2021-03-10 20:15:00',  9.99,  'Credit Card'),   -- 1
-(3,  '2022-05-20 11:30:00', 19.99,  'Credit Card'),   -- 2
-(4,  '2021-08-01 18:45:00',  7.99,  'Debit Card'),    -- 3
-(5,  '2021-10-05 09:00:00', 49.99,  'Credit Card'),   -- 4
-(6,  '2021-09-14 14:22:00', 15.99,  'PayPal'),        -- 5
-(7,  '2021-10-30 21:00:00', 12.99,  'Credit Card'),   -- 6
-(8,  '2021-11-01 16:05:00', 29.99,  'Credit Card'),   -- 7
-(9,  '2021-11-05 10:10:00', 14.99,  'Debit Card'),    -- 8
-(10, '2022-01-07 08:30:00', 11.99,  'PayPal'),        -- 9
-(11, '2022-02-14 19:45:00', 35.00,  'Credit Card'),   -- 10
-(12, '2022-03-05 13:20:00', 19.99,  'Credit Card'),   -- 11
-(13, '2022-04-11 17:55:00',  9.50,  'Apple Pay'),     -- 12
-(14, '2022-06-19 22:10:00',  5.99,  'Debit Card'),    -- 13
-(15, '2022-07-04 15:40:00', 11.99,  'Credit Card'),   -- 14
-(16, '2022-09-01 09:05:00', 13.50,  'Google Pay'),    -- 15
-(17, '2022-10-28 20:30:00', 25.00,  'Credit Card'),   -- 16
-(18, '2022-11-15 11:00:00', 22.00,  'Credit Card'),   -- 17
-(19, '2022-12-03 14:15:00', 18.00,  'PayPal'),        -- 18
-(20, '2023-01-20 16:00:00', 15.00,  'Credit Card'),   -- 19
-(2,  '2023-02-08 10:45:00', 10.00,  'Credit Card'),   -- 20
-(21, '2023-03-12 19:00:00', 29.99,  'Debit Card'),    -- 21
-(22, '2023-04-05 08:20:00', 24.99,  'Credit Card'),   -- 22
-(23, '2023-05-19 13:45:00', 22.00,  'Apple Pay'),     -- 23
-(24, '2023-06-30 21:10:00', 26.00,  'Credit Card'),   -- 24
-(25, '2024-04-02 12:00:00', 16.99,  'Credit Card'),   -- 25
-(26, '2023-09-14 17:30:00', 12.99,  'Google Pay'),    -- 26
-(27, '2023-10-01 09:50:00',  8.99,  'Debit Card'),    -- 27
-(28, '2023-11-11 22:22:00',  7.99,  'Credit Card'),   -- 28
-(29, '2023-12-25 15:00:00', 18.00,  'Credit Card'),   -- 29
-(30, '2024-01-08 11:11:00', 15.00,  'Credit Card'),   -- 30
-(31, '2024-02-20 20:05:00', 14.99,  'Credit Card'),   -- 31
-(32, '2024-03-15 07:45:00', 11.99,  'Apple Pay'),     -- 32
-(33, '2024-04-28 18:30:00',  9.99,  'Debit Card'),    -- 33
-(34, '2024-05-10 14:00:00',  8.50,  'Credit Card'),   -- 34
-(35, '2024-06-03 10:20:00', 12.00,  'PayPal'),        -- 35
-(36, '2024-07-22 16:40:00', 14.99,  'Credit Card'),   -- 36
-(37, '2024-08-15 09:15:00',  9.99,  'Credit Card'),   -- 37
-(38, '2024-09-30 19:55:00', 29.99,  'Debit Card'),    -- 38
-(39, '2024-10-18 13:05:00', 35.00,  'Credit Card'),   -- 39
-(40, '2024-11-29 21:30:00', 25.00,  'Credit Card');   -- 40
+INSERT INTO transaction_list (user_id, transaction_date, total_amount, payment_method, payment_status) VALUES
+(2,  '2021-03-10 20:15:00',  9.99,  'Credit Card', 'Completed'),   -- 1
+(3,  '2022-05-20 11:30:00', 19.99,  'Credit Card', 'Completed'),   -- 2
+(4,  '2021-08-01 18:45:00',  7.99,  'Debit Card', 'Completed'),    -- 3
+(5,  '2021-10-05 09:00:00', 49.99,  'Credit Card', 'Completed'),   -- 4
+(6,  '2021-09-14 14:22:00', 15.99,  'PayPal', 'Completed'),        -- 5
+(7,  '2021-10-30 21:00:00', 12.99,  'Credit Card', 'Completed'),   -- 6
+(8,  '2021-11-01 16:05:00', 29.99,  'Credit Card', 'Completed'),   -- 7
+(9,  '2021-11-05 10:10:00', 14.99,  'Debit Card', 'Completed'),    -- 8
+(10, '2022-01-07 08:30:00', 11.99,  'PayPal', 'Completed'),        -- 9
+(11, '2022-02-14 19:45:00', 35.00,  'Credit Card', 'Completed'),   -- 10
+(12, '2022-03-05 13:20:00', 19.99,  'Credit Card', 'Completed'),   -- 11
+(13, '2022-04-11 17:55:00',  9.50,  'Apple Pay', 'Completed'),     -- 12
+(14, '2022-06-19 22:10:00',  5.99,  'Debit Card', 'Completed'),    -- 13
+(15, '2022-07-04 15:40:00', 11.99,  'Credit Card', 'Completed'),   -- 14
+(16, '2022-09-01 09:05:00', 13.50,  'Google Pay', 'Completed'),    -- 15
+(17, '2022-10-28 20:30:00', 25.00,  'Credit Card', 'Completed'),   -- 16
+(18, '2022-11-15 11:00:00', 22.00,  'Credit Card', 'Completed'),   -- 17
+(19, '2022-12-03 14:15:00', 18.00,  'PayPal', 'Completed'),        -- 18
+(20, '2023-01-20 16:00:00', 15.00,  'Credit Card', 'Completed'),   -- 19
+(2,  '2023-02-08 10:45:00', 10.00,  'Credit Card', 'Completed'),   -- 20
+(21, '2023-03-12 19:00:00', 29.99,  'Debit Card', 'Completed'),    -- 21
+(22, '2023-04-05 08:20:00', 24.99,  'Credit Card', 'Completed'),   -- 22
+(23, '2023-05-19 13:45:00', 22.00,  'Apple Pay', 'Completed'),     -- 23
+(24, '2023-06-30 21:10:00', 26.00,  'Credit Card', 'Completed'),   -- 24
+(25, '2024-04-02 12:00:00', 16.99,  'Credit Card', 'Completed'),   -- 25
+(26, '2023-09-14 17:30:00', 12.99,  'Google Pay', 'Completed'),    -- 26
+(27, '2023-10-01 09:50:00',  8.99,  'Debit Card', 'Completed'),    -- 27
+(28, '2023-11-11 22:22:00',  7.99,  'Credit Card', 'Completed'),   -- 28
+(29, '2023-12-25 15:00:00', 18.00,  'Credit Card', 'Completed'),   -- 29
+(30, '2024-01-08 11:11:00', 15.00,  'Credit Card', 'Completed'),   -- 30
+(31, '2024-02-20 20:05:00', 14.99,  'Credit Card', 'Completed'),   -- 31
+(32, '2024-03-15 07:45:00', 11.99,  'Apple Pay', 'Completed'),     -- 32
+(33, '2024-04-28 18:30:00',  9.99,  'Debit Card', 'Completed'),    -- 33
+(34, '2024-05-10 14:00:00',  8.50,  'Credit Card', 'Completed'),   -- 34
+(35, '2024-06-03 10:20:00', 12.00,  'PayPal', 'Completed'),        -- 35
+(36, '2024-07-22 16:40:00', 14.99,  'Credit Card', 'Completed'),   -- 36
+(37, '2024-08-15 09:15:00',  9.99,  'Credit Card', 'Completed'),   -- 37
+(38, '2024-09-30 19:55:00', 29.99,  'Debit Card', 'Completed'),    -- 38
+(39, '2024-10-18 13:05:00', 35.00,  'Credit Card', 'Completed'),   -- 39
+(40, '2024-11-29 21:30:00', 25.00,  'Credit Card', 'Completed');   -- 40
 
 INSERT INTO transaction_detail (transaction_id, content_id, content_name, sold_price) VALUES
 (1,  1,  'Interstellar',                       9.99),

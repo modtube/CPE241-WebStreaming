@@ -31,7 +31,7 @@ SELECT * FROM episode;
 -- ########## BRIDGE TABLES (RELATIONSHIPS) ##########
 SELECT * FROM content_genre;
 SELECT * FROM content_role;
-SELECT * FROM content_language;
+SELECT * FROM content_resource;
 
 -- ########## DIAGNOSTICS & AUDITS ##########
 -- 1. Check Row Counts across all tables
@@ -51,5 +51,10 @@ SELECT c.title, c.content_type, COALESCE(e.title, 'STANDALONE MOVIE') as video_u
 FROM media_path m
 JOIN content c ON m.content_id = c.content_id
 LEFT JOIN episode e ON m.episode_id = e.episode_id;
+
+SELECT c.title, c.content_type, COALESCE(e.title, 'STANDALONE MOVIE') AS video_unit, cr.language_id, cr.lang_type, cr.file_path
+FROM content_resource cr
+JOIN content c ON cr.content_id = c.content_id
+LEFT JOIN episode e ON cr.episode_id = e.episode_id;
 
 -- ########################################################################################################
