@@ -98,50 +98,56 @@ INSERT INTO country (country_name, country_code, primary_timezone_id) VALUES -- 
 -- 3. TABLES THAT DEPEND ON country
 -- ══════════════════════════════════════════════════════════════════════
 
+-- ── membership_tier ──────────────────────────────────────────────────
+INSERT INTO membership_tier (tier_name, price, duration_days, description) VALUES
+('free',    0.00,  0,  'Basic access with limited content and standard quality'),
+('premium', 9.99,  30, 'Full access to all content with 4K streaming'),
+('admin',   0.00,  0,  'System administrator with full platform management access');
+
 -- ── app_user ──────────────────────────────────────────────────────────
 -- NOTE: app_user must be inserted before person, because person.create_by
 --       references app_user(user_id).
-INSERT INTO app_user (username, email, img_path, user_password, register_date, country_id, user_type, user_status) VALUES
-('Wirachat_Admin',   'wirachat.thon@kmutt.ac.th',   NULL, 'safe123',       '2021-01-15 09:00:00',  1,  'Admin',    'active'),   -- 1
-('GenshinLover',     'traveler@teyvat.com',         NULL, 'paimon',        '2021-02-03 14:22:11',  2,  'Premium',  'active'),   -- 2
-('Anya_Fans',        'wakuwaku@spy.com',            NULL, 'peanuts',       '2021-03-18 08:45:30',  3,  'Free',     'active'),   -- 3
-('Luffy_Pirate',     'luffy@grandline.com',         NULL, 'meat',          '2021-05-07 20:10:05',  4,  'Premium',  'active'),   -- 4
-('Zoro_Lost',        'zoro@swords.com',             NULL, 'bushido',       '2021-06-14 11:33:47',  4,  'Free',     'active'),   -- 5
-('Nami_Money',       'nami@berries.com',            NULL, 'gold',          '2021-07-29 16:55:22',  4,  'Premium',  'active'),   -- 6
-('Sanji_Cook',       'sanji@allblue.com',           NULL, 'mellorine',     '2021-08-05 07:12:59',  4,  'Free',     'active'),   -- 7
-('Robin_History',    'robin@ohara.com',             NULL, 'archaeology',   '2021-09-20 13:40:00',  4,  'Premium',  'active'),   -- 8
-('Chopper_Doc',      'chopper@drum.com',            NULL, 'candy',         '2021-10-11 19:08:34',  4,  'Free',     'active'),   -- 9
-('Franky_Super',     'franky@water7.com',           NULL, 'cola',          '2021-11-28 10:27:16',  4,  'Premium',  'active'),   -- 10
-('Brook_Soul',       'brook@soul.com',              NULL, 'laboon',        '2022-01-04 22:15:50',  4,  'Free',     'active'),   -- 11
-('Jimbei_Fish',      'jimbei@sea.com',              NULL, 'karate',        '2022-02-17 09:03:41',  4,  'Premium',  'active'),   -- 12
-('Usopp_Sniper',     'usopp@brave.com',             NULL, 'popgreen',      '2022-03-30 15:49:07',  4,  'Free',     'active'),   -- 13
-('Law_Heart',        'law@op.com',                  NULL, 'shambles',      '2022-05-12 18:22:33', 14,  'Premium',  'active'),   -- 14
-('Kid_Metal',        'kid@punk.com',                NULL, 'magnet',        '2022-06-08 06:57:44',  9,  'Free',     'active'),   -- 15
-('Hancock_Love',     'hancock@kuja.com',            NULL, 'salome',        '2022-08-01 12:34:19',  6,  'Premium',  'active'),   -- 16
-('Ace_Fire',         'ace@spade.com',               NULL, 'meramera',      '2022-09-23 21:05:02', 10,  'Free',     'suspended'),-- 17
-('Sabo_Dragon',      'sabo@rev.com',                NULL, 'dragonclaw',    '2022-10-16 17:48:55', 10,  'Premium',  'active'),   -- 18
-('Whitebeard_Goat', 'newgate@yonko.com',            NULL, 'guranogura',    '2022-11-20 12:00:00',  4,  'Premium',  'active'), -- 19
-('Shanks_Red',       'shanks@yonko.com',            NULL, 'haki',          '2022-12-25 23:59:00', 15,  'Premium',  'active'),   -- 20
-('Naruto_Uzumaki',   'naruto@konoha.com',           NULL, 'dattebayo',     '2023-01-09 10:14:37',  4,  'Premium',  'active'),   -- 21
-('Sasuke_Uchiha',    'sasuke@avenger.com',          NULL, 'chidori',       '2023-02-14 14:00:00',  4,  'Free',     'active'),   -- 22
-('Sakura_Haruno',    'sakura@medic.com',            NULL, 'shannaro',      '2023-03-22 09:30:15',  4,  'Premium',  'active'),   -- 23
-('Kakashi_Sensei',   'kakashi@sharingan.com',       NULL, 'copycat',       '2023-04-01 00:00:01',  4,  'Free',     'active'),   -- 24
-('Itachi_Crow',      'itachi@akatsuki.com',         NULL, 'tsukuyomi',     '2023-05-18 03:33:33',  4,  'Premium',  'active'),   -- 25
-('Goku_Saiyan',      'goku@capsule.com',            NULL, 'kamehameha',    '2023-06-29 12:00:00',  5,  'Free',     'active'),   -- 26
-('Vegeta_Prince',    'vegeta@saiyan.com',           NULL, 'finalflash',    '2023-07-04 08:08:08',  5,  'Premium',  'active'),   -- 27
-('Bulma_Genius',     'bulma@brief.com',             NULL, 'dragonball',    '2023-08-15 16:45:20',  5,  'Free',     'active'),   -- 28
-('Tanjiro_Blade',    'tanjiro@hashira.com',         NULL, 'hinokami',      '2023-09-03 11:22:44',  4,  'Premium',  'active'),   -- 29
-('Nezuko_Box',       'nezuko@demon.com',            NULL, 'bamboo',        '2023-10-10 19:55:10',  4,  'Free',     'active'),   -- 30
-('Edward_Elric',     'edward@alchemy.com',          NULL, 'equivalent',    '2024-01-07 08:00:00',  3,  'Premium',  'active'),   -- 31
-('Roy_Mustang',      'roy@flame.com',               NULL, 'colonel',       '2024-02-14 09:14:59',  3,  'Free',     'active'),   -- 32
-('Mikasa_Ackerman',  'mikasa@survey.com',           NULL, 'scarf',         '2024-03-05 07:30:00',  3,  'Premium',  'active'),   -- 33
-('Armin_Strategist', 'armin@brain.com',             NULL, 'colossal',      '2024-04-18 13:13:13',  3,  'Free',     'active'),   -- 34
-('Levi_Captain',     'levi@clean.com',              NULL, 'HumanitysBest', '2024-05-01 05:00:00',  3,  'Premium',  'active'),   -- 35
-('Sasha_Potato',     'sasha@potato.com',            NULL, 'potatoes',      '2024-06-20 12:30:00',  3,  'Free',     'active'),   -- 36
-('Historia_Queen',   'historia@wall.com',           NULL, 'reiss',         '2024-07-14 18:00:00',  3,  'Premium',  'active'),   -- 37
-('Erwin_Smith',      'erwin@commander.com',         NULL, 'chargefwd',     '2024-08-09 06:45:00',  3,  'Free',     'active'),   -- 38
-('Hange_Zoe',        'hange@titan.com',             NULL, 'experiment',    '2024-09-27 20:20:20',  3,  'Premium',  'active'),   -- 39
-('Reiner_Armor',     'reiner@warrior.com',          NULL, 'bertholt',      '2024-11-11 11:11:11',  3,  'Free',     'active');   -- 40
+INSERT INTO app_user (username, email, img_path, user_password, register_date, country_id, tier_id, user_status) VALUES
+('Wirachat_Admin',   'wirachat.thon@kmutt.ac.th',   NULL, 'safe123',       '2021-01-15 09:00:00',  1,  3,    'active'),   -- 1
+('GenshinLover',     'traveler@teyvat.com',         NULL, 'paimon',        '2021-02-03 14:22:11',  2,  2,  'active'),   -- 2
+('Anya_Fans',        'wakuwaku@spy.com',            NULL, 'peanuts',       '2021-03-18 08:45:30',  3,  1,     'active'),   -- 3
+('Luffy_Pirate',     'luffy@grandline.com',         NULL, 'meat',          '2021-05-07 20:10:05',  4,  2,  'active'),   -- 4
+('Zoro_Lost',        'zoro@swords.com',             NULL, 'bushido',       '2021-06-14 11:33:47',  4,  1,     'active'),   -- 5
+('Nami_Money',       'nami@berries.com',            NULL, 'gold',          '2021-07-29 16:55:22',  4,  2,  'active'),   -- 6
+('Sanji_Cook',       'sanji@allblue.com',           NULL, 'mellorine',     '2021-08-05 07:12:59',  4,  1,     'active'),   -- 7
+('Robin_History',    'robin@ohara.com',             NULL, 'archaeology',   '2021-09-20 13:40:00',  4,  2,  'active'),   -- 8
+('Chopper_Doc',      'chopper@drum.com',            NULL, 'candy',         '2021-10-11 19:08:34',  4,  1,     'active'),   -- 9
+('Franky_Super',     'franky@water7.com',           NULL, 'cola',          '2021-11-28 10:27:16',  4,  2,  'active'),   -- 10
+('Brook_Soul',       'brook@soul.com',              NULL, 'laboon',        '2022-01-04 22:15:50',  4,  1,     'active'),   -- 11
+('Jimbei_Fish',      'jimbei@sea.com',              NULL, 'karate',        '2022-02-17 09:03:41',  4,  2,  'active'),   -- 12
+('Usopp_Sniper',     'usopp@brave.com',             NULL, 'popgreen',      '2022-03-30 15:49:07',  4,  1,     'active'),   -- 13
+('Law_Heart',        'law@op.com',                  NULL, 'shambles',      '2022-05-12 18:22:33', 14,  2,  'active'),   -- 14
+('Kid_Metal',        'kid@punk.com',                NULL, 'magnet',        '2022-06-08 06:57:44',  9,  1,     'active'),   -- 15
+('Hancock_Love',     'hancock@kuja.com',            NULL, 'salome',        '2022-08-01 12:34:19',  6,  2,  'active'),   -- 16
+('Ace_Fire',         'ace@spade.com',               NULL, 'meramera',      '2022-09-23 21:05:02', 10,  1,     'suspended'),-- 17
+('Sabo_Dragon',      'sabo@rev.com',                NULL, 'dragonclaw',    '2022-10-16 17:48:55', 10,  2,  'active'),   -- 18
+('Whitebeard_Goat', 'newgate@yonko.com',            NULL, 'guranogura',    '2022-11-20 12:00:00',  4,  2,  'active'), -- 19
+('Shanks_Red',       'shanks@yonko.com',            NULL, 'haki',          '2022-12-25 23:59:00', 15,  2,  'active'),   -- 20
+('Naruto_Uzumaki',   'naruto@konoha.com',           NULL, 'dattebayo',     '2023-01-09 10:14:37',  4,  2,  'active'),   -- 21
+('Sasuke_Uchiha',    'sasuke@avenger.com',          NULL, 'chidori',       '2023-02-14 14:00:00',  4,  1,     'active'),   -- 22
+('Sakura_Haruno',    'sakura@medic.com',            NULL, 'shannaro',      '2023-03-22 09:30:15',  4,  2,  'active'),   -- 23
+('Kakashi_Sensei',   'kakashi@sharingan.com',       NULL, 'copycat',       '2023-04-01 00:00:01',  4,  1,     'active'),   -- 24
+('Itachi_Crow',      'itachi@akatsuki.com',         NULL, 'tsukuyomi',     '2023-05-18 03:33:33',  4,  2,  'active'),   -- 25
+('Goku_Saiyan',      'goku@capsule.com',            NULL, 'kamehameha',    '2023-06-29 12:00:00',  5,  1,     'active'),   -- 26
+('Vegeta_Prince',    'vegeta@saiyan.com',           NULL, 'finalflash',    '2023-07-04 08:08:08',  5,  2,  'active'),   -- 27
+('Bulma_Genius',     'bulma@brief.com',             NULL, 'dragonball',    '2023-08-15 16:45:20',  5,  1,     'active'),   -- 28
+('Tanjiro_Blade',    'tanjiro@hashira.com',         NULL, 'hinokami',      '2023-09-03 11:22:44',  4,  2,  'active'),   -- 29
+('Nezuko_Box',       'nezuko@demon.com',            NULL, 'bamboo',        '2023-10-10 19:55:10',  4,  1,     'active'),   -- 30
+('Edward_Elric',     'edward@alchemy.com',          NULL, 'equivalent',    '2024-01-07 08:00:00',  3,  2,  'active'),   -- 31
+('Roy_Mustang',      'roy@flame.com',               NULL, 'colonel',       '2024-02-14 09:14:59',  3,  1,     'active'),   -- 32
+('Mikasa_Ackerman',  'mikasa@survey.com',           NULL, 'scarf',         '2024-03-05 07:30:00',  3,  2,  'active'),   -- 33
+('Armin_Strategist', 'armin@brain.com',             NULL, 'colossal',      '2024-04-18 13:13:13',  3,  1,     'active'),   -- 34
+('Levi_Captain',     'levi@clean.com',              NULL, 'HumanitysBest', '2024-05-01 05:00:00',  3,  2,  'active'),   -- 35
+('Sasha_Potato',     'sasha@potato.com',            NULL, 'potatoes',      '2024-06-20 12:30:00',  3,  1,     'active'),   -- 36
+('Historia_Queen',   'historia@wall.com',           NULL, 'reiss',         '2024-07-14 18:00:00',  3,  2,  'active'),   -- 37
+('Erwin_Smith',      'erwin@commander.com',         NULL, 'chargefwd',     '2024-08-09 06:45:00',  3,  1,     'active'),   -- 38
+('Hange_Zoe',        'hange@titan.com',             NULL, 'experiment',    '2024-09-27 20:20:20',  3,  2,  'active'),   -- 39
+('Reiner_Armor',     'reiner@warrior.com',          NULL, 'bertholt',      '2024-11-11 11:11:11',  3,  1,     'active');   -- 40
 
 
 -- ══════════════════════════════════════════════════════════════════════
@@ -197,40 +203,40 @@ OVERRIDING SYSTEM VALUE VALUES
 -- update_by = 1 (Wirachat_Admin) for all content entries
 INSERT INTO content (title, content_description, release_date, price, content_type, rating_id, country_id, update_by) VALUES
 ('Interstellar',                     'Space exploration.',                          '2014-11-07',  9.99,  'Movie',    3,  8,  1),  -- 1
-('Spy x Family',                     'Spy family.',                                 '2022-04-09',  19.99, 'TV_Show',  3,  4,  1),  -- 2
-('The Office',                       'Paper company.',                              '2005-03-24',  24.99, 'TV_Show',  4,  5,  1),  -- 3
+('Spy x Family',                     'Spy family.',                                 '2022-04-09',  19.99, 'TV Show',  3,  4,  1),  -- 2
+('The Office',                       'Paper company.',                              '2005-03-24',  24.99, 'TV Show',  4,  5,  1),  -- 3
 ('Inception',                        'Dream heist.',                                '2010-07-16',  7.99,  'Movie',    3,  8,  1),  -- 4
-('One Piece',                        'Pirate treasure.',                            '1999-10-20',  49.99, 'TV_Show',  3,  4,  1),  -- 5
-('Breaking Bad',                     'Chemistry teacher.',                          '2008-01-20',  29.99, 'TV_Show',  6,  5,  1),  -- 6
+('One Piece',                        'Pirate treasure.',                            '1999-10-20',  49.99, 'TV Show',  3,  4,  1),  -- 5
+('Breaking Bad',                     'Chemistry teacher.',                          '2008-01-20',  29.99, 'TV Show',  6,  5,  1),  -- 6
 ('Your Name',                        'Star-crossed swap.',                          '2016-08-26',  12.99, 'Movie',    3,  4,  1),  -- 7
 ('Dune',                             'Spice wars.',                                 '2021-10-22',  14.99, 'Movie',    3, 13,  1),  -- 8
-('Attack on Titan',                  'Giant war.',                                  '2013-04-07',  35.00, 'TV_Show',  4,  4,  1),  -- 9
-('The Mandalorian',                  'Bounty hunter.',                              '2019-11-12',  19.99, 'TV_Show',  4,  5,  1),  -- 10
+('Attack on Titan',                  'Giant war.',                                  '2013-04-07',  35.00, 'TV Show',  4,  4,  1),  -- 9
+('The Mandalorian',                  'Bounty hunter.',                              '2019-11-12',  19.99, 'TV Show',  4,  5,  1),  -- 10
 ('Parasite',                         'Class struggle.',                             '2019-05-30',  9.50,  'Movie',    5,  6,  1),  -- 11
 ('The Dark Knight',                  'Gotham hero.',                                '2008-07-18',  5.99,  'Movie',    5,  8,  1),  -- 12
 ('Tenet',                            'Reverse time.',                               '2020-08-26',  11.99, 'Movie',    5,  8,  1),  -- 13
 ('Everything Everywhere All at Once','Multiverse.',                                 '2022-03-25',  13.50, 'Movie',    3,  5,  1),  -- 14
-('Jujutsu Kaisen',                   'Curse hunters.',                              '2020-10-03',  25.00, 'TV_Show',  4,  4,  1),  -- 15
-('Better Call Saul',                 'Criminal lawyer.',                            '2015-02-08',  22.00, 'TV_Show',  6,  5,  1),  -- 16
-('Stranger Things',                  'Mysterious girl.',                            '2016-07-15',  18.00, 'TV_Show',  4,  5,  1),  -- 17
+('Jujutsu Kaisen',                   'Curse hunters.',                              '2020-10-03',  25.00, 'TV Show',  4,  4,  1),  -- 15
+('Better Call Saul',                 'Criminal lawyer.',                            '2015-02-08',  22.00, 'TV Show',  6,  5,  1),  -- 16
+('Stranger Things',                  'Mysterious girl.',                            '2016-07-15',  18.00, 'TV Show',  4,  5,  1),  -- 17
 ('The Godfather',                    'Crime family.',                               '1972-03-24',  15.00, 'Movie',    5,  5,  1),  -- 18
 ('Spirited Away',                    'Ghost world.',                                '2001-07-20',  10.00, 'Movie',    1,  4,  1),  -- 19
-('Chernobyl',                        'Power plant.',                                '2019-05-06',  12.00, 'TV_Show',  4,  8,  1),  -- 20
-('Naruto',                           'Ninja who dreams of being Hokage.',           '2002-10-03',  29.99, 'TV_Show',  2,  4,  1),  -- 21
-('Dragon Ball Z',                    'Saiyan warriors protect Earth.',              '1989-04-26',  24.99, 'TV_Show',  2,  4,  1),  -- 22
-('Demon Slayer',                     'Tanjiro fights demons for Nezuko.',           '2019-04-06',  22.00, 'TV_Show',  3,  4,  1),  -- 23
-('Fullmetal Alchemist: Brotherhood', 'Brothers seek the Philosopher Stone.',       '2009-04-05',  26.00, 'TV_Show',  3,  4,  1),  -- 24
+('Chernobyl',                        'Power plant.',                                '2019-05-06',  12.00, 'TV Show',  4,  8,  1),  -- 20
+('Naruto',                           'Ninja who dreams of being Hokage.',           '2002-10-03',  29.99, 'TV Show',  2,  4,  1),  -- 21
+('Dragon Ball Z',                    'Saiyan warriors protect Earth.',              '1989-04-26',  24.99, 'TV Show',  2,  4,  1),  -- 22
+('Demon Slayer',                     'Tanjiro fights demons for Nezuko.',           '2019-04-06',  22.00, 'TV Show',  3,  4,  1),  -- 23
+('Fullmetal Alchemist: Brotherhood', 'Brothers seek the Philosopher Stone.',       '2009-04-05',  26.00, 'TV Show',  3,  4,  1),  -- 24
 ('Dune: Part Two',                   'Paul leads the Fremen to war.',              '2024-03-01',  16.99, 'Movie',    5, 13,  1),  -- 25
 ('Oppenheimer',                      'Father of the atomic bomb.',                 '2023-07-21',  12.99, 'Movie',    3,  8,  1),  -- 26
 ('The Grand Budapest Hotel',         'Legendary concierge in a fading empire.',    '2014-03-07',  8.99,  'Movie',    3,  3,  1),  -- 27
 ('Pulp Fiction',                     'Interconnected crime stories in L.A.',       '1994-10-14',  7.99,  'Movie',    5,  5,  1),  -- 28
-('Squid Game',                       'Desperate people compete in deadly games.',  '2021-09-17',  18.00, 'TV_Show',  6,  6,  1),  -- 29
-('Arcane',                           'The origins of Vi and Jinx.',                '2021-11-06',  15.00, 'TV_Show',  3,  7,  1),  -- 30
-('Severance',                        'Office workers with severed memories.',       '2022-02-18',  14.99, 'TV_Show',  4,  5,  1),  -- 31
+('Squid Game',                       'Desperate people compete in deadly games.',  '2021-09-17',  18.00, 'TV Show',  6,  6,  1),  -- 29
+('Arcane',                           'The origins of Vi and Jinx.',                '2021-11-06',  15.00, 'TV Show',  3,  7,  1),  -- 30
+('Severance',                        'Office workers with severed memories.',       '2022-02-18',  14.99, 'TV Show',  4,  5,  1),  -- 31
 ('Blade Runner 2049',                'A replicant hunter uncovers secrets.',        '2017-10-06',  11.99, 'Movie',    3, 13,  1),  -- 32
 ('Princess Mononoke',                'Humans clash with forest spirits.',           '1997-07-12',  9.99,  'Movie',    1,  4,  1),  -- 33
 ('Goodfellas',                       'Rise and fall of a mob associate.',           '1990-09-19',  8.50,  'Movie',    5,  5,  1),  -- 34
-('The Bear',                         'A fine-dining chef runs a sandwich shop.',   '2022-06-23',  12.00, 'TV_Show',  4,  5,  1);  -- 35
+('The Bear',                         'A fine-dining chef runs a sandwich shop.',   '2022-06-23',  12.00, 'TV Show',  4,  5,  1);  -- 35
 
 
 -- ══════════════════════════════════════════════════════════════════════
@@ -257,24 +263,24 @@ INSERT INTO movie (content_id, curr_status, run_time) VALUES
 (34, 'Released', 146);
 
 INSERT INTO tv_show (content_id, curr_status) VALUES
-(2,  'On-going'),
-(3,  'Ended'),
-(5,  'On-going'),
-(6,  'Ended'),
-(9,  'Ended'),
-(10, 'On-going'),
-(15, 'On-going'),
-(16, 'Ended'),
-(17, 'On-going'),
-(20, 'Ended'),
-(21, 'Ended'),
-(22, 'Ended'),
-(23, 'On-going'),
-(24, 'Ended'),
-(29, 'On-going'),
-(30, 'On-going'),
-(31, 'On-going'),
-(35, 'On-going');
+(2,  'Airing'),
+(3,  'Off'),
+(5,  'Airing'),
+(6,  'Off'),
+(9,  'Off'),
+(10, 'Airing'),
+(15, 'Airing'),
+(16, 'Off'),
+(17, 'Airing'),
+(20, 'Off'),
+(21, 'Off'),
+(22, 'Off'),
+(23, 'Airing'),
+(24, 'Off'),
+(29, 'Airing'),
+(30, 'Airing'),
+(31, 'Airing'),
+(35, 'Airing');
 
 -- Fixed typo: Sypnosis → synopsis
 INSERT INTO season (content_id, season_num, air_date, synopsis) VALUES
@@ -427,219 +433,219 @@ INSERT INTO episode (content_id, season_num, episode_num, title, run_time) VALUE
 INSERT INTO media_path (content_id, episode_id, quality, file_path, priority) VALUES
 -- ── Movies (episode_id = NULL) ────────────────────────────────────────
 -- content 1  (Interstellar): 4K, 1080p, 720p
-(1,  NULL, '4K',    '/media/movies/1/4K.mp4',    1),
-(1,  NULL, '1080p', '/media/movies/1/1080p.mp4', 1),
-(1,  NULL, '720p',  '/media/movies/1/720p.mp4',  1),
+(1,  NULL, 'UHD',    '/media/movies/1/UHD.mp4',    1),
+(1,  NULL, 'FHD', '/media/movies/1/FHD.mp4', 1),
+(1,  NULL, 'HD',  '/media/movies/1/HD.mp4',  1),
 -- content 4  (Inception): 4K, 1080p
-(4,  NULL, '4K',    '/media/movies/4/4K.mp4',    1),
-(4,  NULL, '1080p', '/media/movies/4/1080p.mp4', 1),
+(4,  NULL, 'UHD',    '/media/movies/4/UHD.mp4',    1),
+(4,  NULL, 'FHD', '/media/movies/4/FHD.mp4', 1),
 -- content 7  (Your Name): 1080p, 720p
-(7,  NULL, '1080p', '/media/movies/7/1080p.mp4', 1),
-(7,  NULL, '720p',  '/media/movies/7/720p.mp4',  1),
+(7,  NULL, 'FHD', '/media/movies/7/FHD.mp4', 1),
+(7,  NULL, 'HD',  '/media/movies/7/HD.mp4',  1),
 -- content 8  (Dune): 4K, 1080p, 720p
-(8,  NULL, '4K',    '/media/movies/8/4K.mp4',    1),
-(8,  NULL, '1080p', '/media/movies/8/1080p.mp4', 1),
-(8,  NULL, '720p',  '/media/movies/8/720p.mp4',  1),
+(8,  NULL, 'UHD',    '/media/movies/8/UHD.mp4',    1),
+(8,  NULL, 'FHD', '/media/movies/8/FHD.mp4', 1),
+(8,  NULL, 'HD',  '/media/movies/8/HD.mp4',  1),
 -- content 11 (Parasite): 1080p
-(11, NULL, '1080p', '/media/movies/11/1080p.mp4',1),
+(11, NULL, 'FHD', '/media/movies/11/FHD.mp4',1),
 -- content 12 (The Dark Knight): 4K, 1080p, 720p
-(12, NULL, '4K',    '/media/movies/12/4K.mp4',   1),
-(12, NULL, '1080p', '/media/movies/12/1080p.mp4',1),
-(12, NULL, '720p',  '/media/movies/12/720p.mp4', 1),
+(12, NULL, 'UHD',    '/media/movies/12/UHD.mp4',   1),
+(12, NULL, 'FHD', '/media/movies/12/FHD.mp4',1),
+(12, NULL, 'HD',  '/media/movies/12/HD.mp4', 1),
 -- content 13 (Tenet): 4K, 1080p
-(13, NULL, '4K',    '/media/movies/13/4K.mp4',   1),
-(13, NULL, '1080p', '/media/movies/13/1080p.mp4',1),
+(13, NULL, 'UHD',    '/media/movies/13/UHD.mp4',   1),
+(13, NULL, 'FHD', '/media/movies/13/FHD.mp4',1),
 -- content 14 (Everything Everywhere All at Once): 4K, 1080p
-(14, NULL, '4K',    '/media/movies/14/4K.mp4',   1),
-(14, NULL, '1080p', '/media/movies/14/1080p.mp4',1),
+(14, NULL, 'UHD',    '/media/movies/14/UHD.mp4',   1),
+(14, NULL, 'FHD', '/media/movies/14/FHD.mp4',1),
 -- content 18 (The Godfather): 1080p, 720p
-(18, NULL, '1080p', '/media/movies/18/1080p.mp4',1),
-(18, NULL, '720p',  '/media/movies/18/720p.mp4', 1),
+(18, NULL, 'FHD', '/media/movies/18/FHD.mp4',1),
+(18, NULL, 'HD',  '/media/movies/18/HD.mp4', 1),
 -- content 19 (Spirited Away): 1080p, 720p
-(19, NULL, '1080p', '/media/movies/19/1080p.mp4',1),
-(19, NULL, '720p',  '/media/movies/19/720p.mp4', 1),
+(19, NULL, 'FHD', '/media/movies/19/FHD.mp4',1),
+(19, NULL, 'HD',  '/media/movies/19/HD.mp4', 1),
 -- content 25 (Dune: Part Two): 4K, 1080p, 720p
-(25, NULL, '4K',    '/media/movies/25/4K.mp4',   1),
-(25, NULL, '1080p', '/media/movies/25/1080p.mp4',1),
-(25, NULL, '720p',  '/media/movies/25/720p.mp4', 1),
+(25, NULL, 'UHD',    '/media/movies/25/UHD.mp4',   1),
+(25, NULL, 'FHD', '/media/movies/25/FHD.mp4',1),
+(25, NULL, 'HD',  '/media/movies/25/HD.mp4', 1),
 -- content 26 (Oppenheimer): 4K, 1080p
-(26, NULL, '4K',    '/media/movies/26/4K.mp4',   1),
-(26, NULL, '1080p', '/media/movies/26/1080p.mp4',1),
+(26, NULL, 'UHD',    '/media/movies/26/UHD.mp4',   1),
+(26, NULL, 'FHD', '/media/movies/26/FHD.mp4',1),
 -- content 27 (The Grand Budapest Hotel): 1080p, 720p
-(27, NULL, '1080p', '/media/movies/27/1080p.mp4',1),
-(27, NULL, '720p',  '/media/movies/27/720p.mp4', 1),
+(27, NULL, 'FHD', '/media/movies/27/FHD.mp4',1),
+(27, NULL, 'HD',  '/media/movies/27/HD.mp4', 1),
 -- content 28 (Pulp Fiction): 1080p, 720p
-(28, NULL, '1080p', '/media/movies/28/1080p.mp4',1),
-(28, NULL, '720p',  '/media/movies/28/720p.mp4', 1),
+(28, NULL, 'FHD', '/media/movies/28/FHD.mp4',1),
+(28, NULL, 'HD',  '/media/movies/28/HD.mp4', 1),
 -- content 32 (Blade Runner 2049): 4K, 1080p
-(32, NULL, '4K',    '/media/movies/32/4K.mp4',   1),
-(32, NULL, '1080p', '/media/movies/32/1080p.mp4',1),
+(32, NULL, 'UHD',    '/media/movies/32/UHD.mp4',   1),
+(32, NULL, 'FHD', '/media/movies/32/FHD.mp4',1),
 -- content 33 (Princess Mononoke): 1080p, 720p
-(33, NULL, '1080p', '/media/movies/33/1080p.mp4',1),
-(33, NULL, '720p',  '/media/movies/33/720p.mp4', 1),
+(33, NULL, 'FHD', '/media/movies/33/FHD.mp4',1),
+(33, NULL, 'HD',  '/media/movies/33/HD.mp4', 1),
 -- content 34 (Goodfellas): 1080p, 720p
-(34, NULL, '1080p', '/media/movies/34/1080p.mp4',1),
-(34, NULL, '720p',  '/media/movies/34/720p.mp4', 1),
+(34, NULL, 'FHD', '/media/movies/34/FHD.mp4',1),
+(34, NULL, 'HD',  '/media/movies/34/HD.mp4', 1),
 
 -- ── TV Shows (one row per episode per quality) ────────────────────────
 -- content 2 (Spy x Family): 1080p, 720p — ep_id 1–5
-(2,  1, '1080p', '/media/shows/2/ep_1/1080p.mp4',  1),
-(2,  1, '720p',  '/media/shows/2/ep_1/720p.mp4',   1),
-(2,  2, '1080p', '/media/shows/2/ep_2/1080p.mp4',  1),
-(2,  2, '720p',  '/media/shows/2/ep_2/720p.mp4',   1),
-(2,  3, '1080p', '/media/shows/2/ep_3/1080p.mp4',  1),
-(2,  3, '720p',  '/media/shows/2/ep_3/720p.mp4',   1),
-(2,  4, '1080p', '/media/shows/2/ep_4/1080p.mp4',  1),
-(2,  4, '720p',  '/media/shows/2/ep_4/720p.mp4',   1),
-(2,  5, '1080p', '/media/shows/2/ep_5/1080p.mp4',  1),
-(2,  5, '720p',  '/media/shows/2/ep_5/720p.mp4',   1),
+(2,  1, 'FHD', '/media/shows/2/ep_1/FHD.mp4',  1),
+(2,  1, 'HD',  '/media/shows/2/ep_1/HD.mp4',   1),
+(2,  2, 'FHD', '/media/shows/2/ep_2/FHD.mp4',  1),
+(2,  2, 'HD',  '/media/shows/2/ep_2/HD.mp4',   1),
+(2,  3, 'FHD', '/media/shows/2/ep_3/FHD.mp4',  1),
+(2,  3, 'HD',  '/media/shows/2/ep_3/HD.mp4',   1),
+(2,  4, 'FHD', '/media/shows/2/ep_4/FHD.mp4',  1),
+(2,  4, 'HD',  '/media/shows/2/ep_4/HD.mp4',   1),
+(2,  5, 'FHD', '/media/shows/2/ep_5/FHD.mp4',  1),
+(2,  5, 'HD',  '/media/shows/2/ep_5/HD.mp4',   1),
 -- content 3 (The Office): 720p only — ep_id 6–11
-(3,  6,  '720p', '/media/shows/3/ep_6/720p.mp4',   1),
-(3,  7,  '720p', '/media/shows/3/ep_7/720p.mp4',   1),
-(3,  8,  '720p', '/media/shows/3/ep_8/720p.mp4',   1),
-(3,  9,  '720p', '/media/shows/3/ep_9/720p.mp4',   1),
-(3,  10, '720p', '/media/shows/3/ep_10/720p.mp4',  1),
-(3,  11, '720p', '/media/shows/3/ep_11/720p.mp4',  1),
+(3,  6,  'HD', '/media/shows/3/ep_6/HD.mp4',   1),
+(3,  7,  'HD', '/media/shows/3/ep_7/HD.mp4',   1),
+(3,  8,  'HD', '/media/shows/3/ep_8/HD.mp4',   1),
+(3,  9,  'HD', '/media/shows/3/ep_9/HD.mp4',   1),
+(3,  10, 'HD', '/media/shows/3/ep_10/HD.mp4',  1),
+(3,  11, 'HD', '/media/shows/3/ep_11/HD.mp4',  1),
 -- content 5 (One Piece): 1080p, 720p — ep_id 12–15
-(5,  12, '1080p', '/media/shows/5/ep_12/1080p.mp4',1),
-(5,  12, '720p',  '/media/shows/5/ep_12/720p.mp4', 1),
-(5,  13, '1080p', '/media/shows/5/ep_13/1080p.mp4',1),
-(5,  13, '720p',  '/media/shows/5/ep_13/720p.mp4', 1),
-(5,  14, '1080p', '/media/shows/5/ep_14/1080p.mp4',1),
-(5,  14, '720p',  '/media/shows/5/ep_14/720p.mp4', 1),
-(5,  15, '1080p', '/media/shows/5/ep_15/1080p.mp4',1),
-(5,  15, '720p',  '/media/shows/5/ep_15/720p.mp4', 1),
+(5,  12, 'FHD', '/media/shows/5/ep_12/FHD.mp4',1),
+(5,  12, 'HD',  '/media/shows/5/ep_12/HD.mp4', 1),
+(5,  13, 'FHD', '/media/shows/5/ep_13/FHD.mp4',1),
+(5,  13, 'HD',  '/media/shows/5/ep_13/HD.mp4', 1),
+(5,  14, 'FHD', '/media/shows/5/ep_14/FHD.mp4',1),
+(5,  14, 'HD',  '/media/shows/5/ep_14/HD.mp4', 1),
+(5,  15, 'FHD', '/media/shows/5/ep_15/FHD.mp4',1),
+(5,  15, 'HD',  '/media/shows/5/ep_15/HD.mp4', 1),
 -- content 6 (Breaking Bad): 4K, 1080p — ep_id 16–21
-(6,  16, '4K',    '/media/shows/6/ep_16/4K.mp4',   1),
-(6,  16, '1080p', '/media/shows/6/ep_16/1080p.mp4',1),
-(6,  17, '4K',    '/media/shows/6/ep_17/4K.mp4',   1),
-(6,  17, '1080p', '/media/shows/6/ep_17/1080p.mp4',1),
-(6,  18, '4K',    '/media/shows/6/ep_18/4K.mp4',   1),
-(6,  18, '1080p', '/media/shows/6/ep_18/1080p.mp4',1),
-(6,  19, '4K',    '/media/shows/6/ep_19/4K.mp4',   1),
-(6,  19, '1080p', '/media/shows/6/ep_19/1080p.mp4',1),
-(6,  20, '4K',    '/media/shows/6/ep_20/4K.mp4',   1),
-(6,  20, '1080p', '/media/shows/6/ep_20/1080p.mp4',1),
-(6,  21, '4K',    '/media/shows/6/ep_21/4K.mp4',   1),
-(6,  21, '1080p', '/media/shows/6/ep_21/1080p.mp4',1),
+(6,  16, 'UHD',    '/media/shows/6/ep_16/UHD.mp4',   1),
+(6,  16, 'FHD', '/media/shows/6/ep_16/FHD.mp4',1),
+(6,  17, 'UHD',    '/media/shows/6/ep_17/UHD.mp4',   1),
+(6,  17, 'FHD', '/media/shows/6/ep_17/FHD.mp4',1),
+(6,  18, 'UHD',    '/media/shows/6/ep_18/UHD.mp4',   1),
+(6,  18, 'FHD', '/media/shows/6/ep_18/FHD.mp4',1),
+(6,  19, 'UHD',    '/media/shows/6/ep_19/UHD.mp4',   1),
+(6,  19, 'FHD', '/media/shows/6/ep_19/FHD.mp4',1),
+(6,  20, 'UHD',    '/media/shows/6/ep_20/UHD.mp4',   1),
+(6,  20, 'FHD', '/media/shows/6/ep_20/FHD.mp4',1),
+(6,  21, 'UHD',    '/media/shows/6/ep_21/UHD.mp4',   1),
+(6,  21, 'FHD', '/media/shows/6/ep_21/FHD.mp4',1),
 -- content 9 (Attack on Titan): 1080p, 720p — ep_id 22–27
-(9,  22, '1080p', '/media/shows/9/ep_22/1080p.mp4',1),
-(9,  22, '720p',  '/media/shows/9/ep_22/720p.mp4', 1),
-(9,  23, '1080p', '/media/shows/9/ep_23/1080p.mp4',1),
-(9,  23, '720p',  '/media/shows/9/ep_23/720p.mp4', 1),
-(9,  24, '1080p', '/media/shows/9/ep_24/1080p.mp4',1),
-(9,  24, '720p',  '/media/shows/9/ep_24/720p.mp4', 1),
-(9,  25, '1080p', '/media/shows/9/ep_25/1080p.mp4',1),
-(9,  25, '720p',  '/media/shows/9/ep_25/720p.mp4', 1),
-(9,  26, '1080p', '/media/shows/9/ep_26/1080p.mp4',1),
-(9,  26, '720p',  '/media/shows/9/ep_26/720p.mp4', 1),
-(9,  27, '1080p', '/media/shows/9/ep_27/1080p.mp4',1),
-(9,  27, '720p',  '/media/shows/9/ep_27/720p.mp4', 1),
+(9,  22, 'FHD', '/media/shows/9/ep_22/FHD.mp4',1),
+(9,  22, 'HD',  '/media/shows/9/ep_22/HD.mp4', 1),
+(9,  23, 'FHD', '/media/shows/9/ep_23/FHD.mp4',1),
+(9,  23, 'HD',  '/media/shows/9/ep_23/HD.mp4', 1),
+(9,  24, 'FHD', '/media/shows/9/ep_24/FHD.mp4',1),
+(9,  24, 'HD',  '/media/shows/9/ep_24/HD.mp4', 1),
+(9,  25, 'FHD', '/media/shows/9/ep_25/FHD.mp4',1),
+(9,  25, 'HD',  '/media/shows/9/ep_25/HD.mp4', 1),
+(9,  26, 'FHD', '/media/shows/9/ep_26/FHD.mp4',1),
+(9,  26, 'HD',  '/media/shows/9/ep_26/HD.mp4', 1),
+(9,  27, 'FHD', '/media/shows/9/ep_27/FHD.mp4',1),
+(9,  27, 'HD',  '/media/shows/9/ep_27/HD.mp4', 1),
 -- content 10 (The Mandalorian): 4K, 1080p — ep_id 28–31
-(10, 28, '4K',    '/media/shows/10/ep_28/4K.mp4',   1),
-(10, 28, '1080p', '/media/shows/10/ep_28/1080p.mp4',1),
-(10, 29, '4K',    '/media/shows/10/ep_29/4K.mp4',   1),
-(10, 29, '1080p', '/media/shows/10/ep_29/1080p.mp4',1),
-(10, 30, '4K',    '/media/shows/10/ep_30/4K.mp4',   1),
-(10, 30, '1080p', '/media/shows/10/ep_30/1080p.mp4',1),
-(10, 31, '4K',    '/media/shows/10/ep_31/4K.mp4',   1),
-(10, 31, '1080p', '/media/shows/10/ep_31/1080p.mp4',1),
+(10, 28, 'UHD',    '/media/shows/10/ep_28/UHD.mp4',   1),
+(10, 28, 'FHD', '/media/shows/10/ep_28/FHD.mp4',1),
+(10, 29, 'UHD',    '/media/shows/10/ep_29/UHD.mp4',   1),
+(10, 29, 'FHD', '/media/shows/10/ep_29/FHD.mp4',1),
+(10, 30, 'UHD',    '/media/shows/10/ep_30/UHD.mp4',   1),
+(10, 30, 'FHD', '/media/shows/10/ep_30/FHD.mp4',1),
+(10, 31, 'UHD',    '/media/shows/10/ep_31/UHD.mp4',   1),
+(10, 31, 'FHD', '/media/shows/10/ep_31/FHD.mp4',1),
 -- content 15 (Jujutsu Kaisen): 1080p, 720p — ep_id 32–35
-(15, 32, '1080p', '/media/shows/15/ep_32/1080p.mp4',1),
-(15, 32, '720p',  '/media/shows/15/ep_32/720p.mp4', 1),
-(15, 33, '1080p', '/media/shows/15/ep_33/1080p.mp4',1),
-(15, 33, '720p',  '/media/shows/15/ep_33/720p.mp4', 1),
-(15, 34, '1080p', '/media/shows/15/ep_34/1080p.mp4',1),
-(15, 34, '720p',  '/media/shows/15/ep_34/720p.mp4', 1),
-(15, 35, '1080p', '/media/shows/15/ep_35/1080p.mp4',1),
-(15, 35, '720p',  '/media/shows/15/ep_35/720p.mp4', 1),
+(15, 32, 'FHD', '/media/shows/15/ep_32/FHD.mp4',1),
+(15, 32, 'HD',  '/media/shows/15/ep_32/HD.mp4', 1),
+(15, 33, 'FHD', '/media/shows/15/ep_33/FHD.mp4',1),
+(15, 33, 'HD',  '/media/shows/15/ep_33/HD.mp4', 1),
+(15, 34, 'FHD', '/media/shows/15/ep_34/FHD.mp4',1),
+(15, 34, 'HD',  '/media/shows/15/ep_34/HD.mp4', 1),
+(15, 35, 'FHD', '/media/shows/15/ep_35/FHD.mp4',1),
+(15, 35, 'HD',  '/media/shows/15/ep_35/HD.mp4', 1),
 -- content 16 (Better Call Saul): 1080p, 720p — ep_id 36–39
-(16, 36, '1080p', '/media/shows/16/ep_36/1080p.mp4',1),
-(16, 36, '720p',  '/media/shows/16/ep_36/720p.mp4', 1),
-(16, 37, '1080p', '/media/shows/16/ep_37/1080p.mp4',1),
-(16, 37, '720p',  '/media/shows/16/ep_37/720p.mp4', 1),
-(16, 38, '1080p', '/media/shows/16/ep_38/1080p.mp4',1),
-(16, 38, '720p',  '/media/shows/16/ep_38/720p.mp4', 1),
-(16, 39, '1080p', '/media/shows/16/ep_39/1080p.mp4',1),
-(16, 39, '720p',  '/media/shows/16/ep_39/720p.mp4', 1),
+(16, 36, 'FHD', '/media/shows/16/ep_36/FHD.mp4',1),
+(16, 36, 'HD',  '/media/shows/16/ep_36/HD.mp4', 1),
+(16, 37, 'FHD', '/media/shows/16/ep_37/FHD.mp4',1),
+(16, 37, 'HD',  '/media/shows/16/ep_37/HD.mp4', 1),
+(16, 38, 'FHD', '/media/shows/16/ep_38/FHD.mp4',1),
+(16, 38, 'HD',  '/media/shows/16/ep_38/HD.mp4', 1),
+(16, 39, 'FHD', '/media/shows/16/ep_39/FHD.mp4',1),
+(16, 39, 'HD',  '/media/shows/16/ep_39/HD.mp4', 1),
 -- content 17 (Stranger Things): 4K, 1080p — ep_id 40–45
-(17, 40, '4K',    '/media/shows/17/ep_40/4K.mp4',   1),
-(17, 40, '1080p', '/media/shows/17/ep_40/1080p.mp4',1),
-(17, 41, '4K',    '/media/shows/17/ep_41/4K.mp4',   1),
-(17, 41, '1080p', '/media/shows/17/ep_41/1080p.mp4',1),
-(17, 42, '4K',    '/media/shows/17/ep_42/4K.mp4',   1),
-(17, 42, '1080p', '/media/shows/17/ep_42/1080p.mp4',1),
-(17, 43, '4K',    '/media/shows/17/ep_43/4K.mp4',   1),
-(17, 43, '1080p', '/media/shows/17/ep_43/1080p.mp4',1),
-(17, 44, '4K',    '/media/shows/17/ep_44/4K.mp4',   1),
-(17, 44, '1080p', '/media/shows/17/ep_44/1080p.mp4',1),
-(17, 45, '4K',    '/media/shows/17/ep_45/4K.mp4',   1),
-(17, 45, '1080p', '/media/shows/17/ep_45/1080p.mp4',1),
+(17, 40, 'UHD',    '/media/shows/17/ep_40/UHD.mp4',   1),
+(17, 40, 'FHD', '/media/shows/17/ep_40/FHD.mp4',1),
+(17, 41, 'UHD',    '/media/shows/17/ep_41/UHD.mp4',   1),
+(17, 41, 'FHD', '/media/shows/17/ep_41/FHD.mp4',1),
+(17, 42, 'UHD',    '/media/shows/17/ep_42/UHD.mp4',   1),
+(17, 42, 'FHD', '/media/shows/17/ep_42/FHD.mp4',1),
+(17, 43, 'UHD',    '/media/shows/17/ep_43/UHD.mp4',   1),
+(17, 43, 'FHD', '/media/shows/17/ep_43/FHD.mp4',1),
+(17, 44, 'UHD',    '/media/shows/17/ep_44/UHD.mp4',   1),
+(17, 44, 'FHD', '/media/shows/17/ep_44/FHD.mp4',1),
+(17, 45, 'UHD',    '/media/shows/17/ep_45/UHD.mp4',   1),
+(17, 45, 'FHD', '/media/shows/17/ep_45/FHD.mp4',1),
 -- content 20 (Chernobyl): 4K, 1080p — ep_id 46–47
-(20, 46, '4K',    '/media/shows/20/ep_46/4K.mp4',   1),
-(20, 46, '1080p', '/media/shows/20/ep_46/1080p.mp4',1),
-(20, 47, '4K',    '/media/shows/20/ep_47/4K.mp4',   1),
-(20, 47, '1080p', '/media/shows/20/ep_47/1080p.mp4',1),
+(20, 46, 'UHD',    '/media/shows/20/ep_46/UHD.mp4',   1),
+(20, 46, 'FHD', '/media/shows/20/ep_46/FHD.mp4',1),
+(20, 47, 'UHD',    '/media/shows/20/ep_47/UHD.mp4',   1),
+(20, 47, 'FHD', '/media/shows/20/ep_47/FHD.mp4',1),
 -- content 21 (Naruto): 1080p, 720p — ep_id 48–51
-(21, 48, '1080p', '/media/shows/21/ep_48/1080p.mp4',1),
-(21, 48, '720p',  '/media/shows/21/ep_48/720p.mp4', 1),
-(21, 49, '1080p', '/media/shows/21/ep_49/1080p.mp4',1),
-(21, 49, '720p',  '/media/shows/21/ep_49/720p.mp4', 1),
-(21, 50, '1080p', '/media/shows/21/ep_50/1080p.mp4',1),
-(21, 50, '720p',  '/media/shows/21/ep_50/720p.mp4', 1),
-(21, 51, '1080p', '/media/shows/21/ep_51/1080p.mp4',1),
-(21, 51, '720p',  '/media/shows/21/ep_51/720p.mp4', 1),
+(21, 48, 'FHD', '/media/shows/21/ep_48/FHD.mp4',1),
+(21, 48, 'HD',  '/media/shows/21/ep_48/HD.mp4', 1),
+(21, 49, 'FHD', '/media/shows/21/ep_49/FHD.mp4',1),
+(21, 49, 'HD',  '/media/shows/21/ep_49/HD.mp4', 1),
+(21, 50, 'FHD', '/media/shows/21/ep_50/FHD.mp4',1),
+(21, 50, 'HD',  '/media/shows/21/ep_50/HD.mp4', 1),
+(21, 51, 'FHD', '/media/shows/21/ep_51/FHD.mp4',1),
+(21, 51, 'HD',  '/media/shows/21/ep_51/HD.mp4', 1),
 -- content 22 (Dragon Ball Z): 720p only — ep_id 52–55
-(22, 52, '720p',  '/media/shows/22/ep_52/720p.mp4', 1),
-(22, 53, '720p',  '/media/shows/22/ep_53/720p.mp4', 1),
-(22, 54, '720p',  '/media/shows/22/ep_54/720p.mp4', 1),
-(22, 55, '720p',  '/media/shows/22/ep_55/720p.mp4', 1),
+(22, 52, 'HD',  '/media/shows/22/ep_52/HD.mp4', 1),
+(22, 53, 'HD',  '/media/shows/22/ep_53/HD.mp4', 1),
+(22, 54, 'HD',  '/media/shows/22/ep_54/HD.mp4', 1),
+(22, 55, 'HD',  '/media/shows/22/ep_55/HD.mp4', 1),
 -- content 23 (Demon Slayer): 4K, 1080p — ep_id 56–59
-(23, 56, '4K',    '/media/shows/23/ep_56/4K.mp4',   1),
-(23, 56, '1080p', '/media/shows/23/ep_56/1080p.mp4',1),
-(23, 57, '4K',    '/media/shows/23/ep_57/4K.mp4',   1),
-(23, 57, '1080p', '/media/shows/23/ep_57/1080p.mp4',1),
-(23, 58, '4K',    '/media/shows/23/ep_58/4K.mp4',   1),
-(23, 58, '1080p', '/media/shows/23/ep_58/1080p.mp4',1),
-(23, 59, '4K',    '/media/shows/23/ep_59/4K.mp4',   1),
-(23, 59, '1080p', '/media/shows/23/ep_59/1080p.mp4',1),
+(23, 56, 'UHD',    '/media/shows/23/ep_56/UHD.mp4',   1),
+(23, 56, 'FHD', '/media/shows/23/ep_56/FHD.mp4',1),
+(23, 57, 'UHD',    '/media/shows/23/ep_57/UHD.mp4',   1),
+(23, 57, 'FHD', '/media/shows/23/ep_57/FHD.mp4',1),
+(23, 58, 'UHD',    '/media/shows/23/ep_58/UHD.mp4',   1),
+(23, 58, 'FHD', '/media/shows/23/ep_58/FHD.mp4',1),
+(23, 59, 'UHD',    '/media/shows/23/ep_59/UHD.mp4',   1),
+(23, 59, 'FHD', '/media/shows/23/ep_59/FHD.mp4',1),
 -- content 24 (FMA: Brotherhood): 1080p, 720p — ep_id 60–63
-(24, 60, '1080p', '/media/shows/24/ep_60/1080p.mp4',1),
-(24, 60, '720p',  '/media/shows/24/ep_60/720p.mp4', 1),
-(24, 61, '1080p', '/media/shows/24/ep_61/1080p.mp4',1),
-(24, 61, '720p',  '/media/shows/24/ep_61/720p.mp4', 1),
-(24, 62, '1080p', '/media/shows/24/ep_62/1080p.mp4',1),
-(24, 62, '720p',  '/media/shows/24/ep_62/720p.mp4', 1),
-(24, 63, '1080p', '/media/shows/24/ep_63/1080p.mp4',1),
-(24, 63, '720p',  '/media/shows/24/ep_63/720p.mp4', 1),
+(24, 60, 'FHD', '/media/shows/24/ep_60/FHD.mp4',1),
+(24, 60, 'HD',  '/media/shows/24/ep_60/HD.mp4', 1),
+(24, 61, 'FHD', '/media/shows/24/ep_61/FHD.mp4',1),
+(24, 61, 'HD',  '/media/shows/24/ep_61/HD.mp4', 1),
+(24, 62, 'FHD', '/media/shows/24/ep_62/FHD.mp4',1),
+(24, 62, 'HD',  '/media/shows/24/ep_62/HD.mp4', 1),
+(24, 63, 'FHD', '/media/shows/24/ep_63/FHD.mp4',1),
+(24, 63, 'HD',  '/media/shows/24/ep_63/HD.mp4', 1),
 -- content 29 (Squid Game): 4K, 1080p — ep_id 64–65
-(29, 64, '4K',    '/media/shows/29/ep_64/4K.mp4',   1),
-(29, 64, '1080p', '/media/shows/29/ep_64/1080p.mp4',1),
-(29, 65, '4K',    '/media/shows/29/ep_65/4K.mp4',   1),
-(29, 65, '1080p', '/media/shows/29/ep_65/1080p.mp4',1),
+(29, 64, 'UHD',    '/media/shows/29/ep_64/UHD.mp4',   1),
+(29, 64, 'FHD', '/media/shows/29/ep_64/FHD.mp4',1),
+(29, 65, 'UHD',    '/media/shows/29/ep_65/UHD.mp4',   1),
+(29, 65, 'FHD', '/media/shows/29/ep_65/FHD.mp4',1),
 -- content 30 (Arcane): 4K, 1080p — ep_id 66–67
-(30, 66, '4K',    '/media/shows/30/ep_66/4K.mp4',   1),
-(30, 66, '1080p', '/media/shows/30/ep_66/1080p.mp4',1),
-(30, 67, '4K',    '/media/shows/30/ep_67/4K.mp4',   1),
-(30, 67, '1080p', '/media/shows/30/ep_67/1080p.mp4',1),
+(30, 66, 'UHD',    '/media/shows/30/ep_66/UHD.mp4',   1),
+(30, 66, 'FHD', '/media/shows/30/ep_66/FHD.mp4',1),
+(30, 67, 'UHD',    '/media/shows/30/ep_67/UHD.mp4',   1),
+(30, 67, 'FHD', '/media/shows/30/ep_67/FHD.mp4',1),
 -- content 31 (Severance): 4K, 1080p — ep_id 68–71
-(31, 68, '4K',    '/media/shows/31/ep_68/4K.mp4',   1),
-(31, 68, '1080p', '/media/shows/31/ep_68/1080p.mp4',1),
-(31, 69, '4K',    '/media/shows/31/ep_69/4K.mp4',   1),
-(31, 69, '1080p', '/media/shows/31/ep_69/1080p.mp4',1),
-(31, 70, '4K',    '/media/shows/31/ep_70/4K.mp4',   1),
-(31, 70, '1080p', '/media/shows/31/ep_70/1080p.mp4',1),
-(31, 71, '4K',    '/media/shows/31/ep_71/4K.mp4',   1),
-(31, 71, '1080p', '/media/shows/31/ep_71/1080p.mp4',1),
+(31, 68, 'UHD',    '/media/shows/31/ep_68/UHD.mp4',   1),
+(31, 68, 'FHD', '/media/shows/31/ep_68/FHD.mp4',1),
+(31, 69, 'UHD',    '/media/shows/31/ep_69/UHD.mp4',   1),
+(31, 69, 'FHD', '/media/shows/31/ep_69/FHD.mp4',1),
+(31, 70, 'UHD',    '/media/shows/31/ep_70/UHD.mp4',   1),
+(31, 70, 'FHD', '/media/shows/31/ep_70/FHD.mp4',1),
+(31, 71, 'UHD',    '/media/shows/31/ep_71/UHD.mp4',   1),
+(31, 71, 'FHD', '/media/shows/31/ep_71/FHD.mp4',1),
 -- content 35 (The Bear): 4K, 1080p — ep_id 72–75
-(35, 72, '4K',    '/media/shows/35/ep_72/4K.mp4',   1),
-(35, 72, '1080p', '/media/shows/35/ep_72/1080p.mp4',1),
-(35, 73, '4K',    '/media/shows/35/ep_73/4K.mp4',   1),
-(35, 73, '1080p', '/media/shows/35/ep_73/1080p.mp4',1),
-(35, 74, '4K',    '/media/shows/35/ep_74/4K.mp4',   1),
-(35, 74, '1080p', '/media/shows/35/ep_74/1080p.mp4',1),
-(35, 75, '4K',    '/media/shows/35/ep_75/4K.mp4',   1),
-(35, 75, '1080p', '/media/shows/35/ep_75/1080p.mp4',1);
+(35, 72, 'UHD',    '/media/shows/35/ep_72/UHD.mp4',   1),
+(35, 72, 'FHD', '/media/shows/35/ep_72/FHD.mp4',1),
+(35, 73, 'UHD',    '/media/shows/35/ep_73/UHD.mp4',   1),
+(35, 73, 'FHD', '/media/shows/35/ep_73/FHD.mp4',1),
+(35, 74, 'UHD',    '/media/shows/35/ep_74/UHD.mp4',   1),
+(35, 74, 'FHD', '/media/shows/35/ep_74/FHD.mp4',1),
+(35, 75, 'UHD',    '/media/shows/35/ep_75/UHD.mp4',   1),
+(35, 75, 'FHD', '/media/shows/35/ep_75/FHD.mp4',1);
 
 
 -- ══════════════════════════════════════════════════════════════════════
@@ -1116,31 +1122,31 @@ INSERT INTO content_resource (content_id, episode_id, language_id, lang_type, fi
 INSERT INTO content_role (content_id, person_id, role_type, character_name) VALUES
 (1,  1,  'Director', NULL),
 (1,  7,  'Actor',    'Amelia Brand'),
-(2,  2,  'Creator',  NULL),
-(3,  3,  'Lead',     'Michael Scott'),
-(5,  5,  'Creator',  NULL),
-(6,  6,  'Lead',     'Walter White'),
+(2,  2,  'Producer',  NULL),
+(3,  3,  'Actor',     'Michael Scott'),
+(5,  5,  'Producer',  NULL),
+(6,  6,  'Actor',     'Walter White'),
 (6,  25, 'Actor',    'Jesse Pinkman'),
 (6,  26, 'Actor',    'Skyler White'),
 (7,  15, 'Director', NULL),
 (8,  14, 'Director', NULL),
 (8,  31, 'Actor',    'Paul Atreides'),
 (8,  9,  'Actor',    'Duncan Idaho'),   -- corrected from 'Stilgar'
-(9,  11, 'Creator',  NULL),
-(10, 9,  'Lead',     'Din Djarin'),
+(9,  11, 'Producer',  NULL),
+(10, 9,  'Actor',     'Din Djarin'),
 (11, 8,  'Director', NULL),
 (12, 4,  'Actor',    'Joker'),
 (12, 1,  'Director', NULL),
 (17, 27, 'Actor',    'Eleven'),
 (17, 28, 'Actor',    'Joyce Byers'),
 (18, 29, 'Actor',    'Michael Corleone'),
-(18, 30, 'Lead',     'Vito Corleone'),
+(18, 30, 'Actor',     'Vito Corleone'),
 (19, 16, 'Director', NULL),
 -- (20, 18, 'Director', NULL) removed — Wes Anderson did not direct Chernobyl
-(21, 21, 'Creator',  NULL),
-(22, 22, 'Creator',  NULL),
-(23, 23, 'Creator',  NULL),
-(24, 24, 'Creator',  NULL),
+(21, 21, 'Producer',  NULL),
+(22, 22, 'Producer',  NULL),
+(23, 23, 'Producer',  NULL),
+(24, 24, 'Producer',  NULL),
 (25, 14, 'Director', NULL),
 (25, 31, 'Actor',    'Paul Atreides'),
 (26, 1,  'Director', NULL),
@@ -1156,46 +1162,46 @@ INSERT INTO content_role (content_id, person_id, role_type, character_name) VALU
 -- ══════════════════════════════════════════════════════════════════════
 
 INSERT INTO transaction_list (user_id, transaction_date, total_amount, payment_method, payment_status) VALUES
-(2,  '2021-03-10 20:15:00',  9.99,  'Credit Card', 'Completed'),   -- 1
-(3,  '2022-05-20 11:30:00', 19.99,  'Credit Card', 'Completed'),   -- 2
-(4,  '2021-08-01 18:45:00',  7.99,  'Debit Card', 'Completed'),    -- 3
-(5,  '2021-10-05 09:00:00', 49.99,  'Credit Card', 'Completed'),   -- 4
-(6,  '2021-09-14 14:22:00', 15.99,  'PayPal', 'Completed'),        -- 5
-(7,  '2021-10-30 21:00:00', 12.99,  'Credit Card', 'Completed'),   -- 6
-(8,  '2021-11-01 16:05:00', 29.99,  'Credit Card', 'Completed'),   -- 7
-(9,  '2021-11-05 10:10:00', 14.99,  'Debit Card', 'Completed'),    -- 8
-(10, '2022-01-07 08:30:00', 11.99,  'PayPal', 'Completed'),        -- 9
-(11, '2022-02-14 19:45:00', 35.00,  'Credit Card', 'Completed'),   -- 10
-(12, '2022-03-05 13:20:00', 19.99,  'Credit Card', 'Completed'),   -- 11
-(13, '2022-04-11 17:55:00',  9.50,  'Apple Pay', 'Completed'),     -- 12
-(14, '2022-06-19 22:10:00',  5.99,  'Debit Card', 'Completed'),    -- 13
-(15, '2022-07-04 15:40:00', 11.99,  'Credit Card', 'Completed'),   -- 14
-(16, '2022-09-01 09:05:00', 13.50,  'Google Pay', 'Completed'),    -- 15
-(17, '2022-10-28 20:30:00', 25.00,  'Credit Card', 'Completed'),   -- 16
-(18, '2022-11-15 11:00:00', 22.00,  'Credit Card', 'Completed'),   -- 17
-(19, '2022-12-03 14:15:00', 18.00,  'PayPal', 'Completed'),        -- 18
-(20, '2023-01-20 16:00:00', 15.00,  'Credit Card', 'Completed'),   -- 19
-(2,  '2023-02-08 10:45:00', 10.00,  'Credit Card', 'Completed'),   -- 20
-(21, '2023-03-12 19:00:00', 29.99,  'Debit Card', 'Completed'),    -- 21
-(22, '2023-04-05 08:20:00', 24.99,  'Credit Card', 'Completed'),   -- 22
-(23, '2023-05-19 13:45:00', 22.00,  'Apple Pay', 'Completed'),     -- 23
-(24, '2023-06-30 21:10:00', 26.00,  'Credit Card', 'Completed'),   -- 24
-(25, '2024-04-02 12:00:00', 16.99,  'Credit Card', 'Completed'),   -- 25
-(26, '2023-09-14 17:30:00', 12.99,  'Google Pay', 'Completed'),    -- 26
-(27, '2023-10-01 09:50:00',  8.99,  'Debit Card', 'Completed'),    -- 27
-(28, '2023-11-11 22:22:00',  7.99,  'Credit Card', 'Completed'),   -- 28
-(29, '2023-12-25 15:00:00', 18.00,  'Credit Card', 'Completed'),   -- 29
-(30, '2024-01-08 11:11:00', 15.00,  'Credit Card', 'Completed'),   -- 30
-(31, '2024-02-20 20:05:00', 14.99,  'Credit Card', 'Completed'),   -- 31
-(32, '2024-03-15 07:45:00', 11.99,  'Apple Pay', 'Completed'),     -- 32
-(33, '2024-04-28 18:30:00',  9.99,  'Debit Card', 'Completed'),    -- 33
-(34, '2024-05-10 14:00:00',  8.50,  'Credit Card', 'Completed'),   -- 34
-(35, '2024-06-03 10:20:00', 12.00,  'PayPal', 'Completed'),        -- 35
-(36, '2024-07-22 16:40:00', 14.99,  'Credit Card', 'Completed'),   -- 36
-(37, '2024-08-15 09:15:00',  9.99,  'Credit Card', 'Completed'),   -- 37
-(38, '2024-09-30 19:55:00', 29.99,  'Debit Card', 'Completed'),    -- 38
-(39, '2024-10-18 13:05:00', 35.00,  'Credit Card', 'Completed'),   -- 39
-(40, '2024-11-29 21:30:00', 25.00,  'Credit Card', 'Completed');   -- 40
+(2,  '2021-03-10 20:15:00',  9.99,  'credit_card', 'Completed'),   -- 1
+(3,  '2022-05-20 11:30:00', 19.99,  'credit_card', 'Completed'),   -- 2
+(4,  '2021-08-01 18:45:00',  7.99,  'debit_card', 'Completed'),    -- 3
+(5,  '2021-10-05 09:00:00', 49.99,  'credit_card', 'Completed'),   -- 4
+(6,  '2021-09-14 14:22:00', 15.99,  'paypal', 'Completed'),        -- 5
+(7,  '2021-10-30 21:00:00', 12.99,  'credit_card', 'Completed'),   -- 6
+(8,  '2021-11-01 16:05:00', 29.99,  'credit_card', 'Completed'),   -- 7
+(9,  '2021-11-05 10:10:00', 14.99,  'debit_card', 'Completed'),    -- 8
+(10, '2022-01-07 08:30:00', 11.99,  'paypal', 'Completed'),        -- 9
+(11, '2022-02-14 19:45:00', 35.00,  'credit_card', 'Completed'),   -- 10
+(12, '2022-03-05 13:20:00', 19.99,  'credit_card', 'Completed'),   -- 11
+(13, '2022-04-11 17:55:00',  9.50,  'credit_card', 'Completed'),     -- 12
+(14, '2022-06-19 22:10:00',  5.99,  'debit_card', 'Completed'),    -- 13
+(15, '2022-07-04 15:40:00', 11.99,  'credit_card', 'Completed'),   -- 14
+(16, '2022-09-01 09:05:00', 13.50,  'credit_card', 'Completed'),    -- 15
+(17, '2022-10-28 20:30:00', 25.00,  'credit_card', 'Completed'),   -- 16
+(18, '2022-11-15 11:00:00', 22.00,  'credit_card', 'Completed'),   -- 17
+(19, '2022-12-03 14:15:00', 18.00,  'paypal', 'Completed'),        -- 18
+(20, '2023-01-20 16:00:00', 15.00,  'credit_card', 'Completed'),   -- 19
+(2,  '2023-02-08 10:45:00', 10.00,  'credit_card', 'Completed'),   -- 20
+(21, '2023-03-12 19:00:00', 29.99,  'debit_card', 'Completed'),    -- 21
+(22, '2023-04-05 08:20:00', 24.99,  'credit_card', 'Completed'),   -- 22
+(23, '2023-05-19 13:45:00', 22.00,  'credit_card', 'Completed'),     -- 23
+(24, '2023-06-30 21:10:00', 26.00,  'credit_card', 'Completed'),   -- 24
+(25, '2024-04-02 12:00:00', 16.99,  'credit_card', 'Completed'),   -- 25
+(26, '2023-09-14 17:30:00', 12.99,  'credit_card', 'Completed'),    -- 26
+(27, '2023-10-01 09:50:00',  8.99,  'debit_card', 'Completed'),    -- 27
+(28, '2023-11-11 22:22:00',  7.99,  'credit_card', 'Completed'),   -- 28
+(29, '2023-12-25 15:00:00', 18.00,  'credit_card', 'Completed'),   -- 29
+(30, '2024-01-08 11:11:00', 15.00,  'credit_card', 'Completed'),   -- 30
+(31, '2024-02-20 20:05:00', 14.99,  'credit_card', 'Completed'),   -- 31
+(32, '2024-03-15 07:45:00', 11.99,  'credit_card', 'Completed'),     -- 32
+(33, '2024-04-28 18:30:00',  9.99,  'debit_card', 'Completed'),    -- 33
+(34, '2024-05-10 14:00:00',  8.50,  'credit_card', 'Completed'),   -- 34
+(35, '2024-06-03 10:20:00', 12.00,  'paypal', 'Completed'),        -- 35
+(36, '2024-07-22 16:40:00', 14.99,  'credit_card', 'Completed'),   -- 36
+(37, '2024-08-15 09:15:00',  9.99,  'credit_card', 'Completed'),   -- 37
+(38, '2024-09-30 19:55:00', 29.99,  'debit_card', 'Completed'),    -- 38
+(39, '2024-10-18 13:05:00', 35.00,  'credit_card', 'Completed'),   -- 39
+(40, '2024-11-29 21:30:00', 25.00,  'credit_card', 'Completed');   -- 40
 
 INSERT INTO transaction_detail (transaction_id, content_id, content_name, sold_price) VALUES
 (1,  1,  'Interstellar',                       9.99),
@@ -1239,48 +1245,60 @@ INSERT INTO transaction_detail (transaction_id, content_id, content_name, sold_p
 (39, 9,  'Attack on Titan',                   35.00),
 (40, 15, 'Jujutsu Kaisen',                    25.00);
 
--- post_status = 'published' for all reviews (visible to public)
+INSERT INTO subscription_detail (transaction_id, tier_id, tier_name, start_date, end_date, sold_price) VALUES
+(2,  2, 'premium', '2022-05-20', '2022-06-20',  9.99),
+(4,  2, 'premium', '2021-08-01', '2021-09-01',  9.99),
+(6,  2, 'premium', '2021-10-30', '2021-11-30',  9.99),
+(8,  2, 'premium', '2021-11-05', '2021-12-05',  9.99),
+(11, 2, 'premium', '2022-03-05', '2022-04-05',  9.99),
+(18, 2, 'premium', '2022-11-15', '2022-12-15',  9.99),
+(21, 2, 'premium', '2023-03-12', '2023-04-12',  9.99),
+(29, 2, 'premium', '2023-12-25', '2024-01-25',  9.99),
+(37, 2, 'premium', '2024-08-15', '2024-09-15',  9.99);
+
+
+-- post_status = 'Published' for all reviews (visible to public)
 INSERT INTO reviews (user_id, content_id, rating, comment_text, post_time, post_status) VALUES
-(2,  1,  5.0, 'A masterpiece of visual storytelling.',                    '2021-03-17 22:10:00', 'published'),
-(3,  2,  4.5, 'So cute and funny, Anya is adorable!',                     '2022-05-28 14:00:00', 'published'),
-(4,  4,  4.8, 'Dreams within dreams — blew my mind.',                     '2021-08-10 19:30:00', 'published'),
-(5,  5,  5.0, 'Legendary. The only show that keeps going and stays great.','2021-10-15 09:45:00', 'published'),
-(6,  3,  4.2, 'Michael Scott is pure comedy gold.',                       '2021-09-25 20:00:00', 'published'),
-(7,  7,  4.7, 'Beautiful and heartbreaking at the same time.',            '2021-11-12 17:20:00', 'published'),
-(8,  6,  5.0, 'The best TV drama ever made.',                             '2021-11-20 21:55:00', 'published'),
-(9,  8,  4.3, 'Epic world-building, stunning visuals.',                   '2021-11-19 10:30:00', 'published'),
-(10, 13, 3.8, 'Wait... what direction did that bullet go?',               '2022-01-18 23:05:00', 'published'),
-(11, 9,  4.9, 'Cried three times. No regrets.',                           '2022-02-28 18:40:00', 'published'),
-(12, 10, 4.6, 'Baby Yoda alone is worth the price.',                      '2022-03-19 13:10:00', 'published'),
-(13, 11, 4.8, 'Bong Joon-ho is a genius.',                               '2022-04-24 16:50:00', 'published'),
-(14, 12, 5.0, 'Heath Ledger''s Joker is untouchable.',                    '2022-07-01 20:15:00', 'published'),
-(15, 13, 3.5, 'Visually amazing but hard to follow.',                     '2022-07-22 11:00:00', 'published'),
-(16, 14, 4.7, 'So wild, yet so emotionally resonant.',                    '2022-09-15 08:30:00', 'published'),
-(17, 15, 4.5, 'The animation during Domain Expansions is insane.',        '2022-11-08 22:45:00', 'published'),
-(18, 16, 4.9, 'Better than Breaking Bad? Dare I say yes.',                '2022-11-30 19:00:00', 'published'),
-(19, 17, 4.4, 'Season 1 is flawless.',                                    '2022-12-20 14:25:00', 'published'),
-(20, 18, 5.0, 'Leave the gun. Take the cannoli.',                         '2023-02-01 21:00:00', 'published'),
-(2,  19, 4.9, 'Miyazaki''s greatest work.',                               '2023-02-20 16:30:00', 'published'),
-(21, 21, 5.0, 'Believe it! Naruto is my all-time favourite.',             '2023-03-25 10:00:00', 'published'),
-(22, 22, 4.8, 'Over 9000/10. Timeless classic.',                          '2023-04-18 07:30:00', 'published'),
-(23, 23, 4.9, 'The Mugen Train arc made me sob.',                         '2023-06-01 20:10:00', 'published'),
-(24, 24, 5.0, 'Brotherhood is peak anime storytelling.',                  '2023-07-14 15:55:00', 'published'),
-(25, 25, 4.7, 'Denis did it again — Dune Part Two is a war epic.',        '2024-04-20 18:00:00', 'published'),
-(26, 26, 4.9, 'Cillian Murphy deserved every award.',                     '2023-09-30 22:30:00', 'published'),
-(27, 27, 4.5, 'Wes Anderson is in a league of his own.',                  '2023-10-15 12:40:00', 'published'),
-(28, 28, 5.0, 'Cool, cool, cool. Tarantino''s magnum opus.',              '2023-11-25 20:00:00', 'published'),
-(29, 29, 4.8, 'Red light green light will haunt me forever.',             '2024-01-05 09:15:00', 'published'),
-(30, 30, 5.0, 'The animation quality is absolutely stunning.',            '2024-01-22 17:45:00', 'published'),
-(31, 31, 4.6, 'The most unsettling office drama since The Office.',       '2024-03-04 11:30:00', 'published'),
-(32, 32, 4.4, 'Atmospheric and visually breathtaking.',                   '2024-03-28 14:00:00', 'published'),
-(33, 33, 4.8, 'San and Ashitaka''s story is timeless.',                   '2024-05-09 19:20:00', 'published'),
-(34, 34, 4.7, 'Scorsese at his most electrifying.',                       '2024-05-24 21:10:00', 'published'),
-(35, 35, 4.9, 'The kitchen chaos is so real it gives me anxiety.',        '2024-06-18 08:50:00', 'published'),
-(36, 8,  4.3, 'Dune is a slow burn done perfectly.',                      '2024-08-05 16:00:00', 'published'),
-(37, 1,  4.8, 'Interstellar made me call my dad.',                        '2024-08-29 20:30:00', 'published'),
-(38, 6,  5.0, 'Mr. White... I am the danger.',                            '2024-10-14 13:45:00', 'published'),
-(39, 9,  4.9, 'Season 3 of AoT broke me completely.',                     '2024-11-02 22:00:00', 'published'),
-(40, 15, 4.6, 'Gojo Satoru is the most iconic character in anime.',       '2024-12-10 18:20:00', 'published');
+(2,  1,  5.0, 'A masterpiece of visual storytelling.',                    '2021-03-17 22:10:00', 'Published'),
+(3,  2,  4.5, 'So cute and funny, Anya is adorable!',                     '2022-05-28 14:00:00', 'Published'),
+(4,  4,  4.8, 'Dreams within dreams — blew my mind.',                     '2021-08-10 19:30:00', 'Published'),
+(5,  5,  5.0, 'Legendary. The only show that keeps going and stays great.','2021-10-15 09:45:00', 'Published'),
+(6,  3,  4.2, 'Michael Scott is pure comedy gold.',                       '2021-09-25 20:00:00', 'Published'),
+(7,  7,  4.7, 'Beautiful and heartbreaking at the same time.',            '2021-11-12 17:20:00', 'Published'),
+(8,  6,  5.0, 'The best TV drama ever made.',                             '2021-11-20 21:55:00', 'Published'),
+(9,  8,  4.3, 'Epic world-building, stunning visuals.',                   '2021-11-19 10:30:00', 'Published'),
+(10, 13, 3.8, 'Wait... what direction did that bullet go?',               '2022-01-18 23:05:00', 'Published'),
+(11, 9,  4.9, 'Cried three times. No regrets.',                           '2022-02-28 18:40:00', 'Published'),
+(12, 10, 4.6, 'Baby Yoda alone is worth the price.',                      '2022-03-19 13:10:00', 'Published'),
+(13, 11, 4.8, 'Bong Joon-ho is a genius.',                               '2022-04-24 16:50:00', 'Published'),
+(14, 12, 5.0, 'Heath Ledger''s Joker is untouchable.',                    '2022-07-01 20:15:00', 'Published'),
+(15, 13, 3.5, 'Visually amazing but hard to follow.',                     '2022-07-22 11:00:00', 'Published'),
+(16, 14, 4.7, 'So wild, yet so emotionally resonant.',                    '2022-09-15 08:30:00', 'Published'),
+(17, 15, 4.5, 'The animation during Domain Expansions is insane.',        '2022-11-08 22:45:00', 'Published'),
+(18, 16, 4.9, 'Better than Breaking Bad? Dare I say yes.',                '2022-11-30 19:00:00', 'Published'),
+(19, 17, 4.4, 'Season 1 is flawless.',                                    '2022-12-20 14:25:00', 'Published'),
+(20, 18, 5.0, 'Leave the gun. Take the cannoli.',                         '2023-02-01 21:00:00', 'Published'),
+(2,  19, 4.9, 'Miyazaki''s greatest work.',                               '2023-02-20 16:30:00', 'Published'),
+(21, 21, 5.0, 'Believe it! Naruto is my all-time favourite.',             '2023-03-25 10:00:00', 'Published'),
+(22, 22, 4.8, 'Over 9000/10. Timeless classic.',                          '2023-04-18 07:30:00', 'Published'),
+(23, 23, 4.9, 'The Mugen Train arc made me sob.',                         '2023-06-01 20:10:00', 'Published'),
+(24, 24, 5.0, 'Brotherhood is peak anime storytelling.',                  '2023-07-14 15:55:00', 'Published'),
+(25, 25, 4.7, 'Denis did it again — Dune Part Two is a war epic.',        '2024-04-20 18:00:00', 'Published'),
+(26, 26, 4.9, 'Cillian Murphy deserved every award.',                     '2023-09-30 22:30:00', 'Published'),
+(27, 27, 4.5, 'Wes Anderson is in a league of his own.',                  '2023-10-15 12:40:00', 'Published'),
+(28, 28, 5.0, 'Cool, cool, cool. Tarantino''s magnum opus.',              '2023-11-25 20:00:00', 'Published'),
+(29, 29, 4.8, 'Red light green light will haunt me forever.',             '2024-01-05 09:15:00', 'Published'),
+(30, 30, 5.0, 'The animation quality is absolutely stunning.',            '2024-01-22 17:45:00', 'Published'),
+(31, 31, 4.6, 'The most unsettling office drama since The Office.',       '2024-03-04 11:30:00', 'Published'),
+(32, 32, 4.4, 'Atmospheric and visually breathtaking.',                   '2024-03-28 14:00:00', 'Published'),
+(33, 33, 4.8, 'San and Ashitaka''s story is timeless.',                   '2024-05-09 19:20:00', 'Published'),
+(34, 34, 4.7, 'Scorsese at his most electrifying.',                       '2024-05-24 21:10:00', 'Published'),
+(35, 35, 4.9, 'The kitchen chaos is so real it gives me anxiety.',        '2024-06-18 08:50:00', 'Published'),
+(36, 8,  4.3, 'Dune is a slow burn done perfectly.',                      '2024-08-05 16:00:00', 'Published'),
+(37, 1,  4.8, 'Interstellar made me call my dad.',                        '2024-08-29 20:30:00', 'Published'),
+(38, 6,  5.0, 'Mr. White... I am the danger.',                            '2024-10-14 13:45:00', 'Published'),
+(39, 9,  4.9, 'Season 3 of AoT broke me completely.',                     '2024-11-02 22:00:00', 'Published'),
+(40, 15, 4.6, 'Gojo Satoru is the most iconic character in anime.',       '2024-12-10 18:20:00', 'Published');
 
 -- watch_status: 'Finished' for content the user has reviewed; otherwise 'Unfinished' or 'Unwatched'.
 -- last_watch:   set to review post_time for 'Finished' entries; NULL for 'Unwatched'.
@@ -1342,20 +1360,20 @@ INSERT INTO user_content (user_id, content_id, last_watch, watch_status) VALUES
 (4,  14, NULL,                  'Unwatched'),
 (4,  27, NULL,                  'Unwatched');
 
--- visibility: 'public' for shared playlists, 'private' for personal ones
+-- visibility: 'Public' for shared playlists, 'Hidden' for personal ones
 INSERT INTO playlist (playlist_id, user_id, playlist_name, create_date, visibility) VALUES
-(1, 2,  'Sci-Fi Favourites',  '2021-04-15 18:00:00', 'public'),
-(2, 2,  'Anime Watchlist',    '2021-07-20 21:30:00', 'public'),
-(1, 4,  'Mind-Bending Films', '2021-08-25 15:45:00', 'private'),
-(1, 6,  'Comedy Night',       '2021-10-03 20:10:00', 'public'),
-(3, 2,  'Nolan Universe',     '2022-01-01 00:01:00', 'public'),
-(1, 5,  'Pirate & Adventure', '2021-11-14 19:00:00', 'public'),
-(1, 8,  'Prestige Drama',     '2022-02-28 14:30:00', 'public'),
-(1, 17, 'Thriller & Horror',  '2022-10-31 22:00:00', 'private'),
-(1, 21, 'Anime Classics',     '2023-04-10 11:20:00', 'public'),
-(2, 21, 'Adventure Picks',    '2023-06-18 16:45:00', 'public'),
-(1, 29, 'K-Drama & K-Film',   '2024-01-15 09:00:00', 'public'),
-(1, 35, 'Chef''s Table Picks','2024-07-01 12:00:00', 'private');
+(1, 2,  'Sci-Fi Favourites',  '2021-04-15 18:00:00', 'Public'),
+(2, 2,  'Anime Watchlist',    '2021-07-20 21:30:00', 'Public'),
+(1, 4,  'Mind-Bending Films', '2021-08-25 15:45:00', 'Hidden'),
+(1, 6,  'Comedy Night',       '2021-10-03 20:10:00', 'Public'),
+(3, 2,  'Nolan Universe',     '2022-01-01 00:01:00', 'Public'),
+(1, 5,  'Pirate & Adventure', '2021-11-14 19:00:00', 'Public'),
+(1, 8,  'Prestige Drama',     '2022-02-28 14:30:00', 'Public'),
+(1, 17, 'Thriller & Horror',  '2022-10-31 22:00:00', 'Hidden'),
+(1, 21, 'Anime Classics',     '2023-04-10 11:20:00', 'Public'),
+(2, 21, 'Adventure Picks',    '2023-06-18 16:45:00', 'Public'),
+(1, 29, 'K-Drama & K-Film',   '2024-01-15 09:00:00', 'Public'),
+(1, 35, 'Chef''s Table Picks','2024-07-01 12:00:00', 'Hidden');
 
 INSERT INTO playlist_item (playlist_id, user_id, content_id, add_date) VALUES
 (1, 2, 1,  '2021-04-15 18:05:00'),
