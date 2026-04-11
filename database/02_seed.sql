@@ -99,55 +99,55 @@ INSERT INTO country (country_name, country_code, primary_timezone_id) VALUES -- 
 -- ══════════════════════════════════════════════════════════════════════
 
 -- ── membership_tier ──────────────────────────────────────────────────
-INSERT INTO membership_tier (tier_name, price, duration_days, description) VALUES
-('free',    0.00,  0,  'Basic access with limited content and standard quality'),
-('premium', 9.99,  30, 'Full access to all content with 4K streaming'),
-('admin',   0.00,  0,  'System administrator with full platform management access');
+INSERT INTO membership_tier (tier_name, monthly_price, discount_rate, duration_days, description) VALUES
+('free',    0.00, 0.00,  0,  'Basic access with limited content and standard quality'),
+('premium', 9.99, 0.20, 30, 'Full access to all content with 4K streaming'),
+('admin',   0.00, 0.00,  0,  'System administrator with full platform management access');
 
 -- ── app_user ──────────────────────────────────────────────────────────
 -- NOTE: app_user must be inserted before person, because person.create_by
 --       references app_user(user_id).
-INSERT INTO app_user (username, email, img_path, user_password, register_date, country_id, tier_id, user_status) VALUES
-('Wirachat_Admin',   'wirachat.thon@kmutt.ac.th',   NULL, 'safe123',       '2021-01-15 09:00:00',  1,  3,    'active'),   -- 1
-('GenshinLover',     'traveler@teyvat.com',         NULL, 'paimon',        '2021-02-03 14:22:11',  2,  2,  'active'),   -- 2
-('Anya_Fans',        'wakuwaku@spy.com',            NULL, 'peanuts',       '2021-03-18 08:45:30',  3,  1,     'active'),   -- 3
-('Luffy_Pirate',     'luffy@grandline.com',         NULL, 'meat',          '2021-05-07 20:10:05',  4,  2,  'active'),   -- 4
-('Zoro_Lost',        'zoro@swords.com',             NULL, 'bushido',       '2021-06-14 11:33:47',  4,  1,     'active'),   -- 5
-('Nami_Money',       'nami@berries.com',            NULL, 'gold',          '2021-07-29 16:55:22',  4,  2,  'active'),   -- 6
-('Sanji_Cook',       'sanji@allblue.com',           NULL, 'mellorine',     '2021-08-05 07:12:59',  4,  1,     'active'),   -- 7
-('Robin_History',    'robin@ohara.com',             NULL, 'archaeology',   '2021-09-20 13:40:00',  4,  2,  'active'),   -- 8
-('Chopper_Doc',      'chopper@drum.com',            NULL, 'candy',         '2021-10-11 19:08:34',  4,  1,     'active'),   -- 9
-('Franky_Super',     'franky@water7.com',           NULL, 'cola',          '2021-11-28 10:27:16',  4,  2,  'active'),   -- 10
-('Brook_Soul',       'brook@soul.com',              NULL, 'laboon',        '2022-01-04 22:15:50',  4,  1,     'active'),   -- 11
-('Jimbei_Fish',      'jimbei@sea.com',              NULL, 'karate',        '2022-02-17 09:03:41',  4,  2,  'active'),   -- 12
-('Usopp_Sniper',     'usopp@brave.com',             NULL, 'popgreen',      '2022-03-30 15:49:07',  4,  1,     'active'),   -- 13
-('Law_Heart',        'law@op.com',                  NULL, 'shambles',      '2022-05-12 18:22:33', 14,  2,  'active'),   -- 14
-('Kid_Metal',        'kid@punk.com',                NULL, 'magnet',        '2022-06-08 06:57:44',  9,  1,     'active'),   -- 15
-('Hancock_Love',     'hancock@kuja.com',            NULL, 'salome',        '2022-08-01 12:34:19',  6,  2,  'active'),   -- 16
-('Ace_Fire',         'ace@spade.com',               NULL, 'meramera',      '2022-09-23 21:05:02', 10,  1,     'suspended'),-- 17
-('Sabo_Dragon',      'sabo@rev.com',                NULL, 'dragonclaw',    '2022-10-16 17:48:55', 10,  2,  'active'),   -- 18
-('Whitebeard_Goat', 'newgate@yonko.com',            NULL, 'guranogura',    '2022-11-20 12:00:00',  4,  2,  'active'), -- 19
-('Shanks_Red',       'shanks@yonko.com',            NULL, 'haki',          '2022-12-25 23:59:00', 15,  2,  'active'),   -- 20
-('Naruto_Uzumaki',   'naruto@konoha.com',           NULL, 'dattebayo',     '2023-01-09 10:14:37',  4,  2,  'active'),   -- 21
-('Sasuke_Uchiha',    'sasuke@avenger.com',          NULL, 'chidori',       '2023-02-14 14:00:00',  4,  1,     'active'),   -- 22
-('Sakura_Haruno',    'sakura@medic.com',            NULL, 'shannaro',      '2023-03-22 09:30:15',  4,  2,  'active'),   -- 23
-('Kakashi_Sensei',   'kakashi@sharingan.com',       NULL, 'copycat',       '2023-04-01 00:00:01',  4,  1,     'active'),   -- 24
-('Itachi_Crow',      'itachi@akatsuki.com',         NULL, 'tsukuyomi',     '2023-05-18 03:33:33',  4,  2,  'active'),   -- 25
-('Goku_Saiyan',      'goku@capsule.com',            NULL, 'kamehameha',    '2023-06-29 12:00:00',  5,  1,     'active'),   -- 26
-('Vegeta_Prince',    'vegeta@saiyan.com',           NULL, 'finalflash',    '2023-07-04 08:08:08',  5,  2,  'active'),   -- 27
-('Bulma_Genius',     'bulma@brief.com',             NULL, 'dragonball',    '2023-08-15 16:45:20',  5,  1,     'active'),   -- 28
-('Tanjiro_Blade',    'tanjiro@hashira.com',         NULL, 'hinokami',      '2023-09-03 11:22:44',  4,  2,  'active'),   -- 29
-('Nezuko_Box',       'nezuko@demon.com',            NULL, 'bamboo',        '2023-10-10 19:55:10',  4,  1,     'active'),   -- 30
-('Edward_Elric',     'edward@alchemy.com',          NULL, 'equivalent',    '2024-01-07 08:00:00',  3,  2,  'active'),   -- 31
-('Roy_Mustang',      'roy@flame.com',               NULL, 'colonel',       '2024-02-14 09:14:59',  3,  1,     'active'),   -- 32
-('Mikasa_Ackerman',  'mikasa@survey.com',           NULL, 'scarf',         '2024-03-05 07:30:00',  3,  2,  'active'),   -- 33
-('Armin_Strategist', 'armin@brain.com',             NULL, 'colossal',      '2024-04-18 13:13:13',  3,  1,     'active'),   -- 34
-('Levi_Captain',     'levi@clean.com',              NULL, 'HumanitysBest', '2024-05-01 05:00:00',  3,  2,  'active'),   -- 35
-('Sasha_Potato',     'sasha@potato.com',            NULL, 'potatoes',      '2024-06-20 12:30:00',  3,  1,     'active'),   -- 36
-('Historia_Queen',   'historia@wall.com',           NULL, 'reiss',         '2024-07-14 18:00:00',  3,  2,  'active'),   -- 37
-('Erwin_Smith',      'erwin@commander.com',         NULL, 'chargefwd',     '2024-08-09 06:45:00',  3,  1,     'active'),   -- 38
-('Hange_Zoe',        'hange@titan.com',             NULL, 'experiment',    '2024-09-27 20:20:20',  3,  2,  'active'),   -- 39
-('Reiner_Armor',     'reiner@warrior.com',          NULL, 'bertholt',      '2024-11-11 11:11:11',  3,  1,     'active');   -- 40
+INSERT INTO app_user (username, email, img_path, user_password, register_date, country_id, tier_id, user_status, user_role) VALUES
+('Wirachat_Admin',   'wirachat.thon@kmutt.ac.th',   NULL, 'safe123',       '2021-01-15 09:00:00',  1,  3,    'active', 'admin'),   -- 1
+('GenshinLover',     'traveler@teyvat.com',         NULL, 'paimon',        '2021-02-03 14:22:11',  2,  2,  'active', 'customer'),   -- 2
+('Anya_Fans',        'wakuwaku@spy.com',            NULL, 'peanuts',       '2021-03-18 08:45:30',  3,  1,     'active', 'customer'),   -- 3
+('Luffy_Pirate',     'luffy@grandline.com',         NULL, 'meat',          '2021-05-07 20:10:05',  4,  2,  'active', 'customer'),   -- 4
+('Zoro_Lost',        'zoro@swords.com',             NULL, 'bushido',       '2021-06-14 11:33:47',  4,  1,     'active', 'customer'),   -- 5
+('Nami_Money',       'nami@berries.com',            NULL, 'gold',          '2021-07-29 16:55:22',  4,  2,  'active', 'customer'),   -- 6
+('Sanji_Cook',       'sanji@allblue.com',           NULL, 'mellorine',     '2021-08-05 07:12:59',  4,  1,     'active', 'customer'),   -- 7
+('Robin_History',    'robin@ohara.com',             NULL, 'archaeology',   '2021-09-20 13:40:00',  4,  2,  'active', 'customer'),   -- 8
+('Chopper_Doc',      'chopper@drum.com',            NULL, 'candy',         '2021-10-11 19:08:34',  4,  1,     'active', 'customer'),   -- 9
+('Franky_Super',     'franky@water7.com',           NULL, 'cola',          '2021-11-28 10:27:16',  4,  2,  'active', 'customer'),   -- 10
+('Brook_Soul',       'brook@soul.com',              NULL, 'laboon',        '2022-01-04 22:15:50',  4,  1,     'active', 'customer'),   -- 11
+('Jimbei_Fish',      'jimbei@sea.com',              NULL, 'karate',        '2022-02-17 09:03:41',  4,  2,  'active', 'customer'),   -- 12
+('Usopp_Sniper',     'usopp@brave.com',             NULL, 'popgreen',      '2022-03-30 15:49:07',  4,  1,     'active', 'customer'),   -- 13
+('Law_Heart',        'law@op.com',                  NULL, 'shambles',      '2022-05-12 18:22:33', 14,  2,  'active', 'customer'),   -- 14
+('Kid_Metal',        'kid@punk.com',                NULL, 'magnet',        '2022-06-08 06:57:44',  9,  1,     'active', 'customer'),   -- 15
+('Hancock_Love',     'hancock@kuja.com',            NULL, 'salome',        '2022-08-01 12:34:19',  6,  2,  'active', 'customer'),   -- 16
+('Ace_Fire',         'ace@spade.com',               NULL, 'meramera',      '2022-09-23 21:05:02', 10,  1,     'suspended',  'customer'),-- 17
+('Sabo_Dragon',      'sabo@rev.com',                NULL, 'dragonclaw',    '2022-10-16 17:48:55', 10,  2,  'active', 'customer'),   -- 18
+('Whitebeard_Goat', 'newgate@yonko.com',            NULL, 'guranogura',    '2022-11-20 12:00:00',  4,  2,  'active', 'customer'), -- 19
+('Shanks_Red',       'shanks@yonko.com',            NULL, 'haki',          '2022-12-25 23:59:00', 15,  2,  'active', 'customer'),   -- 20
+('Naruto_Uzumaki',   'naruto@konoha.com',           NULL, 'dattebayo',     '2023-01-09 10:14:37',  4,  2,  'active', 'customer'),   -- 21
+('Sasuke_Uchiha',    'sasuke@avenger.com',          NULL, 'chidori',       '2023-02-14 14:00:00',  4,  1,     'active', 'customer'),   -- 22
+('Sakura_Haruno',    'sakura@medic.com',            NULL, 'shannaro',      '2023-03-22 09:30:15',  4,  2,  'active', 'customer'),   -- 23
+('Kakashi_Sensei',   'kakashi@sharingan.com',       NULL, 'copycat',       '2023-04-01 00:00:01',  4,  1,     'active', 'customer'),   -- 24
+('Itachi_Crow',      'itachi@akatsuki.com',         NULL, 'tsukuyomi',     '2023-05-18 03:33:33',  4,  2,  'active', 'customer'),   -- 25
+('Goku_Saiyan',      'goku@capsule.com',            NULL, 'kamehameha',    '2023-06-29 12:00:00',  5,  1,     'active', 'customer'),   -- 26
+('Vegeta_Prince',    'vegeta@saiyan.com',           NULL, 'finalflash',    '2023-07-04 08:08:08',  5,  2,  'active', 'customer'),   -- 27
+('Bulma_Genius',     'bulma@brief.com',             NULL, 'dragonball',    '2023-08-15 16:45:20',  5,  1,     'active', 'customer'),   -- 28
+('Tanjiro_Blade',    'tanjiro@hashira.com',         NULL, 'hinokami',      '2023-09-03 11:22:44',  4,  2,  'active', 'customer'),   -- 29
+('Nezuko_Box',       'nezuko@demon.com',            NULL, 'bamboo',        '2023-10-10 19:55:10',  4,  1,     'active', 'customer'),   -- 30
+('Edward_Elric',     'edward@alchemy.com',          NULL, 'equivalent',    '2024-01-07 08:00:00',  3,  2,  'active', 'customer'),   -- 31
+('Roy_Mustang',      'roy@flame.com',               NULL, 'colonel',       '2024-02-14 09:14:59',  3,  1,     'active', 'customer'),   -- 32
+('Mikasa_Ackerman',  'mikasa@survey.com',           NULL, 'scarf',         '2024-03-05 07:30:00',  3,  2,  'active', 'customer'),   -- 33
+('Armin_Strategist', 'armin@brain.com',             NULL, 'colossal',      '2024-04-18 13:13:13',  3,  1,     'active', 'customer'),   -- 34
+('Levi_Captain',     'levi@clean.com',              NULL, 'HumanitysBest', '2024-05-01 05:00:00',  3,  2,  'active', 'customer'),   -- 35
+('Sasha_Potato',     'sasha@potato.com',            NULL, 'potatoes',      '2024-06-20 12:30:00',  3,  1,     'active', 'customer'),   -- 36
+('Historia_Queen',   'historia@wall.com',           NULL, 'reiss',         '2024-07-14 18:00:00',  3,  2,  'active', 'customer'),   -- 37
+('Erwin_Smith',      'erwin@commander.com',         NULL, 'chargefwd',     '2024-08-09 06:45:00',  3,  1,     'active', 'customer'),   -- 38
+('Hange_Zoe',        'hange@titan.com',             NULL, 'experiment',    '2024-09-27 20:20:20',  3,  2,  'active', 'customer'),   -- 39
+('Reiner_Armor',     'reiner@warrior.com',          NULL, 'bertholt',      '2024-11-11 11:11:11',  3,  1,     'active', 'customer');   -- 40
 
 
 -- ══════════════════════════════════════════════════════════════════════
@@ -1203,47 +1203,89 @@ INSERT INTO transaction_list (user_id, transaction_date, total_amount, payment_m
 (39, '2024-10-18 13:05:00', 35.00,  'credit_card', 'Completed'),   -- 39
 (40, '2024-11-29 21:30:00', 25.00,  'credit_card', 'Completed');   -- 40
 
-INSERT INTO transaction_detail (transaction_id, content_id, content_name, sold_price) VALUES
-(1,  1,  'Interstellar',                       9.99),
-(2,  2,  'Spy x Family',                      19.99),
-(3,  4,  'Inception',                          7.99),
-(4,  5,  'One Piece',                         49.99),
-(5,  3,  'The Office',                        15.99),
-(6,  7,  'Your Name',                         12.99),
-(7,  6,  'Breaking Bad',                      29.99),
-(8,  8,  'Dune',                              14.99),
-(9,  13, 'Tenet',                             11.99),
-(10, 9,  'Attack on Titan',                   35.00),
-(11, 10, 'The Mandalorian',                   19.99),
-(12, 11, 'Parasite',                           9.50),
-(13, 12, 'The Dark Knight',                    5.99),
-(14, 13, 'Tenet',                             11.99),
-(15, 14, 'Everything Everywhere All at Once', 13.50),
-(16, 15, 'Jujutsu Kaisen',                    25.00),
-(17, 16, 'Better Call Saul',                  22.00),
-(18, 17, 'Stranger Things',                   18.00),
-(19, 18, 'The Godfather',                     15.00),
-(20, 19, 'Spirited Away',                     10.00),
-(21, 21, 'Naruto',                            29.99),
-(22, 22, 'Dragon Ball Z',                     24.99),
-(23, 23, 'Demon Slayer',                      22.00),
-(24, 24, 'Fullmetal Alchemist: Brotherhood',  26.00),
-(25, 25, 'Dune: Part Two',                    16.99),
-(26, 26, 'Oppenheimer',                       12.99),
-(27, 27, 'The Grand Budapest Hotel',           8.99),
-(28, 28, 'Pulp Fiction',                       7.99),
-(29, 29, 'Squid Game',                        18.00),
-(30, 30, 'Arcane',                            15.00),
-(31, 31, 'Severance',                         14.99),
-(32, 32, 'Blade Runner 2049',                 11.99),
-(33, 33, 'Princess Mononoke',                  9.99),
-(34, 34, 'Goodfellas',                         8.50),
-(35, 35, 'The Bear',                          12.00),
-(36, 8,  'Dune',                              14.99),
-(37, 1,  'Interstellar',                       9.99),
-(38, 6,  'Breaking Bad',                      29.99),
-(39, 9,  'Attack on Titan',                   35.00),
-(40, 15, 'Jujutsu Kaisen',                    25.00);
+INSERT INTO transaction_detail (transaction_id, content_id, content_name, original_price, discount_applied, sold_price) VALUES
+(1,  1,  'Interstellar',                       9.99,  0.00,  9.99),
+(2,  2,  'Spy x Family',                      19.99,  4.00,  15.99), -- Premium User (20% off)
+(3,  4,  'Inception',                          7.99,  0.00,  7.99),
+(4,  5,  'One Piece',                         49.99, 10.00,  39.99), -- Premium User (20% off)
+(5,  3,  'The Office',                        15.99,  0.00,  15.99),
+(6,  7,  'Your Name',                         12.99,  2.60,  10.39),
+(7,  6,  'Breaking Bad',                      29.99,  0.00,  29.99),
+(8,  8,  'Dune',                              14.99,  3.00,  11.99),
+(9,  13, 'Tenet',                             11.99,  0.00,  11.99),
+(10, 9,  'Attack on Titan',                   35.00,  7.00,  28.00),
+(11, 10, 'The Mandalorian',                   19.99,  0.00,  19.99),
+(12, 11, 'Parasite',                           9.50,  1.90,   7.60),
+(13, 12, 'The Dark Knight',                    5.99,  0.00,   5.99),
+(14, 13, 'Tenet',                             11.99,  2.40,   9.59),
+(15, 14, 'Everything Everywhere All at Once', 13.50,  0.00,  13.50),
+(16, 15, 'Jujutsu Kaisen',                    25.00,  5.00,  20.00),
+(17, 16, 'Better Call Saul',                  22.00,  0.00,  22.00),
+(18, 17, 'Stranger Things',                   18.00,  3.60,  14.40),
+(19, 18, 'The Godfather',                     15.00,  0.00,  15.00),
+(20, 19, 'Spirited Away',                     10.00,  2.00,   8.00),
+(21, 21, 'Naruto',                            29.99,  0.00,  29.99),
+(22, 22, 'Dragon Ball Z',                     24.99,  5.00,  19.99),
+(23, 23, 'Demon Slayer',                      22.00,  0.00,  22.00),
+(24, 24, 'Fullmetal Alchemist: Brotherhood',  26.00,  5.20,  20.80),
+(25, 25, 'Dune: Part Two',                    16.99,  0.00,  16.99),
+(26, 26, 'Oppenheimer',                       12.99,  2.60,  10.39),
+(27, 27, 'The Grand Budapest Hotel',           8.99,  0.00,   8.99),
+(28, 28, 'Pulp Fiction',                       7.99,  1.60,   6.39),
+(29, 29, 'Squid Game',                        18.00,  0.00,  18.00),
+(30, 30, 'Arcane',                            15.00,  3.00,  12.00),
+(31, 31, 'Severance',                         14.99,  0.00,  14.99),
+(32, 32, 'Blade Runner 2049',                 11.99,  2.40,   9.59),
+(33, 33, 'Princess Mononoke',                  9.99,  0.00,   9.99),
+(34, 34, 'Goodfellas',                         8.50,  1.70,   6.80),
+(35, 35, 'The Bear',                          12.00,  0.00,  12.00),
+(36, 8,  'Dune',                              14.99,  3.00,  11.99),
+(37, 1,  'Interstellar',                       9.99,  0.00,   9.99),
+(38, 6,  'Breaking Bad',                      29.99,  6.00,  23.99),
+(39, 9,  'Attack on Titan',                   35.00,  0.00,  35.00),
+(40, 15, 'Jujutsu Kaisen',                    25.00,  5.00,  20.00);
+
+INSERT INTO personal_library (user_id, content_id, purchase_date) VALUES
+(2, 1, '2021-03-10'), 
+(2, 2, '2021-03-11'), 
+(3, 4, '2021-03-12'), 
+(2, 5, '2021-03-13'), 
+(3, 3, '2021-03-14'),
+(4, 7, '2021-03-15'), 
+(5, 6, '2021-03-16'), 
+(6, 8, '2021-03-17'), 
+(7, 13, '2021-03-18'), 
+(8, 9, '2021-03-19'),
+(9, 10, '2021-03-20'), 
+(10, 11, '2021-03-21'), 
+(11, 12, '2021-03-22'), 
+(12, 13, '2021-03-23'), 
+(13, 14, '2021-03-24'),
+(14, 15, '2021-03-25'), 
+(15, 16, '2021-03-26'), 
+(16, 17, '2021-03-27'), 
+(17, 18, '2021-03-28'), 
+(18, 19, '2021-03-29'),
+(19, 21, '2021-03-30'), 
+(20, 22, '2021-03-31'), 
+(21, 23, '2021-04-01'), 
+(22, 24, '2021-04-02'), 
+(23, 25, '2021-04-03'),
+(24, 26, '2021-04-04'), 
+(25, 27, '2021-04-05'), 
+(26, 28, '2021-04-06'), 
+(27, 29, '2021-04-07'), 
+(28, 30, '2021-04-08'),
+(29, 31, '2021-04-09'), 
+(30, 32, '2021-04-10'), 
+(31, 33, '2021-04-11'), 
+(32, 34, '2021-04-12'), 
+(33, 35, '2021-04-13'),
+(34, 8, '2021-04-14'), 
+(35, 1, '2021-04-15'), 
+(36, 6, '2021-04-16'), 
+(37, 9, '2021-04-17'), 
+(38, 15, '2021-04-18');
 
 INSERT INTO subscription_detail (transaction_id, tier_id, tier_name, start_date, end_date, sold_price) VALUES
 (2,  2, 'premium', '2022-05-20', '2022-06-20',  9.99),

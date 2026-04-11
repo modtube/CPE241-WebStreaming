@@ -5,7 +5,7 @@
 SELECT * FROM timezone;
 SELECT * FROM content_rating;
 SELECT * FROM country;
-SELECT * FROM membership_tier;         -- NEW: verify free / premium / admin tiers seeded correctly
+SELECT * FROM membership_tier;
 SELECT * FROM app_user;
 SELECT * FROM content;
 SELECT * FROM genre;
@@ -15,7 +15,7 @@ SELECT * FROM language_list;
 -- ########## TRANSACTION & FEEDBACK ##########
 SELECT * FROM transaction_list;
 SELECT * FROM transaction_detail;
-SELECT * FROM subscription_detail;     -- NEW: verify subscription purchase records
+SELECT * FROM subscription_history;     -- FIXED: Changed from subscription_history
 SELECT * FROM reviews;
 
 -- ########## USER PERSONALIZATION ##########
@@ -76,7 +76,7 @@ JOIN content c ON cr.content_id = c.content_id
 LEFT JOIN episode e ON cr.episode_id = e.episode_id;
 
 
--- ########## NEW: MEMBERSHIP DIAGNOSTICS ##########
+-- ########## MEMBERSHIP DIAGNOSTICS ##########
 
 -- 4. Show each user with their resolved tier name (replaces the old user_type string)
 --    Confirms that tier_id FK resolves correctly to membership_tier
@@ -84,7 +84,7 @@ SELECT u.user_id,
        u.username,
        u.email,
        mt.tier_name,
-       mt.price        AS monthly_price,
+       mt.monthly_price, -- FIXED: Changed from price to monthly_price
        u.user_status
 FROM app_user u
 JOIN membership_tier mt ON u.tier_id = mt.tier_id
@@ -100,24 +100,21 @@ GROUP BY mt.tier_name
 ORDER BY user_count DESC;
 
 
--- 6. Verify subscription_detail: confirm start_date < end_date (CHECK constraint test)
---    All rows should have valid = TRUE; any FALSE indicates a bad row slipped through
-SELECT sd.detail_id,
+-- 6. Verify subscription history: confirm start_date < end_date
+SELECT sh.detail_id,
        u.username,
-       mt.tier_name,
-       sd.start_date,
-       sd.end_date,
-       (sd.end_date > sd.start_date) AS valid_date_range,
-       sd.sold_price
-FROM subscription_detail sd
-JOIN transaction_list tl ON sd.transaction_id = tl.transaction_id
+       sh.tier_name,
+       sh.start_date,
+       sh.end_date,
+       (sh.end_date > sh.start_date) AS valid_date_range,
+       sh.sold_price
+FROM subscription_history sh
+JOIN transaction_list tl ON sh.transaction_id = tl.transaction_id
 LEFT JOIN app_user u ON tl.user_id = u.user_id
-LEFT JOIN membership_tier mt ON sd.tier_id = mt.tier_id
-ORDER BY sd.start_date;
+ORDER BY sh.start_date;
 
 
--- 7. Full transaction history per user — combines content purchases AND subscriptions
---    Uses UNION to merge transaction_detail and subscription_detail into one view
+-- 7. Full transaction history per user (Content + Subscriptions)
 SELECT tl.transaction_id,
        u.username,
        tl.transaction_date,
@@ -136,13 +133,13 @@ SELECT tl.transaction_id,
        u.username,
        tl.transaction_date,
        'Subscription'       AS purchase_type,
-       sd.tier_name         AS item_name,
-       sd.sold_price,
+       sh.tier_name         AS item_name,
+       sh.sold_price,
        tl.payment_method,
        tl.payment_status
 FROM transaction_list tl
 JOIN app_user u          ON tl.user_id = u.user_id
-JOIN subscription_detail sd ON tl.transaction_id = sd.transaction_id
+JOIN subscription_history sh ON tl.transaction_id = sh.transaction_id
 
 ORDER BY transaction_date;
 
@@ -155,7 +152,11 @@ ORDER BY transaction_date;
 SELECT 'app_user.user_status' AS check_name, COUNT(*) AS violations
 FROM app_user WHERE user_status NOT IN ('active', 'suspended', 'banned')
 UNION ALL
+SELECT 'app_user.user_role',           COUNT(*) FROM app_user       WHERE user_role    NOT IN ('admin', 'customer')
+UNION ALL
 SELECT 'content.content_type',         COUNT(*) FROM content        WHERE content_type NOT IN ('Movie', 'TV Show')
+UNION ALL
+SELECT 'content.price_range',          COUNT(*) FROM content        WHERE price < 0 -- FIXED: Changed sold_price to price to match schema
 UNION ALL
 SELECT 'tv_show.curr_status',          COUNT(*) FROM tv_show        WHERE curr_status  NOT IN ('Not aired', 'Airing', 'Off')
 UNION ALL
@@ -166,6 +167,8 @@ UNION ALL
 SELECT 'transaction_list.pay_method',  COUNT(*) FROM transaction_list WHERE payment_method NOT IN ('credit_card', 'debit_card', 'paypal', 'bank_transfer')
 UNION ALL
 SELECT 'transaction_list.pay_status',  COUNT(*) FROM transaction_list WHERE payment_status NOT IN ('Completed', 'Pending', 'Refunded', 'Cancelled')
+UNION ALL
+SELECT 'transaction_list.total_range', COUNT(*) FROM transaction_list WHERE total_amount < 0
 UNION ALL
 SELECT 'reviews.post_status',          COUNT(*) FROM reviews        WHERE post_status  NOT IN ('Published', 'Hidden', 'Removed')
 UNION ALL
@@ -179,11 +182,15 @@ SELECT 'content_role.role_type',       COUNT(*) FROM content_role   WHERE role_t
 UNION ALL
 SELECT 'user_content.watch_status',    COUNT(*) FROM user_content   WHERE watch_status NOT IN ('Unwatched', 'Unfinished', 'Finished') AND watch_status IS NOT NULL
 UNION ALL
-SELECT 'membership_tier.price',        COUNT(*) FROM membership_tier WHERE price < 0
+SELECT 'membership_tier.monthly_price',        COUNT(*) FROM membership_tier WHERE monthly_price < 0
 UNION ALL
-SELECT 'subscription_detail.dates',    COUNT(*) FROM subscription_detail WHERE end_date <= start_date
+SELECT 'subscription_history.dates',    COUNT(*) FROM subscription_history WHERE end_date <= start_date
 UNION ALL
-SELECT 'transaction_detail.price',     COUNT(*) FROM transaction_detail WHERE sold_price < 0
+SELECT 'transaction_detail.orig_price',COUNT(*) FROM transaction_detail WHERE original_price < 0
 UNION ALL
-SELECT 'subscription_detail.price',    COUNT(*) FROM subscription_detail WHERE sold_price < 0;
+SELECT 'transaction_detail.discount',  COUNT(*) FROM transaction_detail WHERE discount_applied < 0
+UNION ALL
+SELECT 'transaction_detail.sold_price',COUNT(*) FROM transaction_detail WHERE sold_price < 0
+UNION ALL
+SELECT 'subscription_history.sold_price',    COUNT(*) FROM subscription_history WHERE sold_price < 0;
 -- ########################################################################################################
