@@ -1,111 +1,174 @@
-:root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+@import "tailwindcss";
+@theme {
+  /* Brand Colors (จากโลโก้ของคุณ) */
+  --color-brand-maroon: #a3526d;
+  --color-brand-dark: #111827;
+  --color-brand-gray: #64748b;
+  --color-brand-light-gray: #f3f4f6;
+  --color-brand-border: #e2e8f0;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+  /* Admin Specific Colors (สีเฉพาะสำหรับส่วน Admin) */
+  --color-admin-primary: #2563eb;
+  --color-admin-bg: #f9fafb;
+  --color-admin-sidebar-bg: #111827;
+  --color-admin-content-bg: #ffffff;
+  --color-admin-text: #111827;
+  --color-admin-table-bg: #f9fafb;
+  --color-admin-table-text: #6b7280;
+  --color-admin-border-light: #e5e7eb;
+  --color-admin-border-dark: #d1d5db;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /* Theme Variables (Dynamic variables that change based on scope) */
+  --color-ui-primary: var(--brand-maroon);
+  --color-ui-bg: #ffffff;
+  --color-ui-text: var(--brand-dark);
+  
+  /* Shared Radius */
+  --radius-brand: 32px;
+}
 
-  @media (max-width: 1024px) {
-    font-size: 16px;
+/* 1. Global Reset */
+@layer base {
+  html, body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+    background-color: var(--color-brand-light-gray);
+    color: var(--color-brand-dark);
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+/* 2. Theme Scoping (การแยกธีม) */
+
+/* Login Theme: Maroon brand focus */
+.theme-login {
+  --color-ui-primary: #a3526d;
+  --color-ui-bg: #f8fafc;
+  --color-ui-text: #111827;
+}
+
+/* Admin Theme: Professional blue and dark sidebar focus */
+.theme-admin {
+  --color-ui-primary: var(--color-admin-primary);
+  --color-ui-bg: var(--color-admin-bg);
+  --color-ui-text: var(--color-admin-text);
+  
+  /* You can use these admin-specific variables directly in components within this scope */
+}
+
+/* Customer Theme: Friendly maroon focus */
+.theme-customer {
+  --color-ui-primary: #a3526d;
+  --color-ui-bg: #ffffff;
+  --color-ui-text: #111827;
+}
+
+@layer base {
+  html {
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+    color-scheme: light dark;
+    color: rgba(255, 255, 255, 0.87);
+    background-color: #242424;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
   }
 
-  #social .button-icon {
-    filter: invert(1) brightness(2);
+  body {
+    margin: 0;
+    display: flex;
+    place-items: center;
+    min-width: 320px;
+    min-height: 100vh;
+  }
+
+  #root {
+    width: 100%;
+    margin: 0 auto;
+    text-align: left;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    line-height: 1.25;
+  }
+
+  a {
+    font-weight: 500;
+    color: #646cff;
+    text-decoration: inherit;
+  }
+
+  a:hover {
+    color: #535bf2;
+  }
+
+  button {
+    border-radius: 8px;
+    border: 1px solid transparent;
+    padding: 0.6em 1.2em;
+    font-size: 1em;
+    font-weight: 500;
+    font-family: inherit;
+    background-color: #1a1a1a;
+    cursor: pointer;
+    transition: border-color 0.25s;
+  }
+
+  button:hover {
+    border-color: #646cff;
+  }
+
+  button:focus,
+  button:focus-visible {
+    outline: 4px auto -webkit-focus-ring-color;
+  }
+
+  @media (prefers-color-scheme: light) {
+    a:hover {
+      color: #747bff;
+    }
+
+    button {
+      background-color: #f9f9f9;
+    }
   }
 }
 
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-}
-
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
-
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
+@layer components {
+  .btn-primary {
+    @apply bg-rose-600 hover:bg-rose-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
   }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
+
+  .btn-secondary {
+    @apply bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
   }
-}
-p {
-  margin: 0;
-}
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
+  .input-field {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-colors duration-200;
+  }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+  .card {
+    @apply bg-white rounded-3xl shadow-lg border border-gray-200;
+  }
+
+  .sidebar-item {
+    @apply flex items-center px-4 py-3 mx-4 my-1 rounded-lg transition-colors duration-200;
+  }
+
+  .sidebar-item-active {
+    @apply bg-rose-600 text-white;
+  }
+
+  .sidebar-item-inactive {
+    @apply text-gray-300 hover:bg-gray-700;
+  }
+
+  .content {
+    @apply text-gray-800;
+  }
 }
