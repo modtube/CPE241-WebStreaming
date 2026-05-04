@@ -1,5 +1,5 @@
-import type { FormEvent, ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
+import type { FormEvent, ReactNode } from "react";
+import { useNavigate } from "react-router-dom";
 
 function FormHeader() {
   return (
@@ -14,7 +14,15 @@ function FormHeader() {
   );
 }
 
-function AuthField({ htmlFor, label, children }: { htmlFor: string; label: string; children: ReactNode }) {
+function AuthField({
+  htmlFor,
+  label,
+  children,
+}: {
+  htmlFor: string;
+  label: string;
+  children: ReactNode;
+}) {
   return (
     <div className="flex flex-col gap-2">
       <label htmlFor={htmlFor} className="text-sm font-semibold text-gray-700">
@@ -30,11 +38,14 @@ export default function LoginForm() {
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    navigate('/admin/dashboard');
+    navigate("/admin/dashboard");
   };
 
   return (
-    <form onSubmit={handleSubmit} className="w-full max-w-md bg-white border border-gray-200 rounded-3xl p-8 flex flex-col gap-6 shadow-large">
+    <form
+      onSubmit={handleSubmit}
+      className="w-full max-w-md bg-white border border-gray-200 rounded-3xl p-8 flex flex-col gap-6 shadow-large"
+    >
       <FormHeader />
 
       <div className="grid gap-6">
@@ -58,7 +69,10 @@ export default function LoginForm() {
 
         <div className="flex justify-between items-center gap-2 text-sm text-slate-600">
           <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500" />
+            <input
+              type="checkbox"
+              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+            />
             Remember me
           </label>
           <a href="#" className="text-blue-600 hover:text-blue-800 font-medium">
@@ -69,13 +83,26 @@ export default function LoginForm() {
         <button
           type="submit"
           className="bg-brand-maroon btn-primary w-full py-3 text-lg font-semibold"
+          id="admin"
         >
           Sign In
         </button>
 
+        {/* Dumb-Button to /customer/*/}
+        <button
+          type="button"
+          onClick={() => navigate("/customer/home")}
+          className="bg-gray-500 btn-primary w-full py-3 text-lg font-semibold text-white hover:bg-gray-600"
+        >
+          Go to Customer Home
+        </button>
+
         <div className="text-center text-sm text-gray-600 mt-2">
-          Don't have an account?{' '}
-          <a href="#" className="text-brand-maroon hover:text-brand-maroon font-semibold">
+          Don't have an account?{" "}
+          <a
+            href="#"
+            className="text-brand-maroon hover:text-brand-maroon font-semibold"
+          >
             Sign up
           </a>
         </div>

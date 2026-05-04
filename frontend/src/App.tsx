@@ -1,18 +1,18 @@
 // src/App.tsx
-import { Routes, Route, Navigate } from 'react-router-dom';
-import AdminLayout from './layouts/AdminLayout';
-import AuthLayout from './layouts/AuthLayout';
-import CustomerLayout from './layouts/CustomerLayout';
-import Login from './pages/auth/Login';
-import AdminDashboard from './pages/admin/Dashboard';
-import MoviesView from './pages/admin/Movies';
-import ReviewsView from './pages/admin/Reviews';
-import CrewView from './pages/admin/Crew';
-import UserManagement from './pages/admin/UserManagement';
-import TransactionsView from './pages/admin/Transactions';
-import SetupsView from './pages/admin/Setups';
-import Home from './pages/customer/Home';
-import Profile from './pages/customer/Profile';
+import { Routes, Route, Navigate } from "react-router-dom";
+import AdminLayout from "./layouts/AdminLayout";
+import AuthLayout from "./layouts/AuthLayout";
+import CustomerLayout from "./layouts/CustomerLayout";
+import Login from "./pages/auth/Login";
+import AdminDashboard from "./pages/admin/Dashboard";
+import MoviesView from "./pages/admin/Movies";
+import ReviewsView from "./pages/admin/Reviews";
+import CrewView from "./pages/admin/Crew";
+import UserManagement from "./pages/admin/UserManagement";
+import TransactionsView from "./pages/admin/Transactions";
+import SetupsView from "./pages/admin/Setups";
+import Home from "./pages/customer/Home";
+import Profile from "./pages/customer/Profile";
 
 function App() {
   return (
@@ -37,7 +37,8 @@ function App() {
 
       {/* Customer Routes */}
       <Route path="/customer" element={<CustomerLayout />}>
-        <Route index element={<Home />} />
+        <Route index element={<Navigate to="home" replace />} />
+        <Route path="home" element={<Home />} />
         <Route path="profile" element={<Profile />} />
       </Route>
 
