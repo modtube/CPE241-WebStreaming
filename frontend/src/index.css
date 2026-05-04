@@ -18,21 +18,30 @@
   --color-admin-border-light: #e5e7eb;
   --color-admin-border-dark: #d1d5db;
 
+  /* Customer Specific Colors */
+  --color-customer-primary: #a3526d;
+  --color-customer-primary-transclucent: #a3526d;
+  --color-customer-sidebar-bg: #0a0a0a;
+  --color-customer-sidebar-bg-secondary: #141414;
+  --color-customer-border-dark: #d1d5db;
+  --color-customer-border-pink: #a3526d;
+
   /* Theme Variables (Dynamic variables that change based on scope) */
   --color-ui-primary: var(--brand-maroon);
   --color-ui-bg: #ffffff;
   --color-ui-text: var(--brand-dark);
-  
+
   /* Shared Radius */
   --radius-brand: 32px;
 }
 
 /* 1. Global Reset */
 @layer base {
-  html, body {
+  html,
+  body {
     margin: 0;
     padding: 0;
-    font-family: 'Inter', sans-serif;
+    font-family: "Inter", sans-serif;
     background-color: var(--color-brand-light-gray);
     color: var(--color-brand-dark);
   }
@@ -52,7 +61,7 @@
   --color-ui-primary: var(--color-admin-primary);
   --color-ui-bg: var(--color-admin-bg);
   --color-ui-text: var(--color-admin-text);
-  
+
   /* You can use these admin-specific variables directly in components within this scope */
 }
 
@@ -92,7 +101,12 @@
     text-align: left;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-weight: 600;
     line-height: 1.25;
   }

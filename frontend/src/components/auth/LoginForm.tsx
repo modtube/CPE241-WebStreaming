@@ -94,7 +94,7 @@ export default function LoginForm() {
           onClick={() => navigate("/customer/home")}
           className="bg-gray-500 btn-primary w-full py-3 text-lg font-semibold text-white hover:bg-gray-600"
         >
-          Go to Customer Home
+          Dummy Customer Btn
         </button>
 
         <div className="text-center text-sm text-gray-600 mt-2">

@@ -12,7 +12,10 @@ import UserManagement from "./pages/admin/UserManagement";
 import TransactionsView from "./pages/admin/Transactions";
 import SetupsView from "./pages/admin/Setups";
 import Home from "./pages/customer/Home";
-import Profile from "./pages/customer/Profile";
+import PersonalLibrary from "./pages/customer/PersonalLibrary";
+import Playlists from "./pages/customer/Playlists";
+import TransactionHistory from "./pages/customer/TransactionHistory";
+import EditProfile from "./pages/customer/EditProfile";
 
 function App() {
   return (
@@ -39,7 +42,10 @@ function App() {
       <Route path="/customer" element={<CustomerLayout />}>
         <Route index element={<Navigate to="home" replace />} />
         <Route path="home" element={<Home />} />
-        <Route path="profile" element={<Profile />} />
+        <Route path="personal-library" element={<PersonalLibrary />} />
+        <Route path="playlists" element={<Playlists />} />
+        <Route path="transaction-history" element={<TransactionHistory />} />
+        <Route path="edit-profile" element={<EditProfile />} />
       </Route>
 
       {/* Redirect unknown URLs back to login */}
@@ -47,5 +53,4 @@ function App() {
     </Routes>
   );
 }
-
 export default App;
