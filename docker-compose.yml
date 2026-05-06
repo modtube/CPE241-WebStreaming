@@ -24,6 +24,28 @@ services:
     networks:
       - modtube-network
 
+  # --- pgAdmin ---
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: streaming_pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+    networks:
+      - modtube-network
+
+      # --- Fill these in pgAdmin when adding a server ---
+      # Host: db
+      # Port: 5432
+      # Username: admin
+      # Password: cpe38Final
+      # Database: modtube_db
+
   # --- Backend Service (Express) ---
   backend:
     build: ./backend
