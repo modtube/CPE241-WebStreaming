@@ -11,11 +11,11 @@ import {
 
 const menuItems = [
   { name: 'Dashboard', path: '/admin/dashboard', Icon: LayoutDashboard },
-  { name: 'Movies', path: '/admin/movies', Icon: Film },
-  { name: 'Reviews', path: '/admin/reviews', Icon: Star },
-  { name: 'Crew', path: '/admin/crew', Icon: Users },
-  { name: 'Users', path: '/admin/users', Icon: User },
-  { name: 'Transactions', path: '/admin/transactions', Icon: CreditCard },
+  { name: 'Movies View', path: '/admin/movies', Icon: Film },
+  { name: 'Reviews View', path: '/admin/reviews', Icon: Star },
+  { name: 'Crew View', path: '/admin/crew', Icon: Users },
+  { name: 'Users View', path: '/admin/users', Icon: User },
+  { name: 'Transactions View', path: '/admin/transactions', Icon: CreditCard },
   { name: 'Setups', path: '/admin/setups', Icon: Settings },
 ];
 
