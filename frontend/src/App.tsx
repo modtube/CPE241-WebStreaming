@@ -8,6 +8,7 @@ import AdminDashboard from "./pages/admin/Dashboard";
 import MoviesView from "./pages/admin/Movies";
 import ReviewsView from "./pages/admin/Reviews";
 import CrewView from "./pages/admin/Crew";
+import CrewForm from "./pages/admin/CrewForm";
 import UserManagement from "./pages/admin/UserManagement";
 import TransactionsView from "./pages/admin/Transactions";
 import SetupsView from "./pages/admin/Setups";
@@ -33,6 +34,8 @@ function App() {
         <Route path="movies" element={<MoviesView />} />
         <Route path="reviews" element={<ReviewsView />} />
         <Route path="crew" element={<CrewView />} />
+        <Route path="crew/add" element={<CrewForm />} />
+        <Route path="crew/edit/:id" element={<CrewForm />} />        
         <Route path="users" element={<UserManagement />} />
         <Route path="transactions" element={<TransactionsView />} />
         <Route path="setups" element={<SetupsView />} />
