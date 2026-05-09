@@ -4,7 +4,7 @@ import { SearchOutlined, EditOutlined, DeleteOutlined, PlusOutlined } from '@ant
 import { Funnel } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { ColumnsType } from 'antd/es/table';
-import GenreBadge from '../../../components/admin/GenreComponent';
+import GenreBadge from '../../../components/admin/setup/GenreComponent';
 
 interface Movie {
   movie_id: string;
