@@ -6,7 +6,7 @@ export default function EditProfile() {
   const navigate = useNavigate();
 
   return (
-    <div className="-mt-6 -mr-6 -mb-6 ml-[232px] min-h-[calc(100vh+48px)] bg-black text-white">
+    <div className="-mt-6 -mr-6 -mb-6 min-h-[calc(100vh+48px)] bg-black text-white">
       
       <div className="p-8 max-w-3xl pt-14"> 
         <h2 className="font-display text-2xl font-bold mb-1">Edit Profile</h2>
