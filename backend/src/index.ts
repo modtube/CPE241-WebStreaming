@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import movieRoutes from './routes/movieRoutes.js'; 
 import crewRoutes from './routes/crewRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
+import path from 'path';
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ app.get('/', (req, res) => {
 app.use('/api/movies', movieRoutes);
 app.use('/api/crew', crewRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 app.get('/api/status', (req, res) => {
   res.json({ message: 'Backend is ready!' });

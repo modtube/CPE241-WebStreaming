@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Table, Space} from 'antd';
+import { Table, Space, message, Popconfirm } from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import ManagementHeader from '../../../components/admin/ManagementHeader';
 
-// 1. กำหนด Interface ให้ตรงกับ SQL Schema ของคุณ
 interface Person {
-  person_id: number;
+  person_id: string;
   img_path: string;
   first_name: string;
   middle_name?: string;
@@ -26,76 +25,43 @@ export default function Crew() {
   const [dataSource, setDataSource] = useState<Person[]>([]);
   const [loading, setLoading] = useState(false);
 
- const fetchCrew = async () => {
+ const fetchCrew = async (search: string = '') => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/crew');
+      // ส่ง query string ไปที่ backend
+      const response = await fetch(`http://localhost:5000/api/crew?search=${search}`);
       if (!response.ok) throw new Error('Fetch failed');
       const data = await response.json();
       setDataSource(data);
     } catch (error) {
-      // 🚨 MOCKUP DATA: ส่วนนี้จะทำงานเมื่อหา Backend ไม่เจอ (คอมเมนต์ทิ้งได้เลยเมื่อเชื่อม API จริงเสร็จ)
-      console.warn("Backend not found. Using Crew Mockup Data instead.");
-      setDataSource([
-        {
-          person_id: 1,
-          img_path: 'https://example.com/nolan.jpg',
-          first_name: 'Christopher',
-          last_name: 'Nolan',
-          nationality: 'British-American',
-          birth_date: '1970-07-30',
-          birth_place: 'London, England',
-          biography: 'Known for making complex blockbusters.',
-          create_date: '2026-05-09T10:00:00Z',
-          update_date: '2026-05-09T10:00:00Z'
-        },
-        {
-          person_id: 2,
-          img_path: 'https://example.com/cillian.jpg',
-          first_name: 'Cillian',
-          last_name: 'Murphy',
-          nationality: 'Irish',
-          birth_date: '1976-05-25',
-          birth_place: 'Cork, Ireland',
-          biography: 'Frequent collaborator with Christopher Nolan.',
-          create_date: '2026-05-09T10:15:00Z',
-          update_date: '2026-05-09T10:15:00Z'
-        },
-        {
-          person_id: 3,
-          img_path: 'https://example.com/robert.jpg',
-          first_name: 'Robert',
-          middle_name: 'John',
-          last_name: 'Downey Jr.',
-          nationality: 'American',
-          birth_date: '1965-04-04',
-          birth_place: 'New York, USA',
-          biography: 'Academy Award-winning actor.',
-          create_date: '2026-05-09T10:30:00Z',
-          update_date: '2026-05-09T10:30:00Z'
-        },
-        {
-          person_id: 4,
-          img_path: 'https://example.com/hans.jpg',
-          first_name: 'Hans',
-          last_name: 'Zimmer',
-          nationality: 'German',
-          birth_date: '1957-09-12',
-          birth_place: 'Frankfurt, Germany',
-          biography: 'Legendary film score composer.',
-          create_date: '2026-05-09T10:45:00Z',
-          update_date: '2026-05-09T10:45:00Z'
-        }
-      ]);
-      // message.error('Failed to load crew data'); // ปิดแจ้งเตือน Error สีแดงไว้ชั่วคราว
+      console.error("Fetch Error:", error);
+      // กรณี Error หรือหา Backend ไม่เจอ สามารถใส่ Mockup ไว้กันพังได้เหมือนเดิมครับ
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchCrew();
-  }, []);
+    fetchCrew(searchText);
+  }, [searchText]);
+
+  const handleDelete = async (id: string) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/crew/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        message.success('Deleted successfully');
+        fetchCrew(); // เรียกดึงข้อมูลใหม่หลังจากลบสำเร็จ
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete');
+      }
+    } catch (error: any) {
+      message.error(error.message);
+    }
+  };
 
   // 2. ตั้งค่า Columns ให้ครบและใส่ Sorter (การเรียงลำดับ)
   const columns: ColumnsType<Person> = [
@@ -104,7 +70,7 @@ export default function Crew() {
       dataIndex: 'person_id', 
       key: 'person_id', 
       width: '80px',
-      sorter: (a, b) => a.person_id - b.person_id 
+      sorter: (a, b) => a.person_id.localeCompare(b.person_id) 
     },
     {
       title: 'NAME',
@@ -151,7 +117,17 @@ export default function Crew() {
             className="text-gray-400 hover:text-blue-600 cursor-pointer text-lg" 
             onClick={() => navigate(`/admin/crew/edit/${record.person_id}`)} 
           />
-          <DeleteOutlined className="text-gray-400 hover:text-red-500 cursor-pointer text-lg" />
+          {/* 2. หุ้ม DeleteOutlined ด้วย Popconfirm เพื่อความปลอดภัย */}
+          <Popconfirm
+            title="Delete this person?"
+            description="Are you sure you want to delete this crew member?"
+            onConfirm={() => handleDelete(record.person_id)}
+            okText="Yes"
+            cancelText="No"
+            okButtonProps={{ danger: true }}
+          >
+            <DeleteOutlined className="text-gray-400 hover:text-red-500 cursor-pointer text-lg" />
+          </Popconfirm>
         </Space>
       ),
     },
@@ -164,6 +140,7 @@ export default function Crew() {
         onAdd={() => navigate('/admin/crew/add')} 
         searchText={searchText}
         onSearchChange={setSearchText}
+        searchPlaceholder="Search by ID, Name..." 
       />
       
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
