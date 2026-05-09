@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import movieRoutes from './routes/movieRoutes.js'; 
 import crewRoutes from './routes/crewRoutes.js';
+import dashboardRoutes from './routes/dashboardRoutes.js';
 
 dotenv.config();
 
@@ -19,6 +20,7 @@ app.get('/', (req, res) => {
 // บอกให้ Express ใช้ movieRoutes สำหรับ URL ที่ขึ้นต้นด้วย /api/movies
 app.use('/api/movies', movieRoutes);
 app.use('/api/crew', crewRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 app.get('/api/status', (req, res) => {
   res.json({ message: 'Backend is ready!' });
