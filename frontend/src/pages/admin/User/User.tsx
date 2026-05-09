@@ -4,8 +4,8 @@ import { SearchOutlined } from '@ant-design/icons';
 import { Funnel } from 'lucide-react';
 import type { ColumnsType } from 'antd/es/table';
 import type { MenuProps } from 'antd'; 
-import StatusBadge from '../../../components/admin/UserStatus';
-import RoleBadge from '../../../components/admin/Role';
+import StatusBadge from '../../../components/admin/user/UserStatus';
+import RoleBadge from '../../../components/admin/user/Role';
 
 interface User {
   user_id: string; 

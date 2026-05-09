@@ -5,7 +5,7 @@ import { Funnel } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { ColumnsType } from 'antd/es/table';
 import type { MenuProps } from 'antd';
-import ReviewStatus from '../../../components/admin/ReviewStatus'; 
+import ReviewStatus from '../../../components/admin/review/ReviewStatus'; 
 
 interface Review {
   review_id: string;
