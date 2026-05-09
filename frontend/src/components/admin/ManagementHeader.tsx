@@ -9,16 +9,18 @@ interface Props {
   onSearchChange: (val: string) => void;
   onDelete?: () => void; 
   selectedCount?: number; 
+  searchPlaceholder?: string; 
 }
 
 export default function ManagementHeader({ 
-  title, onAdd, buttonText, searchText, onSearchChange, onDelete, selectedCount 
+  title, onAdd, buttonText, searchText, onSearchChange, onDelete, selectedCount,
+  searchPlaceholder
 }: Props) {
   return (
     <div className="flex justify-between items-center mb-6">
       <div className="w-full max-w-md">
         <Input
-          placeholder={`Search ${title.toLowerCase()}...`}
+          placeholder={searchPlaceholder || `Search ${title.toLowerCase()}...`}
           prefix={<SearchOutlined className="text-gray-400" />}
           value={searchText}
           onChange={(e) => onSearchChange(e.target.value)}
@@ -33,7 +35,7 @@ export default function ManagementHeader({
             danger
             icon={<DeleteOutlined />}
             onClick={onDelete}
-            className="!h-10 px-6 rounded-lg flex items-center font-medium border-red-200 bg-red-50 hover:bg-red-100 text-red-600 shadow-sm"
+            className="!h-9 px-6 rounded-lg flex items-center font-medium border-red-200 bg-red-50 hover:bg-red-100 text-red-600 shadow-sm"
           >
             Delete ({selectedCount})
           </Button>
@@ -45,7 +47,7 @@ export default function ManagementHeader({
             type="primary" 
             icon={<PlusOutlined />} 
             onClick={onAdd}
-            className="bg-blue-600 hover:bg-blue-700 !h-10 px-6 rounded-lg flex items-center font-medium border-none shadow-sm text-white"
+            className="bg-blue-600 hover:bg-blue-700 !h-9 px-6 rounded-lg flex items-center font-medium border-none shadow-sm text-white"
           >
             {buttonText || `Add ${title}`}
           </Button>
