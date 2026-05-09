@@ -4,8 +4,8 @@ import { SearchOutlined } from '@ant-design/icons';
 import { Funnel } from 'lucide-react';
 import type { ColumnsType } from 'antd/es/table';
 import type { MenuProps } from 'antd'; 
-import StatusBadge from '../../components/admin/Status';
-import RoleBadge from '../../components/admin/Role';
+import StatusBadge from '../../../components/admin/UserStatus';
+import RoleBadge from '../../../components/admin/Role';
 
 interface User {
   user_id: string; 
@@ -207,7 +207,7 @@ export default function Users() {
     },
   ];
 
-  // 💡 สร้างตัวแปรมาเก็บข้อมูลที่ถูกกรองจากการค้นหา (พิมพ์ปุ๊บ กรองปั๊บ!)
+  // 💡 สร้างตัวแปรมาเก็บข้อมูลที่ถูกกรองจากการค้นหา
   const filteredData = dataSource.filter((user) =>
     user.username.toLowerCase().includes(searchText.toLowerCase()) ||
     user.email.toLowerCase().includes(searchText.toLowerCase())
@@ -243,19 +243,15 @@ export default function Users() {
         <Table 
           rowSelection={rowSelection}
           columns={columns} 
-          dataSource={filteredData}  // 💡 โยนข้อมูลที่กรองแล้วเข้าตาราง
+          dataSource={filteredData}  
           loading={loading}
           rowKey="user_id"
           pagination={{ 
             pageSize: 5,
             showTotal: (total, range) => (
               <span className="text-gray-400 font-normal">Showing {range[0]} to {range[1]} of {total} results</span>
-            ),
-            itemRender: (_, type, originalElement) => {
-              if (type === 'prev') return <Button className="text-gray-600 rounded-md border-gray-200 px-4 h-9">Back</Button>;
-              if (type === 'next') return <Button className="text-gray-600 rounded-md border-gray-200 px-4 h-9">Next</Button>;
-              return originalElement;
-            }
+            )
+            // 💡 ลบ itemRender เพื่อให้กลับไปใช้ปุ่ม Default (< 1 >) ของ Ant Design
           }}
           className="
             [&_.ant-table-thead_th]:bg-white
@@ -278,7 +274,6 @@ export default function Users() {
             [&_.ant-pagination]:!px-6 
             [&_.ant-pagination]:!py-5
             [&_.ant-pagination-total-text]:!mr-auto 
-            [&_.ant-pagination-item]:!hidden
           "
         />
       </div>

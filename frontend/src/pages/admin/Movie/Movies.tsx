@@ -4,7 +4,7 @@ import { SearchOutlined, EditOutlined, DeleteOutlined, PlusOutlined } from '@ant
 import { Funnel } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { ColumnsType } from 'antd/es/table';
-import GenreBadge from '../../components/admin/Genre';
+import GenreBadge from '../../../components/admin/GenreComponent';
 
 interface Movie {
   movie_id: string;
@@ -139,7 +139,7 @@ export default function Movies() {
       title: 'GENRE',
       dataIndex: 'genres',
       key: 'genres',
-      filters: genreFilters, // 💡 โยนตัวเลือกที่โหลดจาก Backend เข้ามาตรงนี้
+      filters: genreFilters, // โยนตัวเลือกที่โหลดจาก Backend เข้ามาตรงนี้
       onFilter: (value, record) => record.genres.includes(value as string),
       filterIcon: (filtered) => <Funnel size={16} color={filtered ? '#3b82f6' : '#9ca3af'} strokeWidth={filtered ? 3 : 2} />,
       render: (genres: string[]) => (
@@ -172,7 +172,6 @@ export default function Movies() {
     },
   ];
 
-  // ระบบค้นหา (กรองจาก Title)
   const filteredData = dataSource.filter((movie) =>
     movie.title.toLowerCase().includes(searchText.toLowerCase())
   );
@@ -210,12 +209,7 @@ export default function Movies() {
           rowKey="movie_id"
           pagination={{ 
             pageSize: 5,
-            showTotal: (total, range) => <span className="text-gray-400 font-normal">Showing {range[0]} to {range[1]} of {total} results</span>,
-            itemRender: (_, type, originalElement) => {
-              if (type === 'prev') return <Button className="text-gray-600 rounded-md border-gray-200 px-4 h-9">Back</Button>;
-              if (type === 'next') return <Button className="text-gray-600 rounded-md border-gray-200 px-4 h-9">Next</Button>;
-              return originalElement;
-            }
+            showTotal: (total, range) => <span className="text-gray-400 font-normal">Showing {range[0]} to {range[1]} of {total} results</span>
           }}
           className="
             min-w-[1200px] /* ป้องกันตารางบีบตัวจนพังถ้าย่อจอ */
@@ -227,7 +221,6 @@ export default function Movies() {
             [&_.ant-table-thead_th]:py-4
             [&_.ant-table-row_td]:py-4
             
-            /* ใช้ gap จัดระยะห่างให้ Sort และ Filter */
             [&_.ant-table-column-sorters]:flex-row-reverse 
             [&_.ant-table-column-sorters]:gap-2
             
@@ -240,7 +233,6 @@ export default function Movies() {
             [&_.ant-pagination]:!px-6 
             [&_.ant-pagination]:!py-5
             [&_.ant-pagination-total-text]:!mr-auto 
-            [&_.ant-pagination-item]:!hidden
           "
         />
       </div>
