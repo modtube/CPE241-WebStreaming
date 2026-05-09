@@ -1,108 +1,222 @@
-import PageContainer from '../../components/common/PageContainer';
+import React, { useState, useEffect } from 'react';
+import { Table, message, Spin } from 'antd';
+import { 
+  VideoCameraOutlined, 
+  UserOutlined, 
+  DollarOutlined, 
+  StarOutlined 
+} from '@ant-design/icons';
+import { 
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
+  BarChart, Bar, Cell 
+} from 'recharts';
+
+// --- คอมโพเนนต์ย่อยสำหรับการ์ดสถิติ ---
+interface StatCardProps {
+  title: string;
+  value: string | number;
+  icon: React.ReactNode;
+  trend?: string;
+  trendColor?: string;
+}
+
+const StatCard = ({ title, value, icon, trend, trendColor }: StatCardProps) => (
+  <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex flex-col gap-2">
+    <div className="flex justify-between items-start">
+      <div className="flex flex-col">
+        <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">{title}</span>
+        <h2 className="text-2xl font-black text-gray-800 mt-1">{value}</h2>
+      </div>
+      <div className="p-3 bg-gray-50 rounded-lg text-blue-600">
+        {icon}
+      </div>
+    </div>
+    {trend && (
+      <div className={`text-xs font-bold ${trendColor || 'text-green-500'} flex items-center gap-1`}>
+        {trend}
+      </div>
+    )}
+  </div>
+);
+
+// --- หน้า Dashboard หลัก ---
+
+// เตรียมสีไว้ 15 สีเพื่อให้รองรับหมวดหมู่ที่เยอะ
+const COLORS = [
+  '#4F46E5', '#10B981', '#3B82F6', '#F59E0B', '#EC4899', 
+  '#8B5CF6', '#EF4444', '#06B6D4', '#F97316', '#84CC16',
+  '#0EA5E9', '#D946EF', '#6366F1', '#14B8A6', '#F43F5E'
+];
 
 export default function Dashboard() {
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('http://localhost:5000/api/dashboard')
+      .then(res => res.json())
+      .then(json => {
+        // แปลงข้อมูลสถิติให้เป็น Number และเรียงลำดับข้อมูลก่อนแสดงผล
+        const processed = {
+          ...json,
+          revenueTrend: json.revenueTrend?.map((item: any) => ({
+            ...item,
+            amount: parseFloat(item.amount) || 0
+          })) || [],
+          genreDistribution: json.genreDistribution?.map((item: any) => ({
+            ...item,
+            value: parseInt(item.value, 10) || 0
+          })).sort((a: any, b: any) => b.value - a.value) || [], 
+          userGrowth: json.userGrowth?.map((item: any) => ({
+            ...item,
+            count: parseInt(item.count, 10) || 0
+          })) || [],
+          countryDistribution: json.countryDistribution?.map((item: any) => ({
+            ...item,
+            value: parseInt(item.value, 10) || 0
+          })).sort((a: any, b: any) => b.value - a.value) || []
+        };
+
+        setData(processed);
+        setLoading(false);
+      })
+      .catch(() => {
+        message.error('ไม่สามารถโหลดข้อมูล Dashboard ได้');
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) return (
+    <div className="h-screen flex items-center justify-center bg-gray-50">
+      <Spin size="large" tip="กำลังโหลดข้อมูล..." />
+    </div>
+  );
+
   return (
-    <PageContainer>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        {/* Stats Cards */}
-        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-          <div className="flex items-center">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-              </svg>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Users</p>
-              <p className="text-2xl font-semibold text-gray-900">1,234</p>
-            </div>
-          </div>
+    <div className="p-8 bg-gray-50 min-h-screen flex flex-col gap-8 text-sans">
+      <h1 className="text-2xl font-bold text-gray-800">Dashboard Overview</h1>
+
+      {/* 1. Quick Stats Row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatCard 
+          title="Total Movies" 
+          value={data?.quickStats?.total_movies || 0} 
+          icon={<VideoCameraOutlined className="text-xl" />} 
+          trend="+2.5% this month"
+        />
+        <StatCard 
+          title="Total Users" 
+          value={Number(data?.quickStats?.total_users || 0).toLocaleString()} 
+          icon={<UserOutlined className="text-xl" />} 
+          trend="+1.5% this month"
+        />
+        <StatCard 
+          title="Total Revenue" 
+          value={`$${Number(data?.quickStats?.total_revenue || 0).toLocaleString()}`} 
+          icon={<DollarOutlined className="text-xl" />} 
+          trend="+12.5% from last period"
+          trendColor="text-green-500"
+        />
+        <StatCard 
+          title="Average Rating" 
+          value={`${Number(data?.quickStats?.avg_rating || 0).toFixed(1)} / 5.0`} 
+          icon={<StarOutlined className="text-xl text-yellow-500" />} 
+        />
+      </div>
+
+      {/* 2. Revenue Trend (Line Chart) */}
+      <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
+        <h3 className="text-lg font-bold text-gray-800 mb-6">Revenue Trend ($)</h3>
+        <div className="h-[300px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={data?.revenueTrend}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F3F4F6" />
+              <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fill: '#9CA3AF', fontSize: 12}} />
+              <YAxis axisLine={false} tickLine={false} tick={{fill: '#9CA3AF', fontSize: 12}} />
+              <Tooltip contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}} />
+              <Line type="monotone" dataKey="amount" stroke="#4F46E5" strokeWidth={4} dot={{ r: 6, fill: '#4F46E5', stroke: '#fff', strokeWidth: 2 }} activeDot={{ r: 8 }} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* 3. Middle Row: Top Sellers & Genre Distribution */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <h3 className="text-lg font-bold text-gray-800 mb-6">Top 5 Best Sellers</h3>
+          <Table 
+            dataSource={data?.topSellers} 
+            rowKey="id" // ใช้ string ID เป็นคีย์
+            columns={[
+              { 
+                title: 'ID', 
+                dataIndex: 'id', 
+                key: 'id',
+                sorter: (a: any, b: any) => (a.id || "").localeCompare(b.id || "")              },
+              { title: 'TITLE', dataIndex: 'title', key: 'title', render: (text) => <span className="font-bold">{text}</span> },
+              { title: 'UNITS', dataIndex: 'units_sold', key: 'units_sold', align: 'center' },
+              { title: 'TOTAL', dataIndex: 'total', key: 'total', align: 'right', render: (val) => `$${Number(val).toLocaleString()}` }
+            ]}
+            pagination={false}
+            size="middle"
+          />
         </div>
 
-        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-          <div className="flex items-center">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2m-9 0h10m-9 0V1m10 3V1m0 3l1 1v16a2 2 0 01-2 2H6a2 2 0 01-2-2V5l1-1z" />
-              </svg>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Movies</p>
-              <p className="text-2xl font-semibold text-gray-900">567</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-          <div className="flex items-center">
-            <div className="p-2 bg-yellow-100 rounded-lg">
-              <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-              </svg>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Revenue</p>
-              <p className="text-2xl font-semibold text-gray-900">$12,345</p>
-            </div>
+        <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
+          <h3 className="text-lg font-bold text-gray-800 mb-6">Movie Distribution by Genre</h3>
+          <div className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={data?.genreDistribution} layout="vertical" margin={{ left: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#F3F4F6" />
+                <XAxis type="number" hide />
+                <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{fill: '#4B5563', fontSize: 11}} width={100} />
+                <Tooltip cursor={{fill: '#F9FAFB'}} />
+                <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={14}>
+                  {data?.genreDistribution.map((_: any, i: number) => (
+                    <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Activity */}
-        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
-          <div className="space-y-3">
-            <div className="flex items-center space-x-3">
-              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-              <p className="text-sm text-gray-600">New user registered</p>
-              <span className="text-xs text-gray-400 ml-auto">2 min ago</span>
+      {/* 4. Bottom Row: User Growth & Country Distribution */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
+            <h3 className="text-lg font-bold text-gray-800 mb-6">User Growth (Cumulative)</h3>
+            <div className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={data?.userGrowth}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F3F4F6" />
+                        <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fill: '#9CA3AF', fontSize: 12}} />
+                        <YAxis axisLine={false} tickLine={false} tick={{fill: '#9CA3AF', fontSize: 12}} />
+                        <Tooltip contentStyle={{borderRadius: '12px'}} />
+                        <Line type="monotone" dataKey="count" stroke="#EC4899" strokeWidth={3} dot={{ fill: '#EC4899', r: 4 }} />
+                    </LineChart>
+                </ResponsiveContainer>
             </div>
-            <div className="flex items-center space-x-3">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <p className="text-sm text-gray-600">Movie uploaded</p>
-              <span className="text-xs text-gray-400 ml-auto">15 min ago</span>
-            </div>
-            <div className="flex items-center space-x-3">
-              <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-              <p className="text-sm text-gray-600">Payment received</p>
-              <span className="text-xs text-gray-400 ml-auto">1 hour ago</span>
-            </div>
-          </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-          <div className="grid grid-cols-2 gap-3">
-            <button className="p-3 bg-blue-50 hover:bg-blue-100 rounded-lg border border-blue-200 transition-colors">
-              <svg className="w-5 h-5 text-blue-600 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-              <p className="text-xs text-blue-700 font-medium">Add Movie</p>
-            </button>
-            <button className="p-3 bg-green-50 hover:bg-green-100 rounded-lg border border-green-200 transition-colors">
-              <svg className="w-5 h-5 text-green-600 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-              </svg>
-              <p className="text-xs text-green-700 font-medium">Add User</p>
-            </button>
-            <button className="p-3 bg-yellow-50 hover:bg-yellow-100 rounded-lg border border-yellow-200 transition-colors">
-              <svg className="w-5 h-5 text-yellow-600 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              <p className="text-xs text-yellow-700 font-medium">View Reports</p>
-            </button>
-            <button className="p-3 bg-purple-50 hover:bg-purple-100 rounded-lg border border-purple-200 transition-colors">
-              <svg className="w-5 h-5 text-purple-600 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              <p className="text-xs text-purple-700 font-medium">Settings</p>
-            </button>
-          </div>
+        <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
+            <h3 className="text-lg font-bold text-gray-800 mb-6">Top Countries</h3>
+            <div className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={data?.countryDistribution?.slice(0, 10)} layout="vertical" margin={{ left: 10 }}>
+                        <XAxis type="number" hide />
+                        <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{fill: '#4B5563', fontSize: 10}} width={80} />
+                        <Tooltip />
+                        <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={18}>
+                          {data?.countryDistribution?.slice(0, 10).map((_: any, i: number) => (
+                            <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                          ))}
+                        </Bar>
+                    </BarChart>
+                </ResponsiveContainer>
+            </div>
         </div>
       </div>
-    </PageContainer>
+    </div>
   );
 }
