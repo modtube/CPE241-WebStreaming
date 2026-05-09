@@ -9,7 +9,7 @@ import MoviesView from "./pages/admin/Movies";
 import ReviewsView from "./pages/admin/Reviews";
 import CrewView from "./pages/admin/Crew";
 import CrewForm from "./pages/admin/CrewForm";
-import UserManagement from "./pages/admin/UserManagement";
+import UserManagement from "./pages/admin/User";
 import TransactionsView from "./pages/admin/Transactions";
 import SetupsView from "./pages/admin/Setups";
 import Home from "./pages/customer/Home";

@@ -26,7 +26,7 @@ export default function Crew() {
   const [dataSource, setDataSource] = useState<Person[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchCrew = async () => {
+ const fetchCrew = async () => {
     setLoading(true);
     try {
       const response = await fetch('http://localhost:5000/api/crew');
@@ -34,7 +34,60 @@ export default function Crew() {
       const data = await response.json();
       setDataSource(data);
     } catch (error) {
-      message.error('Failed to load crew data');
+      // 🚨 MOCKUP DATA: ส่วนนี้จะทำงานเมื่อหา Backend ไม่เจอ (คอมเมนต์ทิ้งได้เลยเมื่อเชื่อม API จริงเสร็จ)
+      console.warn("Backend not found. Using Crew Mockup Data instead.");
+      setDataSource([
+        {
+          person_id: 1,
+          img_path: 'https://example.com/nolan.jpg',
+          first_name: 'Christopher',
+          last_name: 'Nolan',
+          nationality: 'British-American',
+          birth_date: '1970-07-30',
+          birth_place: 'London, England',
+          biography: 'Known for making complex blockbusters.',
+          create_date: '2026-05-09T10:00:00Z',
+          update_date: '2026-05-09T10:00:00Z'
+        },
+        {
+          person_id: 2,
+          img_path: 'https://example.com/cillian.jpg',
+          first_name: 'Cillian',
+          last_name: 'Murphy',
+          nationality: 'Irish',
+          birth_date: '1976-05-25',
+          birth_place: 'Cork, Ireland',
+          biography: 'Frequent collaborator with Christopher Nolan.',
+          create_date: '2026-05-09T10:15:00Z',
+          update_date: '2026-05-09T10:15:00Z'
+        },
+        {
+          person_id: 3,
+          img_path: 'https://example.com/robert.jpg',
+          first_name: 'Robert',
+          middle_name: 'John',
+          last_name: 'Downey Jr.',
+          nationality: 'American',
+          birth_date: '1965-04-04',
+          birth_place: 'New York, USA',
+          biography: 'Academy Award-winning actor.',
+          create_date: '2026-05-09T10:30:00Z',
+          update_date: '2026-05-09T10:30:00Z'
+        },
+        {
+          person_id: 4,
+          img_path: 'https://example.com/hans.jpg',
+          first_name: 'Hans',
+          last_name: 'Zimmer',
+          nationality: 'German',
+          birth_date: '1957-09-12',
+          birth_place: 'Frankfurt, Germany',
+          biography: 'Legendary film score composer.',
+          create_date: '2026-05-09T10:45:00Z',
+          update_date: '2026-05-09T10:45:00Z'
+        }
+      ]);
+      // message.error('Failed to load crew data'); // ปิดแจ้งเตือน Error สีแดงไว้ชั่วคราว
     } finally {
       setLoading(false);
     }
@@ -120,12 +173,12 @@ export default function Crew() {
           loading={loading}
           rowKey="person_id"
           pagination={{ 
-            pageSize: 5,
+            pageSize: 20,
             showTotal: (total, range) => (
               <span className="text-gray-400">Showing {range[0]} to {range[1]} of {total} results</span>
             )
           }}
-          // 3. CSS เพื่อย้ายปุ่ม Sort มาไว้ด้านหน้าตาม UI ที่ต้องการ
+
           className="
             [&_.ant-table-thead_th]:bg-white
             [&_.ant-table-thead_th]:text-gray-400
