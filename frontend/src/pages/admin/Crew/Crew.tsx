@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Table, Space} from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
-import ManagementHeader from '../../components/admin/ManagementHeader';
+import ManagementHeader from '../../../components/admin/ManagementHeader';
 
 // 1. กำหนด Interface ให้ตรงกับ SQL Schema ของคุณ
 interface Person {
