@@ -40,7 +40,6 @@ export default function Users() {
         { user_id: '004', username: 'john_smith', email: 'john.smith@example.com', country: 'US', status: 'Active', role: 'Customer' },
         { user_id: '005', username: 'emily_jones', email: 'emily.j@example.com', country: 'US', status: 'Suspended', role: 'Customer' },
       ]);
-      // message.error('Failed to load users data'); // ปิดแจ้งเตือน Error สีแดงไว้ชั่วคราว
     } finally {
       setLoading(false);
     }
@@ -59,11 +58,10 @@ export default function Users() {
     onChange: onSelectChange,
   };
 
-  // ฟังก์ชันอัปเดต Status (ยิง API ไปหลังบ้าน)
+  // ฟังก์ชันอัปเดต Status
   const handleStatusChange = async (userId: string, newStatus: string) => {
     try {
-      // TODO: เปิดคอมเมนต์โค้ดด้านล่างเมื่อต่อ Backend เสร็จแล้ว
-      /*
+      /* TODO: เปิดคอมเมนต์เมื่อต่อ Backend เสร็จแล้ว
       const response = await fetch(`http://localhost:5000/api/users/${userId}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -72,9 +70,9 @@ export default function Users() {
       if (!response.ok) throw new Error('Update failed');
       */
       
-      // อัปเดตข้อมูลบนหน้าจอทันที (เพื่อให้เห็นผลลัพธ์ระหว่างใช้ Mockup)
+      // อัปเดตข้อมูลบนหน้าจอทันที
       setDataSource(prevData => 
-        prevData.map(user => user.user_id === userId ? { ...user, status: newStatus as any } : user)
+        prevData.map(user => user.user_id === userId ? { ...user, status: newStatus as User['status'] } : user)
       );
       message.success(`Status updated to ${newStatus}`);
     } catch (error) {
@@ -82,11 +80,10 @@ export default function Users() {
     }
   };
 
-  // ฟังก์ชันอัปเดต Role (ยิง API ไปหลังบ้าน)
+  // ฟังก์ชันอัปเดต Role
   const handleRoleChange = async (userId: string, newRole: string) => {
     try {
-      // TODO: เปิดคอมเมนต์โค้ดเมื่อต่อ Backend เสร็จแล้ว
-      /*
+      /* TODO: เปิดคอมเมนต์เมื่อต่อ Backend เสร็จแล้ว
       const response = await fetch(`http://localhost:5000/api/users/${userId}/role`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -95,8 +92,9 @@ export default function Users() {
       if (!response.ok) throw new Error('Update failed');
       */
       
+      // อัปเดตข้อมูลบนหน้าจอทันที
       setDataSource(prevData => 
-        prevData.map(user => user.user_id === userId ? { ...user, role: newRole as any } : user)
+        prevData.map(user => user.user_id === userId ? { ...user, role: newRole as User['role'] } : user)
       );
       message.success(`Role updated to ${newRole}`);
     } catch (error) {
@@ -134,12 +132,12 @@ export default function Users() {
       filters: [{ text: 'TH', value: 'TH' }, { text: 'US', value: 'US' }],
       onFilter: (value, record) => record.country === value,
       filterIcon: (filtered) => (
-      <Funnel 
-        size={16} 
-        color={filtered ? '#3b82f6' : '#9ca3af'} 
-        strokeWidth={filtered ? 3 : 2} 
-      />
-    ),
+        <Funnel 
+          size={16} 
+          color={filtered ? '#3b82f6' : '#9ca3af'} 
+          strokeWidth={filtered ? 3 : 2} 
+        />
+      ),
       render: (text) => <span className="text-gray-500">{text}</span>
     },
     { 
@@ -153,11 +151,11 @@ export default function Users() {
       ],
       onFilter: (value, record) => record.status === value,
       filterIcon: (filtered) => (
-      <Funnel 
-        size={16} 
-        color={filtered ? '#3b82f6' : '#9ca3af'} 
-        strokeWidth={filtered ? 3 : 2} 
-      />
+        <Funnel 
+          size={16} 
+          color={filtered ? '#3b82f6' : '#9ca3af'} 
+          strokeWidth={filtered ? 3 : 2} 
+        />
       ),
       render: (status, record) => {
         const items: MenuProps['items'] = [
@@ -184,11 +182,11 @@ export default function Users() {
       filters: [{ text: 'Admin', value: 'Admin' }, { text: 'Customer', value: 'Customer' }],
       onFilter: (value, record) => record.role === value,
       filterIcon: (filtered) => (
-      <Funnel 
-        size={16} 
-        color={filtered ? '#3b82f6' : '#9ca3af'} 
-        strokeWidth={filtered ? 3 : 2} 
-      />
+        <Funnel 
+          size={16} 
+          color={filtered ? '#3b82f6' : '#9ca3af'} 
+          strokeWidth={filtered ? 3 : 2} 
+        />
       ),
       render: (role, record) => {
         const items: MenuProps['items'] = [
@@ -209,16 +207,19 @@ export default function Users() {
     },
   ];
 
+  // 💡 สร้างตัวแปรมาเก็บข้อมูลที่ถูกกรองจากการค้นหา (พิมพ์ปุ๊บ กรองปั๊บ!)
+  const filteredData = dataSource.filter((user) =>
+    user.username.toLowerCase().includes(searchText.toLowerCase()) ||
+    user.email.toLowerCase().includes(searchText.toLowerCase())
+  );
+
   return (
     <div className="p-4">
-<<<<<<< Updated upstream
-=======
-      {/* ส่วน Header แยกซ้าย-ขวา */}
->>>>>>> Stashed changes
+      {/* ส่วน Header */}
       <div className="flex justify-between items-center mb-6">
         <div className="w-full max-w-md">
           <Input
-            placeholder="Search by name..."
+            placeholder="Search by username or email..."
             prefix={<SearchOutlined className="text-gray-400" />}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
@@ -226,7 +227,7 @@ export default function Users() {
           />
         </div>
         
-        {/* ปุ่ม Delete จะมีสีแดง และแสดงจำนวนที่เลือก */}
+        {/* ปุ่ม Delete */}
         {selectedRowKeys.length > 0 && (
           <Button 
             danger 
@@ -242,7 +243,7 @@ export default function Users() {
         <Table 
           rowSelection={rowSelection}
           columns={columns} 
-          dataSource={dataSource}
+          dataSource={filteredData}  // 💡 โยนข้อมูลที่กรองแล้วเข้าตาราง
           loading={loading}
           rowKey="user_id"
           pagination={{ 
@@ -265,17 +266,9 @@ export default function Users() {
             [&_.ant-table-thead_th]:py-5
             [&_.ant-table-row_td]:py-5
             
-<<<<<<< Updated upstream
             [&_.ant-table-column-sorters]:flex-row-reverse 
             [&_.ant-table-column-sorters]:gap-2
             
-=======
-            /* 1. ย้ายสัญลักษณ์ Sort มาไว้ซ้ายสุด และใช้ gap จัดระยะห่าง */
-            [&_.ant-table-column-sorters]:flex-row-reverse 
-            [&_.ant-table-column-sorters]:gap-2
-            
-            /* 2. ย้ายสัญลักษณ์ Filter มาไว้ซ้ายสุด และใช้ gap จัดระยะห่าง */
->>>>>>> Stashed changes
             [&_.ant-table-filter-column]:flex-row-reverse 
             [&_.ant-table-filter-column]:justify-end
             [&_.ant-table-filter-column]:gap-2

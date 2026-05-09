@@ -13,10 +13,7 @@ export default function RoleBadge({ role }: RoleBadgeProps) {
     );
   }
   
-<<<<<<< Updated upstream
 
-=======
->>>>>>> Stashed changes
   return (
     <span className="inline-flex items-center px-3 py-1 text-gray-400 text-xs font-bold">
       Customer

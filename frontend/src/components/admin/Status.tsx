@@ -7,10 +7,6 @@ interface StatusBadgeProps {
 }
 
 export default function StatusBadge({ status }: StatusBadgeProps) {
-<<<<<<< Updated upstream
-  // กำหนดสีตาม Status แบบเป๊ะๆ ตาม Figma
-=======
->>>>>>> Stashed changes
   const styles: Record<string, string> = {
     Active: 'bg-green-100 text-green-600',
     Banned: 'bg-gray-200 text-gray-600',

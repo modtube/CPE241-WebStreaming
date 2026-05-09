@@ -1,4 +1,5 @@
 // src/App.tsx
+// src/App.tsx
 import { Routes, Route, Navigate } from "react-router-dom";
 import AdminLayout from "./layouts/AdminLayout";
 import AuthLayout from "./layouts/AuthLayout";
