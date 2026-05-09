@@ -211,6 +211,10 @@ export default function Users() {
 
   return (
     <div className="p-4">
+<<<<<<< Updated upstream
+=======
+      {/* ส่วน Header แยกซ้าย-ขวา */}
+>>>>>>> Stashed changes
       <div className="flex justify-between items-center mb-6">
         <div className="w-full max-w-md">
           <Input
@@ -261,9 +265,17 @@ export default function Users() {
             [&_.ant-table-thead_th]:py-5
             [&_.ant-table-row_td]:py-5
             
+<<<<<<< Updated upstream
             [&_.ant-table-column-sorters]:flex-row-reverse 
             [&_.ant-table-column-sorters]:gap-2
             
+=======
+            /* 1. ย้ายสัญลักษณ์ Sort มาไว้ซ้ายสุด และใช้ gap จัดระยะห่าง */
+            [&_.ant-table-column-sorters]:flex-row-reverse 
+            [&_.ant-table-column-sorters]:gap-2
+            
+            /* 2. ย้ายสัญลักษณ์ Filter มาไว้ซ้ายสุด และใช้ gap จัดระยะห่าง */
+>>>>>>> Stashed changes
             [&_.ant-table-filter-column]:flex-row-reverse 
             [&_.ant-table-filter-column]:justify-end
             [&_.ant-table-filter-column]:gap-2
