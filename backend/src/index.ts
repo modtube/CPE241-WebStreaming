@@ -1,13 +1,9 @@
 import express from "express";
-import cors from "cors";
-import dotenv from "dotenv";
-import movieRoutes from "./routes/movieRoutes.js"; // Import เข้ามาคับ
 import personRoutes from "./routes/personRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 import languageRoutes from "./routes/languageRoutes.js";
 import genreRoutes from "./routes/genreRoutes.js";
 import ratingRoutes from "./routes/ratingRoutes.js";
-import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import movieRoutes from './routes/movieRoutes.js'; 
