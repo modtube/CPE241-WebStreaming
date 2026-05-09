@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Table, Input, Button, message, Space } from 'antd';
-import { SearchOutlined, EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
-import { Funnel } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { Table, Space, message, Popconfirm } from 'antd';
+import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { Funnel } from 'lucide-react';
 import type { ColumnsType } from 'antd/es/table';
+import ManagementHeader from '../../../components/admin/ManagementHeader';
 import GenreBadge from '../../../components/admin/setup/GenreComponent';
 
 interface Movie {
@@ -12,7 +13,8 @@ interface Movie {
   release_date: string;
   price: number;
   rating: string;
-  review_rating: number;
+  average_rating: number;
+  total_reviews: number;
   country: string;
   genres: string[];
   create_date: string;
@@ -24,73 +26,68 @@ export default function Movies() {
   const [searchText, setSearchText] = useState('');
   const [dataSource, setDataSource] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(false);
-  
-  // State สำหรับเก็บตัวเลือก Filter ของ Genre ที่ดึงมาจาก Backend
-  const [genreFilters, setGenreFilters] = useState<{text: string, value: string}[]>([]);
+  const [genreFilters, setGenreFilters] = useState<{ text: string, value: string }[]>([]);
 
-  // ฟังก์ชันดึงรายชื่อหนัง
-  const fetchMovies = async () => {
+  // ฟังก์ชันดึงรายชื่อหนัง (ปรับให้รองรับการ Search ผ่าน Backend เหมือนหน้า Crew)
+  const fetchMovies = async (search: string = '') => {
     setLoading(true);
     try {
-      // TODO: เปิดใช้งานเมื่อ Backend เสร็จแล้ว
-      /*
-      const response = await fetch('http://localhost:5000/api/movies'); 
+      // 1. เรียก API ตามโครงสร้าง URL ที่คุณตั้งไว้ใน index.ts
+      const response = await fetch(`http://localhost:5000/api/movies?search=${search}&limit=10`);
       if (!response.ok) throw new Error('Fetch failed');
-      const data = await response.json();
-      setDataSource(data);
-      */
-      throw new Error('Trigger Mockup'); 
+      
+      const result = await response.json();
+      
+      // 2. สำคัญ: ข้อมูลหนังจริงอยู่ใน result.data คับ
+      setDataSource(result.data || []); 
+      
     } catch (error) {
-      // 🚨 MOCKUP DATA
-      console.warn("Backend not found. Using Movies Mockup Data instead.");
-      setDataSource([
-        { movie_id: '001', title: 'Inception', release_date: '2010-07-16', price: 299.00, rating: 'NR', review_rating: 4.8, country: 'US', genres: ['Action', 'Sci-Fi'], create_date: '2026-01-16', update_date: '2026-01-16' },
-        { movie_id: '002', title: 'Dune: Part Two', release_date: '2024-03-01', price: 349.00, rating: 'NR', review_rating: 4.4, country: 'US', genres: ['Adventure', 'Sci-Fi'], create_date: '2026-03-01', update_date: '2026-03-01' },
-        { movie_id: '003', title: 'Parasite', release_date: '2019-05-30', price: 249.00, rating: 'NR', review_rating: 4.2, country: 'KR', genres: ['Drama', 'Thriller'], create_date: '2026-05-30', update_date: '2026-05-30' },
-        { movie_id: '004', title: 'Spirited Away', release_date: '2001-07-20', price: 199.00, rating: 'NR', review_rating: 4.8, country: 'JP', genres: ['Fantasy', 'Animation'], create_date: '2026-07-20', update_date: '2026-07-20' },
-      ]);
+      console.error("Fetch Movies Error:", error);
+      setDataSource([]); // เคลียร์ข้อมูลป้องกัน Error ค้าง
     } finally {
       setLoading(false);
     }
   };
 
-  // ฟังก์ชันดึง Master Data ของ Genre มาทำเป็นเมนู Filter
+  const handleDelete = async (id: string) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/movies/${id}`, { method: 'DELETE' });
+      if (response.ok) {
+        message.success('Movie deleted successfully');
+        fetchMovies(searchText);
+      } else {
+        throw new Error('Delete failed');
+      }
+    } catch (error: any) {
+      message.error(error.message || 'Failed to delete movie');
+    }
+  };
+
   const fetchGenresForFilter = async () => {
     try {
-      // TODO: เปิดใช้งานเมื่อต่อ Backend
-      /*
+      // 3. ใช้ Route ที่คุณลงทะเบียนไว้ใน index.ts (/api/genres)
       const response = await fetch('http://localhost:5000/api/genres');
+      if (!response.ok) throw new Error();
       const data = await response.json();
+      
+      // ใน genreController ส่งกลับมาเป็น array ของ row ตรงๆ
       setGenreFilters(data.map((g: any) => ({ text: g.genre_name, value: g.genre_name })));
-      */
-
-      // 🚨 MOCKUP DATA ของ Filter
-      setGenreFilters([
-        { text: 'Action', value: 'Action' },
-        { text: 'Sci-Fi', value: 'Sci-Fi' },
-        { text: 'Adventure', value: 'Adventure' },
-        { text: 'Drama', value: 'Drama' },
-        { text: 'Thriller', value: 'Thriller' },
-        { text: 'Fantasy', value: 'Fantasy' },
-        { text: 'Animation', value: 'Animation' },
-      ]);
     } catch (error) {
-      console.error("Failed to load genres for filter");
+      console.error("Genre filter failed, using defaults");
     }
   };
 
   useEffect(() => {
-    fetchMovies();
+    fetchMovies(searchText);
     fetchGenresForFilter();
-  }, []);
+  }, [searchText]);
 
-  // ตั้งค่า Columns ตาราง
   const columns: ColumnsType<Movie> = [
     { 
       title: 'ID', 
       dataIndex: 'movie_id', 
       key: 'movie_id', 
-      width: '70px', 
+      width: '80px', 
       sorter: (a, b) => a.movie_id.localeCompare(b.movie_id) 
     },
     {
@@ -98,12 +95,13 @@ export default function Movies() {
       dataIndex: 'title',
       key: 'title',
       sorter: (a, b) => a.title.localeCompare(b.title),
-      render: (text) => <span className="font-bold text-gray-800">{text}</span>,
+      render: (text) => <span className="font-bold text-gray-900">{text}</span>,
     },
     { 
       title: 'RELEASE DATE', 
       dataIndex: 'release_date', 
-      key: 'release_date', 
+      key: 'release_date',
+      render: (date) => new Date(date).toLocaleDateString(),
       sorter: (a, b) => new Date(a.release_date).getTime() - new Date(b.release_date).getTime() 
     },
     { 
@@ -111,128 +109,120 @@ export default function Movies() {
       dataIndex: 'price', 
       key: 'price',
       sorter: (a, b) => a.price - b.price,
-      render: (price) => `$${price.toFixed(2)}` 
+      render: (price) => `฿${Number(price).toLocaleString()}` 
     },
     { 
-      title: 'RATING', 
-      dataIndex: 'rating', 
-      key: 'rating',
-      filters: [{ text: 'NR', value: 'NR' }, { text: 'R', value: 'R' }, { text: 'PG-13', value: 'PG-13' }],
-      onFilter: (value, record) => record.rating === value,
-      filterIcon: (filtered) => <Funnel size={16} color={filtered ? '#3b82f6' : '#9ca3af'} strokeWidth={filtered ? 3 : 2} />
-    },
-    { 
-      title: 'REVIEW RATING', 
-      dataIndex: 'review_rating', 
-      key: 'review_rating', 
-      sorter: (a, b) => a.review_rating - b.review_rating 
-    },
+    title: 'RATING', 
+    dataIndex: 'rating', // อันนี้คือ Rating ของหนัง (เช่น PG-13, R)
+    key: 'rating',
+    filters: [{ text: 'NR', value: 'NR' }, { text: 'R', value: 'R' }, { text: 'PG-13', value: 'PG-13' }],
+    onFilter: (value, record) => record.rating === value,
+    filterIcon: (filtered) => <Funnel size={14} color={filtered ? '#3b82f6' : '#9ca3af'} />
+  },
+  { 
+    title: 'AVG RATING', 
+    dataIndex: 'average_rating', // แก้จาก review_rating เป็น average_rating ให้ตรงกับ API
+    key: 'average_rating', 
+    width: '120px',
+    sorter: (a, b) => a.average_rating - b.average_rating,
+    render: (rating, record) => (
+      <span className="font-medium text-gray-700">
+        {rating > 0 ? `${rating} ⭐` : 'No reviews'} 
+      </span>
+    )
+  },
+  { 
+    title: 'TOTAL REVIEWS', 
+    dataIndex: 'total_reviews', // เพิ่มคอลัมน์นี้เพื่อให้เห็นจำนวนคนรีวิว
+    key: 'total_reviews', 
+    width: '130px',
+    render: (count) => <span className="text-gray-500">{count} reviews</span>,
+    sorter: (a, b) => a.total_reviews - b.total_reviews 
+  },
     { 
       title: 'COUNTRY', 
       dataIndex: 'country', 
       key: 'country',
       filters: [{ text: 'US', value: 'US' }, { text: 'KR', value: 'KR' }, { text: 'JP', value: 'JP' }],
       onFilter: (value, record) => record.country === value,
-      filterIcon: (filtered) => <Funnel size={16} color={filtered ? '#3b82f6' : '#9ca3af'} strokeWidth={filtered ? 3 : 2} />
+      filterIcon: (filtered) => <Funnel size={14} color={filtered ? '#3b82f6' : '#9ca3af'} />
     },
     {
       title: 'GENRE',
       dataIndex: 'genres',
       key: 'genres',
-      filters: genreFilters, // โยนตัวเลือกที่โหลดจาก Backend เข้ามาตรงนี้
+      filters: genreFilters,
       onFilter: (value, record) => record.genres.includes(value as string),
-      filterIcon: (filtered) => <Funnel size={16} color={filtered ? '#3b82f6' : '#9ca3af'} strokeWidth={filtered ? 3 : 2} />,
+      filterIcon: (filtered) => <Funnel size={14} color={filtered ? '#3b82f6' : '#9ca3af'} />,
       render: (genres: string[]) => (
-        <div className="flex flex-wrap max-w-[150px]">
-          {genres.map(genre => <GenreBadge key={genre} genre={genre} />)}
+        <div className="flex flex-wrap gap-1 max-w-[150px]">
+          {genres?.map(genre => <GenreBadge key={genre} genre={genre} />)}
         </div>
       ),
     },
     { 
       title: 'CREATE DATE', 
       dataIndex: 'create_date', 
-      key: 'create_date', 
+      key: 'create_date',
+      render: (date) => new Date(date).toLocaleDateString(),
       sorter: (a, b) => new Date(a.create_date).getTime() - new Date(b.create_date).getTime() 
-    },
-    { 
-      title: 'UPDATE DATE', 
-      dataIndex: 'update_date', 
-      key: 'update_date', 
-      sorter: (a, b) => new Date(a.update_date).getTime() - new Date(b.update_date).getTime() 
     },
     {
       title: 'ACTION',
       key: 'action',
-      render: (_, record) => (
+      width: '100px',
+      render: (_, record: Movie) => (
         <Space size="middle">
-          <EditOutlined className="text-gray-400 hover:text-blue-600 cursor-pointer text-lg" onClick={() => navigate(`/admin/movies/edit/${record.movie_id}`)} />
-          <DeleteOutlined className="text-gray-400 hover:text-red-500 cursor-pointer text-lg" onClick={() => message.warning(`Delete movie: ${record.title}`)} />
+          <EditOutlined 
+            className="text-gray-400 hover:text-blue-600 cursor-pointer text-lg" 
+            onClick={() => navigate(`/admin/movies/edit/${record.movie_id}`)} 
+          />
+          <Popconfirm
+            title="Delete this movie?"
+            description={`Are you sure to delete "${record.title}"?`}
+            onConfirm={() => handleDelete(record.movie_id)}
+            okText="Yes"
+            cancelText="No"
+            okButtonProps={{ danger: true }}
+          >
+            <DeleteOutlined className="text-gray-400 hover:text-red-500 cursor-pointer text-lg" />
+          </Popconfirm>
         </Space>
       ),
     },
   ];
 
-  const filteredData = dataSource.filter((movie) =>
-    movie.title.toLowerCase().includes(searchText.toLowerCase())
-  );
-
   return (
     <div className="p-4">
-      {/* ส่วน Header */}
-      <div className="flex justify-between items-center mb-6">
-        <div className="w-full max-w-md">
-          <Input
-            placeholder="Search content by title..."
-            prefix={<SearchOutlined className="text-gray-400" />}
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            className="h-10 rounded-lg border-gray-300 shadow-sm"
-          />
-        </div>
-        
-        <Button 
-          type="primary" 
-          icon={<PlusOutlined />} 
-          className="h-10 px-6 rounded-lg bg-blue-600 hover:bg-blue-700 font-medium shadow-md shadow-blue-600/20"
-          onClick={() => navigate('/admin/movies/add')}
-        >
-          Add Content
-        </Button>
-      </div>
+      <ManagementHeader 
+        title="Content" 
+        buttonText="Add Movie"
+        onAdd={() => navigate('/admin/movies/add')} 
+        searchText={searchText}
+        onSearchChange={setSearchText}
+        searchPlaceholder="Search by ID, Title..."
+      />
       
-      {/* ส่วน Table */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden overflow-x-auto">
         <Table 
           columns={columns} 
-          dataSource={filteredData}
+          dataSource={dataSource}
           loading={loading}
           rowKey="movie_id"
           pagination={{ 
-            pageSize: 5,
-            showTotal: (total, range) => <span className="text-gray-400 font-normal">Showing {range[0]} to {range[1]} of {total} results</span>
+            pageSize: 10,
+            showTotal: (total, range) => (
+              <span className="text-gray-400">Showing {range[0]} to {range[1]} of {total} results</span>
+            )
           }}
           className="
-            min-w-[1200px] /* ป้องกันตารางบีบตัวจนพังถ้าย่อจอ */
+            min-w-[1100px]
             [&_.ant-table-thead_th]:bg-white
-            [&_.ant-table-thead_th]:border-b
-            [&_.ant-table-thead_th]:text-[12px] 
             [&_.ant-table-thead_th]:text-gray-400
-            [&_.ant-table-thead_th]:font-semibold 
-            [&_.ant-table-thead_th]:py-4
-            [&_.ant-table-row_td]:py-4
-            
+            [&_.ant-table-thead_th]:text-[13px]
+            [&_.ant-table-thead_th]:font-semibold
             [&_.ant-table-column-sorters]:flex-row-reverse 
-            [&_.ant-table-column-sorters]:gap-2
-            
-            [&_.ant-table-filter-column]:flex-row-reverse 
-            [&_.ant-table-filter-column]:justify-end
-            [&_.ant-table-filter-column]:gap-2
-            
-            [&_.ant-pagination]:!flex 
-            [&_.ant-pagination]:!w-full 
-            [&_.ant-pagination]:!px-6 
-            [&_.ant-pagination]:!py-5
-            [&_.ant-pagination-total-text]:!mr-auto 
+            [&_.ant-table-column-sorter]:mr-2
           "
         />
       </div>
