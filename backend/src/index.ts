@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import movieRoutes from './routes/movieRoutes.js'; // Import เข้ามาคับ
+import reviewRoutes from './routes/reviewRoutes.js';
 
 dotenv.config();
 
@@ -17,6 +18,8 @@ app.get('/', (req, res) => {
 
 // บอกให้ Express ใช้ movieRoutes สำหรับ URL ที่ขึ้นต้นด้วย /api/movies
 app.use('/api/movies', movieRoutes);
+// บอกให้ Express ใช้ reviewRoutes สำหรับ URL ที่ขึ้นต้นด้วย /api/reviews
+app.use('/api/reviews', reviewRoutes);
 
 app.get('/api/status', (req, res) => {
   res.json({ message: 'Backend is ready!' });
