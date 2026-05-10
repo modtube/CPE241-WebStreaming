@@ -91,11 +91,26 @@ export default function App() {
           fetch('http://localhost:5000/api/persons'),
         ]);
         
-        if (gRes.ok) setGenres(await gRes.json());
-        if (rRes.ok) setRatings(await rRes.json());
-        if (lRes.ok) setLanguages(await lRes.json());
-        if (cRes.ok) setCountries(await cRes.json());
-        if (pRes.ok) setPersons(await pRes.json());
+        if (gRes.ok) {
+          const gData = await gRes.json();
+          setGenres(gData.data || gData);
+        }
+        if (rRes.ok) {
+          const rData = await rRes.json();
+          setRatings(rData.data || rData);
+        }
+        if (lRes.ok) {
+          const lData = await lRes.json();
+          setLanguages(lData.data || lData);
+        }
+        if (cRes.ok) {
+          const cData = await cRes.json();
+          setCountries(cData.data || cData);
+        }
+        if (pRes.ok) {
+          const pData = await pRes.json();
+          setPersons(pData.data || pData);
+        }
       } catch (err) {
         message.error("Failed to load master data. Please check your connection.");
       }
