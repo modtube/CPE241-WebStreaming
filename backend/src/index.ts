@@ -4,12 +4,13 @@ import reviewRoutes from "./routes/reviewRoutes.js";
 import languageRoutes from "./routes/languageRoutes.js";
 import genreRoutes from "./routes/genreRoutes.js";
 import ratingRoutes from "./routes/ratingRoutes.js";
-import cors from 'cors';
-import dotenv from 'dotenv';
-import movieRoutes from './routes/movieRoutes.js'; 
-import crewRoutes from './routes/crewRoutes.js';
-import dashboardRoutes from './routes/dashboardRoutes.js';
-import path from 'path';
+import cors from "cors";
+import dotenv from "dotenv";
+import movieRoutes from "./routes/movieRoutes.js";
+import crewRoutes from "./routes/crewRoutes.js";
+import dashboardRoutes from "./routes/dashboardRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
+import path from "path";
 
 dotenv.config();
 
@@ -24,10 +25,12 @@ app.get("/", (req, res) => {
 });
 
 // บอกให้ Express ใช้ movieRoutes สำหรับ URL ที่ขึ้นต้นด้วย /api/movies
-app.use('/api/movies', movieRoutes);
-app.use('/api/crew', crewRoutes);
-app.use('/api/dashboard', dashboardRoutes);
-app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+app.use("/api/movies", movieRoutes);
+app.use("/api/crew", crewRoutes);
+app.use("/api/dashboard", dashboardRoutes);
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+
+app.use("/api/users", userRoutes);
 
 app.use("/api/persons", personRoutes);
 
