@@ -15,3 +15,21 @@ export const getAllGenres = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Getting Genres: Internal Server Issue" });
   }
 };
+
+export const addGenre = async (req: Request, res: Response) => {
+  const { genre_name } = req.body;
+  try {
+    const result = await pool.query(
+      `
+      INSERT INTO genre (genre_name)
+      VALUES ($1)
+      RETURNING *;
+      `,
+      [genre_name],
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error("Error: ", error);
+    res.status(500).json({ message: `Adding Genres: ${error}` });
+  }
+};
