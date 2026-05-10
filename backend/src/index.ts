@@ -14,9 +14,6 @@ import crewRoutes from "./routes/crewRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
-import userProfileRoutes from "./routes/userProfileRoutes.js";
-import playlistRoutes from "./routes/playlistRoutes.js";
-import cartRoutes from "./routes/cartRoutes.js";
 import path from "path";
 
 const app = express();
@@ -50,12 +47,6 @@ app.use("/api/genres", genreRoutes);
 app.use("/api/ratings", ratingRoutes);
 
 app.use("/api/countries", countryRoutes);
-
-// ===== User-facing routes (ไม่กระทบ API ของ admin) =====
-app.use("/api/auth", authRoutes);
-app.use("/api/me", userProfileRoutes);
-app.use("/api/users/:userId/playlists", playlistRoutes);
-app.use("/api/cart", cartRoutes);
 
 app.get("/api/status", (req, res) => {
   res.json({ message: "Backend is ready!" });
