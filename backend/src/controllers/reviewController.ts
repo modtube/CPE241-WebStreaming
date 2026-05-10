@@ -123,31 +123,55 @@ export const getAllReviews = async (req: Request, res: Response) => {
     const offset = (page - 1) * limit;
 
     /* =========================================================================
-     * [SORT — DISABLED] Frontend จะจัดเรียงเอง
+     * SORT — Backend
      * -------------------------------------------------------------------------
-     * ถ้าวันไหนทีมต้องการให้ backend จัดเรียงเอง ให้เปิด comment ด้านล่างนี้
-     * แล้วเปลี่ยน const orderClause ตรงท้าย block นี้ให้ใช้ตัวที่สร้างจาก param
+     * Sort ทั้ง dataset ก่อน paginate (ไม่ใช่แค่หน้าปัจจุบัน)
      *
-     * วิธีใช้ฝั่ง frontend (ตัวอย่าง):
-     *   /api/reviews?sort_by=rating&sort_order=desc
-     *   /api/reviews?sort_by=post_time&sort_order=asc
+     * Query string:
+     *   ?sort_by=review_id|user_id|movie_id|rating|post_status|post_time
+     *   ?sort_order=asc|desc
      *
-     * --- code เริ่ม ---
-     * const ALLOWED_SORT_COLUMNS = ['review_id', 'rating', 'post_time', 'post_status'] as const;
-     * const sortByRaw = req.query.sort_by as string | undefined;
-     * const sortBy = ALLOWED_SORT_COLUMNS.includes(sortByRaw as (typeof ALLOWED_SORT_COLUMNS)[number])
-     *   ? sortByRaw
-     *   : 'post_time';
-     * const sortOrder = req.query.sort_order === 'asc' ? 'ASC' : 'DESC';
-     * const orderClause = `ORDER BY r.${sortBy} ${sortOrder}`;
-     * --- code จบ ---
+     * ถ้าไม่ส่ง sort_by มา → default เป็น post_time DESC (ใหม่สุดอยู่บน)
      *
-     * !! WARNING !!
+     * !! SECURITY !!
      * pg ไม่อนุญาตให้ใช้ ORDER BY $1 (parameterized) เพราะ identifier ไม่ใช่ value
-     * ต้อง concat เป็น string ตรงๆ — ถ้า concat ค่าจาก user โดยไม่ผ่าน whitelist
-     * (ALLOWED_SORT_COLUMNS) จะเปิดช่อง SQL injection เลยทันที ห้ามลืม!
+     * ต้อง concat เป็น string ตรงๆ — ป้องกัน SQL injection ด้วย whitelist เท่านั้น
      * =========================================================================*/
-    const orderClause = 'ORDER BY r.post_time DESC'; // default order ปัจจุบัน
+    const ALLOWED_SORT_COLUMNS = [
+      'review_id',
+      'user_id',
+      'movie_id',
+      'rating',
+      'post_status',
+      'post_time',
+    ] as const;
+    const sortByRaw = Array.isArray(req.query.sort_by)
+      ? String(req.query.sort_by[0])
+      : (req.query.sort_by as string | undefined);
+    const sortBy =
+      sortByRaw && (ALLOWED_SORT_COLUMNS as readonly string[]).includes(sortByRaw)
+        ? sortByRaw
+        : 'post_time';
+    const sortOrder = req.query.sort_order === 'asc' ? 'ASC' : 'DESC';
+    
+    // --- เริ่มแก้ไขตรงนี้ ---
+    let orderClause = '';
+    
+    if (sortBy === 'post_status') {
+      // เรียงลำดับแบบ Custom: Published -> Hidden -> Removed
+      orderClause = `
+        ORDER BY 
+          CASE r.post_status 
+            WHEN 'Published' THEN 1 
+            WHEN 'Hidden' THEN 2 
+            WHEN 'Removed' THEN 3 
+            ELSE 4 
+          END ${sortOrder}
+      `;
+    } else {
+      orderClause = `ORDER BY r.${sortBy} ${sortOrder}`;
+    }
+    // --- จบการแก้ไข ---
 
     // Query 1: นับจำนวนทั้งหมด (สำหรับ "Showing X to Y of Z")
     const countSql = `
