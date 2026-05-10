@@ -51,7 +51,7 @@ export const getAllMovies = async (req: Request, res: Response) => {
 
     // 3. Query หลัก: ดึงข้อมูลหนัง + Genres Array + Review Stats
     const dataSql = `
-      SELECT m.title, m.img_path, m.release_date, -- ดึงตามที่จะใช้ใน front ของ movie view (ภาพ, ชื่อ, ปีที่ฉาย)
+      SELECT m.movie_id, m.title, m.release_date, m.price, m.rating_id, m.country_code, m.create_date, m.update_date,
         -- ดึง Genre ของหนังแต่ละเรื่องออกมาเป็น Array
         (SELECT COALESCE(JSON_AGG(g.genre_name), '[]')
          FROM movie_genre mg 
