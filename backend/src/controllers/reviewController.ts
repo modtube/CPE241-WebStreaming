@@ -2,71 +2,51 @@ import type { Request, Response } from 'express';
 import pool from '../config/db.js'; // ต้องมี .js เพราะเราใช้ ESM คับ
 
 /**
- * ค่าที่ post_status ในตาราง reviews อนุญาต (ตาม CHECK constraint ใน 01_schema.sql)
- * หมายเหตุ: Frontend Figma ใช้คำว่า Active/Suspended/Banned ซึ่งไม่ตรงกับ schema
- *          ค่าพวกนั้นเป็นของ user_status (ตาราง app_user) ไม่ใช่ของ review
- *          คนทำ Frontend ต้องเปลี่ยน label เป็น Published/Hidden/Removed นะ
+ * Reviews controller
+ * Schema (admin branch): review_id, user_id, movie_id เป็น VARCHAR(10)
+ * เก็บค่าเป็น "V00001", "U00001", "M00001" ตรงๆ ใน DB ไม่มีการแปลง
  */
+
+// ค่าที่ post_status ในตาราง reviews อนุญาต ตาม CHECK constraint ใน 01_schema.sql
 const VALID_STATUSES = ['Published', 'Hidden', 'Removed'] as const;
 type ReviewStatus = (typeof VALID_STATUSES)[number];
 
+// Whitelist column ที่ filter ผ่าน query string ได้ (กัน SQL injection)
 const FILTERABLE_COLUMNS = ['post_status', 'user_id', 'movie_id', 'rating'] as const;
-const NUMERIC_FILTER_COLUMNS = new Set(['user_id', 'movie_id', 'rating']);
 
-/* =============================================================================
- * ID FORMAT HELPERS
- * -----------------------------------------------------------------------------
- * Database เก็บ id เป็น INT (เช่น 1, 2, 23) แต่ตามที่ทีมตกลง display จะเป็น
- *   review_id  10 → "V00010"   (V = reView)
- *   user_id    5  → "U00005"
- *   movie_id   23 → "M00023"
- *
- * - Output: ทุก response แปลงเป็น string มี prefix + zero-pad 5 หลัก
- * - Input:  รับได้ทั้ง "V00010" หรือ "10" (parser ตัด prefix ทิ้งให้)
- * - DB:     ไม่ต้องแก้ schema เลย ยังเป็น INT เหมือนเดิม
- * ===========================================================================*/
-const ID_PREFIX = {
-  review: 'V',
-  user: 'U',
-  movie: 'M',
-} as const;
-const ID_PAD_LENGTH = 5;
+// Whitelist column ที่ sort ได้
+const ALLOWED_SORT_COLUMNS = [
+  'review_id',
+  'user_id',
+  'movie_id',
+  'rating',
+  'post_status',
+  'post_time',
+] as const;
 
-function formatId(prefix: string, id: number | null | undefined): string | null {
-  if (id === null || id === undefined) return null;
-  return `${prefix}${String(id).padStart(ID_PAD_LENGTH, '0')}`;
-}
-
-/** รับได้ทั้ง "V00010", "v00010", "00010", "10", หรือ 10 — คืน 10. ผิด format → null */
-function parseId(input: string | number | undefined | null): number | null {
-  if (input === null || input === undefined || input === '') return null;
-  if (typeof input === 'number') return Number.isFinite(input) ? input : null;
-  const numericPart = String(input).replace(/^[A-Za-z]+/, '');
-  const parsed = parseInt(numericPart, 10);
-  return Number.isFinite(parsed) ? parsed : null;
-}
-
-/** แปลง row จาก DB ให้ id ทุกตัวเป็น string format */
-function formatRow(row: Record<string, unknown>) {
-  return {
-    ...row,
-    review_id: formatId(ID_PREFIX.review, row.review_id as number | null),
-    user_id: formatId(ID_PREFIX.user, row.user_id as number | null),
-    movie_id: formatId(ID_PREFIX.movie, row.movie_id as number | null),
-  };
+/** Helper: รับค่าจาก query string ที่อาจเป็น string หรือ array — เอาตัวแรก */
+function pickFirst(v: unknown): string | undefined {
+  if (v === undefined || v === null) return undefined;
+  if (Array.isArray(v)) return v[0] as string | undefined;
+  return String(v);
 }
 
 /* =============================================================================
  * GET /api/reviews
- * Query params:
- *   - post_status, user_id, movie_id, rating  (filter; user_id/movie_id รับ "U00001" หรือ "1" ก็ได้)
- *   - search       (ค้นใน comment_text)
- *   - search_id    (ค้นจาก review_id / user_id / movie_id เช่น "V00001", "U00", "M0002")
- *   - page         (default 1)
- *   - limit        (default 20, max 100)
+ * Query params (optional ทั้งหมด):
+ *   - post_status   filter (Published / Hidden / Removed)
+ *   - user_id       filter เช่น "U00002"
+ *   - movie_id      filter เช่น "M00023"
+ *   - rating        filter เช่น 5.0
+ *   - search        ค้นใน comment_text (ILIKE)
+ *   - search_id     ค้นจาก review_id / user_id / movie_id (ILIKE)
+ *   - sort_by       review_id | user_id | movie_id | rating | post_status | post_time
+ *   - sort_order    asc | desc (default desc)
+ *   - page          default 1
+ *   - limit         default 20, max 100
+ *
  * Response:
- *   { data: [...], total: 120, page: 1, limit: 20, total_pages: 6 }
- *   format นี้ตอบโจทย์ "Showing 1 to 20 of 120 results" ในหน้า Figma ได้เลย
+ *   { data: [...], total: N, page, limit, total_pages }
  * ===========================================================================*/
 export const getAllReviews = async (req: Request, res: Response) => {
   try {
@@ -74,111 +54,55 @@ export const getAllReviews = async (req: Request, res: Response) => {
     const values: unknown[] = [];
     let paramIndex = 1;
 
-    // ----- Filter: whitelist columns เพื่อกัน SQL injection -----
+    // ----- Filter -----
     for (const col of FILTERABLE_COLUMNS) {
-      const raw = req.query[col];
-      if (raw === undefined) continue;
-      let value: string | number | null = Array.isArray(raw) ? String(raw[0] ?? '') : String(raw);
-
-      // ถ้าเป็น column ที่เก็บเป็นเลข ให้ parse "U00005" → 5 ก่อน
-      if (NUMERIC_FILTER_COLUMNS.has(col)) {
-        value = parseId(value);
-        if (value === null) continue; // ค่าไม่ถูก ข้ามไปไม่ filter
-      }
+      const value = pickFirst(req.query[col]);
+      if (value === undefined || value === '') continue;
       conditions.push(`r.${col} = $${paramIndex}`);
       values.push(value);
       paramIndex++;
     }
 
-    // ----- Search keyword ใน comment_text (case-insensitive) -----
-    if (req.query.search) {
-      const v = Array.isArray(req.query.search) ? String(req.query.search[0]) : String(req.query.search);
+    // ----- Search keyword ใน comment_text -----
+    const search = pickFirst(req.query.search);
+    if (search) {
       conditions.push(`r.comment_text ILIKE $${paramIndex}`);
-      values.push(`%${v}%`);
+      values.push(`%${search}%`);
       paramIndex++;
     }
 
-    // ----- Search by formatted ID -----
-    // รองรับการพิมพ์ "V00001", "U00005", "M00023" หรือพิมพ์บางส่วน เช่น "V0001", "U00"
-    // SQL: cast id เป็น string มี prefix แล้วเทียบด้วย ILIKE
-    // (NULL user_id ปลอดภัย: 'U' || LPAD(NULL,5,'0') = NULL, NULL ILIKE ... = false)
-    if (req.query.search_id) {
-      const v = Array.isArray(req.query.search_id) ? String(req.query.search_id[0]) : String(req.query.search_id);
-      conditions.push(`(
-        ('${ID_PREFIX.review}' || LPAD(r.review_id::text, ${ID_PAD_LENGTH}, '0')) ILIKE $${paramIndex}
-        OR ('${ID_PREFIX.user}'  || LPAD(r.user_id::text,  ${ID_PAD_LENGTH}, '0')) ILIKE $${paramIndex}
-        OR ('${ID_PREFIX.movie}' || LPAD(r.movie_id::text, ${ID_PAD_LENGTH}, '0')) ILIKE $${paramIndex}
-      )`);
-      values.push(`%${v}%`);
+    // ----- Search by ID (ค้นทั้ง review/user/movie) -----
+    const searchId = pickFirst(req.query.search_id);
+    if (searchId) {
+      conditions.push(
+        `(r.review_id ILIKE $${paramIndex} OR r.user_id ILIKE $${paramIndex} OR r.movie_id ILIKE $${paramIndex})`
+      );
+      values.push(`%${searchId}%`);
       paramIndex++;
     }
 
     const whereClause = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
 
-    // ----- Pagination -----
-    const limitRaw = parseInt(String(req.query.limit ?? ''), 10);
-    const limit = Number.isFinite(limitRaw) && limitRaw > 0 && limitRaw <= 100 ? limitRaw : 20;
-    const pageRaw = parseInt(String(req.query.page ?? ''), 10);
-    const page = Number.isFinite(pageRaw) && pageRaw > 0 ? pageRaw : 1;
-    const offset = (page - 1) * limit;
-
-    /* =========================================================================
-     * SORT — Backend
-     * -------------------------------------------------------------------------
-     * Sort ทั้ง dataset ก่อน paginate (ไม่ใช่แค่หน้าปัจจุบัน)
-     *
-     * Query string:
-     *   ?sort_by=review_id|user_id|movie_id|rating|post_status|post_time
-     *   ?sort_order=asc|desc
-     *
-     * ถ้าไม่ส่ง sort_by มา → default เป็น post_time DESC (ใหม่สุดอยู่บน)
-     *
-     * !! SECURITY !!
-     * pg ไม่อนุญาตให้ใช้ ORDER BY $1 (parameterized) เพราะ identifier ไม่ใช่ value
-     * ต้อง concat เป็น string ตรงๆ — ป้องกัน SQL injection ด้วย whitelist เท่านั้น
-     * =========================================================================*/
-    const ALLOWED_SORT_COLUMNS = [
-      'review_id',
-      'user_id',
-      'movie_id',
-      'rating',
-      'post_status',
-      'post_time',
-    ] as const;
-    const sortByRaw = Array.isArray(req.query.sort_by)
-      ? String(req.query.sort_by[0])
-      : (req.query.sort_by as string | undefined);
+    // ----- Sort (whitelist เพื่อกัน SQL injection ใน ORDER BY) -----
+    const sortByRaw = pickFirst(req.query.sort_by);
     const sortBy =
       sortByRaw && (ALLOWED_SORT_COLUMNS as readonly string[]).includes(sortByRaw)
         ? sortByRaw
         : 'post_time';
-    const sortOrder = req.query.sort_order === 'asc' ? 'ASC' : 'DESC';
-    
-    // --- เริ่มแก้ไขตรงนี้ ---
-    let orderClause = '';
-    
-    if (sortBy === 'post_status') {
-      // เรียงลำดับแบบ Custom: Published -> Hidden -> Removed
-      orderClause = `
-        ORDER BY 
-          CASE r.post_status 
-            WHEN 'Published' THEN 1 
-            WHEN 'Hidden' THEN 2 
-            WHEN 'Removed' THEN 3 
-            ELSE 4 
-          END ${sortOrder}
-      `;
-    } else {
-      orderClause = `ORDER BY r.${sortBy} ${sortOrder}`;
-    }
-    // --- จบการแก้ไข ---
+    const sortOrder = pickFirst(req.query.sort_order) === 'asc' ? 'ASC' : 'DESC';
+    const orderClause = `ORDER BY r.${sortBy} ${sortOrder}`;
+
+    // ----- Pagination -----
+    const limitRaw = parseInt(pickFirst(req.query.limit) ?? '', 10);
+    const limit = Number.isFinite(limitRaw) && limitRaw > 0 && limitRaw <= 100 ? limitRaw : 20;
+    const pageRaw = parseInt(pickFirst(req.query.page) ?? '', 10);
+    const page = Number.isFinite(pageRaw) && pageRaw > 0 ? pageRaw : 1;
+    const offset = (page - 1) * limit;
 
     // Query 1: นับจำนวนทั้งหมด (สำหรับ "Showing X to Y of Z")
     const countSql = `
       SELECT COUNT(*) AS total
       FROM reviews r
-      LEFT JOIN app_user u ON r.user_id = u.user_id
-      LEFT JOIN movie m ON r.movie_id = m.movie_id
       ${whereClause};
     `;
     const countResult = await pool.query(countSql, values);
@@ -206,7 +130,7 @@ export const getAllReviews = async (req: Request, res: Response) => {
     const dataResult = await pool.query(dataSql, [...values, limit, offset]);
 
     res.status(200).json({
-      data: dataResult.rows.map(formatRow),
+      data: dataResult.rows,
       total,
       page,
       limit,
@@ -220,57 +144,38 @@ export const getAllReviews = async (req: Request, res: Response) => {
 
 /* =============================================================================
  * POST /api/reviews
- * สำหรับ user ที่หน้า movie detail page (ปุ่ม "Post Review" ใน Figma)
- * Body: {
- *   "user_id": "U00001" | 1,       // ใครเป็นคนรีวิว (รับได้ทั้ง format)
- *   "movie_id": "M00001" | 1,      // หนังเรื่องไหน
- *   "rating": 4.5,                 // 1.0 - 5.0
- *   "comment_text": "..."          // optional
- * }
- *
- * ค่า default ที่ backend จะใส่ให้:
- *   - post_status = 'Published'  (admin เปลี่ยนเป็น Hidden/Removed ได้ทีหลัง)
- *   - post_time   = CURRENT_TIMESTAMP (DB ใส่ให้เอง)
- *
- * Error cases:
- *   - 400  field หาย / format ผิด / rating เกิน 1.0-5.0
- *   - 404  user_id หรือ movie_id ที่ส่งมาไม่มีใน DB (FK violation)
- *   - 409  user คนนี้รีวิวหนังเรื่องนี้ไปแล้ว (UNIQUE constraint)
+ * Body: { user_id, movie_id, rating, comment_text? }
  * ===========================================================================*/
 export const createReview = async (req: Request, res: Response) => {
   try {
     const { user_id, movie_id, rating, comment_text } = req.body as {
-      user_id?: string | number;
-      movie_id?: string | number;
+      user_id?: string;
+      movie_id?: string;
       rating?: string | number;
       comment_text?: string | null;
     };
 
-    // ----- Validate user_id / movie_id -----
-    const userId = parseId(user_id);
-    const movieId = parseId(movie_id);
-    if (userId === null) {
+    if (!user_id || typeof user_id !== 'string') {
       res.status(400).json({ message: 'user_id ไม่ถูกต้อง' });
       return;
     }
-    if (movieId === null) {
+    if (!movie_id || typeof movie_id !== 'string') {
       res.status(400).json({ message: 'movie_id ไม่ถูกต้อง' });
       return;
     }
 
-    // ----- Validate rating (1.0 - 5.0) -----
     const ratingNum = typeof rating === 'number' ? rating : parseFloat(String(rating));
     if (!Number.isFinite(ratingNum) || ratingNum < 1.0 || ratingNum > 5.0) {
       res.status(400).json({ message: 'rating ต้องเป็นเลขระหว่าง 1.0 ถึง 5.0' });
       return;
     }
 
-    // ----- comment_text เป็น optional (schema อนุญาตให้ NULL ได้) -----
     const commentText =
       comment_text === undefined || comment_text === null || comment_text === ''
         ? null
         : String(comment_text);
 
+    // review_id auto-generate จาก DEFAULT 'V' || nextval(...)
     const sql = `
       INSERT INTO reviews (user_id, movie_id, rating, comment_text, post_status)
       VALUES ($1, $2, $3, $4, 'Published')
@@ -278,38 +183,26 @@ export const createReview = async (req: Request, res: Response) => {
     `;
 
     try {
-      const result = await pool.query(sql, [userId, movieId, ratingNum, commentText]);
+      const result = await pool.query(sql, [user_id, movie_id, ratingNum, commentText]);
       res.status(201).json({
         message: 'เพิ่ม review เรียบร้อย',
-        review: formatRow(result.rows[0]),
+        review: result.rows[0],
       });
     } catch (dbError) {
-      // จับ error จาก postgres โดยใช้ error code
-      // ดูทั้งหมดได้ที่ https://www.postgresql.org/docs/current/errcodes-appendix.html
       const code = (dbError as { code?: string }).code;
-
       if (code === '23505') {
-        // unique_violation — UNIQUE (user_id, movie_id) ในตาราง reviews
-        res.status(409).json({
-          message: 'ผู้ใช้คนนี้ได้รีวิวหนังเรื่องนี้ไปแล้ว',
-        });
+        res.status(409).json({ message: 'ผู้ใช้คนนี้ได้รีวิวหนังเรื่องนี้ไปแล้ว' });
         return;
       }
       if (code === '23503') {
-        // foreign_key_violation — user_id หรือ movie_id ไม่มีอยู่จริง
-        res.status(404).json({
-          message: 'ไม่พบ user หรือ movie ที่ระบุ',
-        });
+        res.status(404).json({ message: 'ไม่พบ user หรือ movie ที่ระบุ' });
         return;
       }
       if (code === '23514') {
-        // check_violation — rating ไม่ผ่าน CHECK (rating >= 1.0 AND rating <= 5.0)
-        res.status(400).json({
-          message: 'rating ไม่ถูกต้องตามข้อกำหนด',
-        });
+        res.status(400).json({ message: 'rating ไม่ถูกต้องตามข้อกำหนด' });
         return;
       }
-      throw dbError; // ส่งต่อให้ outer catch
+      throw dbError;
     }
   } catch (error) {
     console.error('Error in createReview:', error);
@@ -319,14 +212,12 @@ export const createReview = async (req: Request, res: Response) => {
 
 /* =============================================================================
  * PATCH /api/reviews/:reviewId/status
- * รับ :reviewId เป็น "V00001" หรือ "1" ก็ได้
- * Body: { "post_status": "Published" | "Hidden" | "Removed" }
+ * Body: { post_status: "Published" | "Hidden" | "Removed" }
  * ===========================================================================*/
 export const updateReviewStatus = async (req: Request, res: Response) => {
   try {
-    const rawId = req.params.reviewId;
-    const reviewId = parseId(Array.isArray(rawId) ? rawId[0] : rawId);
-    if (reviewId === null) {
+    const reviewId = req.params.reviewId;
+    if (!reviewId || typeof reviewId !== 'string') {
       res.status(400).json({ message: 'review id ไม่ถูกต้อง' });
       return;
     }
@@ -343,15 +234,13 @@ export const updateReviewStatus = async (req: Request, res: Response) => {
     const result = await pool.query(sql, [post_status, reviewId]);
 
     if (result.rowCount === 0) {
-      res.status(404).json({
-        message: `ไม่พบ review id: ${formatId(ID_PREFIX.review, reviewId)}`,
-      });
+      res.status(404).json({ message: `ไม่พบ review id: ${reviewId}` });
       return;
     }
 
     res.status(200).json({
       message: 'อัปเดตสถานะ review เรียบร้อย',
-      review: formatRow(result.rows[0]),
+      review: result.rows[0],
     });
   } catch (error) {
     console.error('Error in updateReviewStatus:', error);
@@ -360,14 +249,47 @@ export const updateReviewStatus = async (req: Request, res: Response) => {
 };
 
 /* =============================================================================
+ * GET /api/reviews/total?movie=M00001
+ * คืนจำนวน review + average rating ของหนังเรื่องนั้น
+ * ใช้ในหน้า movie detail (sidebar / rating summary)
+ * ===========================================================================*/
+export const getTotalMovieReview = async (req: Request, res: Response) => {
+  try {
+    const movieId = pickFirst(req.query.movie);
+    if (!movieId) {
+      res.status(400).json({ message: 'ต้องส่ง query param "movie"' });
+      return;
+    }
+
+    const sql = `
+      SELECT
+        COUNT(*) AS total_reviews,
+        ROUND(AVG(rating), 1) AS avg_rating
+      FROM reviews
+      WHERE movie_id = $1 AND post_status = 'Published';
+    `;
+    const result = await pool.query(sql, [movieId]);
+
+    res.status(200).json({
+      movie_id: movieId,
+      total_reviews: parseInt(result.rows[0].total_reviews, 10),
+      avg_rating: result.rows[0].avg_rating
+        ? parseFloat(result.rows[0].avg_rating)
+        : null,
+    });
+  } catch (error) {
+    console.error('Error in getTotalMovieReview:', error);
+    res.status(500).json({ message: 'เกิดข้อผิดพลาดในการดึงข้อมูล' });
+  }
+};
+
+/* =============================================================================
  * DELETE /api/reviews/:reviewId
- * รับ :reviewId เป็น "V00001" หรือ "1" ก็ได้
  * ===========================================================================*/
 export const deleteReview = async (req: Request, res: Response) => {
   try {
-    const rawId = req.params.reviewId;
-    const reviewId = parseId(Array.isArray(rawId) ? rawId[0] : rawId);
-    if (reviewId === null) {
+    const reviewId = req.params.reviewId;
+    if (!reviewId || typeof reviewId !== 'string') {
       res.status(400).json({ message: 'review id ไม่ถูกต้อง' });
       return;
     }
@@ -376,15 +298,13 @@ export const deleteReview = async (req: Request, res: Response) => {
     const result = await pool.query(sql, [reviewId]);
 
     if (result.rowCount === 0) {
-      res.status(404).json({
-        message: `ไม่พบ review id: ${formatId(ID_PREFIX.review, reviewId)}`,
-      });
+      res.status(404).json({ message: `ไม่พบ review id: ${reviewId}` });
       return;
     }
 
     res.status(200).json({
       message: 'ลบ review เรียบร้อย',
-      review: formatRow(result.rows[0]),
+      review: result.rows[0],
     });
   } catch (error) {
     console.error('Error in deleteReview:', error);
