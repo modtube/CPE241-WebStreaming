@@ -48,7 +48,7 @@ export const getAllCrew = async (req: Request, res: Response) => {
       result = await pool.query('SELECT * FROM person ORDER BY person_id DESC');
     }
     
-    res.status(200).json(result.rows);
+    res.status(200).json({ data: result.rows });
   } catch (error: any) {
     console.error('Database Error:', error.message);
     res.status(500).json({ message: 'An error occurred while fetching crew data.' });

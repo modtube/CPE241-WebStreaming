@@ -107,8 +107,9 @@ export default function Movies() {
       const response = await fetch("http://localhost:5000/api/genres");
       if (!response.ok) throw new Error();
       const data = await response.json();
+      const genres = data.data || data;
       setGenreFilters(
-        data.map((g: any) => ({ text: g.genre_name, value: g.genre_name })),
+        genres.map((g: any) => ({ text: g.genre_name, value: g.genre_name })),
       );
     } catch (error) {
       console.error("Genre filter failed");
@@ -126,17 +127,18 @@ export default function Movies() {
       const ratingData = await ratingRes.json();
 
       if (countryRes.ok) {
+        const countries = countryData.data || countryData;
         setCountryFilters(
-          countryData.data.map((c: any) => ({
+          countries.map((c: any) => ({
             text: c.country_name,
             value: c.country_code,
           })),
         );
       }
       if (ratingRes.ok) {
-        // 💡 Rating ไม่ต้องใส่ .data ตามที่คุณแจ้ง
+        const ratings = ratingData.data || ratingData;
         setRatingFilters(
-          ratingData.map((r: any) => ({
+          ratings.map((r: any) => ({
             text: r.rating_label,
             value: r.rating_label,
           })),

@@ -9,7 +9,7 @@ export const getAllCountries = async (req: Request, res: Response) => {
     );
 
     res.status(200).json({
-      data: result.rows,
+      data: result.rows || [],
     });
   } catch (error: any) {
     console.error("Error Fetching Countries:", error);

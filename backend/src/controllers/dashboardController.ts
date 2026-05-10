@@ -92,12 +92,14 @@ export const getDashboardStats = async (req: Request, res: Response) => {
     ]);
 
     res.status(200).json({
-      quickStats: quickStats.rows[0],
-      revenueTrend: revenueTrend.rows,
-      topSellers: topSellers.rows,
-      genreDistribution: genres.rows,
-      userGrowth: userGrowth.rows,
-      countryDistribution: countries.rows
+      data: {
+        quickStats: quickStats.rows[0],
+        revenueTrend: revenueTrend.rows,
+        topSellers: topSellers.rows,
+        genreDistribution: genres.rows,
+        userGrowth: userGrowth.rows,
+        countryDistribution: countries.rows
+      }
     });
 
   } catch (error: any) {

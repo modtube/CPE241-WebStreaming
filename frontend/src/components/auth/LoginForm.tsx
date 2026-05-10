@@ -82,7 +82,7 @@ export default function LoginForm() {
 
   return (
     <form
-      onSubmit={handleSubmit}
+      onSubmit={handleRealLogin}
       className="w-full max-w-md bg-white border border-gray-200 rounded-3xl p-8 flex flex-col gap-6 shadow-large"
     >
       <FormHeader mode={mode} />
