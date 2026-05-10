@@ -1,14 +1,17 @@
-import type { FormEvent, ReactNode } from "react";
+import { useState, type FormEvent, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
+import { api, setCurrentUser, type SessionUser } from "../../../lib/api";
 
-function FormHeader() {
+function FormHeader({ mode }: { mode: "login" | "register" }) {
   return (
     <div className="text-center mb-3">
       <h1 className="m-0 text-4xl font-bold tracking-wide text-gray-900">
         MOD<span className="text-brand-maroon">TUBE</span>
       </h1>
       <p className="mt-3 text-gray-600 max-w-xs mx-auto leading-relaxed">
-        Sign in to enjoy watching movies and access admin controls.
+        {mode === "login"
+          ? "Sign in to enjoy watching movies and access admin controls."
+          : "Create your account to start watching."}
       </p>
     </div>
   );
@@ -35,10 +38,46 @@ function AuthField({
 
 export default function LoginForm() {
   const navigate = useNavigate();
+  const [mode, setMode] = useState<"login" | "register">("login");
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    navigate("/admin/dashboard");
+    setError(null);
+    setLoading(true);
+
+    try {
+      if (mode === "login") {
+        const result = await api.post<{ user: SessionUser }>("/api/auth/login", {
+          username,
+          password,
+        });
+        setCurrentUser(result.user);
+        // route ตาม role
+        if (result.user.user_role === "admin") {
+          navigate("/admin/dashboard");
+        } else {
+          navigate("/customer/home");
+        }
+      } else {
+        const result = await api.post<{ user: SessionUser }>("/api/auth/register", {
+          username,
+          email,
+          password,
+        });
+        setCurrentUser(result.user);
+        navigate("/customer/home");
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "เกิดข้อผิดพลาด";
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -46,17 +85,40 @@ export default function LoginForm() {
       onSubmit={handleSubmit}
       className="w-full max-w-md bg-white border border-gray-200 rounded-3xl p-8 flex flex-col gap-6 shadow-large"
     >
-      <FormHeader />
+      <FormHeader mode={mode} />
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded text-sm">
+          {error}
+        </div>
+      )}
 
       <div className="grid gap-6">
-        <AuthField htmlFor="username" label="Username or Email">
+        <AuthField htmlFor="username" label="Username">
           <input
             id="username"
             type="text"
             placeholder="Enter your username"
             className="input-field"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
           />
         </AuthField>
+
+        {mode === "register" && (
+          <AuthField htmlFor="email" label="Email">
+            <input
+              id="email"
+              type="email"
+              placeholder="you@example.com"
+              className="input-field"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </AuthField>
+        )}
 
         <AuthField htmlFor="password" label="Password">
           <input
@@ -64,47 +126,55 @@ export default function LoginForm() {
             type="password"
             placeholder="••••••••"
             className="input-field"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            minLength={mode === "register" ? 6 : undefined}
           />
         </AuthField>
 
-        <div className="flex justify-between items-center gap-2 text-sm text-slate-600">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
-            />
-            Remember me
-          </label>
-          <a href="#" className="text-blue-600 hover:text-blue-800 font-medium">
-            Forgot password?
-          </a>
-        </div>
-
         <button
           type="submit"
-          className="bg-brand-maroon btn-primary w-full py-3 text-lg font-semibold"
-          id="admin"
+          disabled={loading}
+          className="bg-brand-maroon btn-primary w-full py-3 text-lg font-semibold disabled:opacity-50"
         >
-          Sign In
-        </button>
-
-        {/* Dumb-Button to /customer/*/}
-        <button
-          type="button"
-          onClick={() => navigate("/customer/home")}
-          className="bg-gray-500 btn-primary w-full py-3 text-lg font-semibold text-white hover:bg-gray-600"
-        >
-          Dummy Customer Btn
+          {loading
+            ? "กำลังโหลด..."
+            : mode === "login"
+            ? "Sign In"
+            : "Create Account"}
         </button>
 
         <div className="text-center text-sm text-gray-600 mt-2">
-          Don't have an account?{" "}
-          <a
-            href="#"
-            className="text-brand-maroon hover:text-brand-maroon font-semibold"
-          >
-            Sign up
-          </a>
+          {mode === "login" ? (
+            <>
+              Don't have an account?{" "}
+              <button
+                type="button"
+                onClick={() => {
+                  setMode("register");
+                  setError(null);
+                }}
+                className="text-brand-maroon hover:text-brand-maroon font-semibold"
+              >
+                Sign up
+              </button>
+            </>
+          ) : (
+            <>
+              Already have an account?{" "}
+              <button
+                type="button"
+                onClick={() => {
+                  setMode("login");
+                  setError(null);
+                }}
+                className="text-brand-maroon hover:text-brand-maroon font-semibold"
+              >
+                Sign in
+              </button>
+            </>
+          )}
         </div>
       </div>
     </form>
