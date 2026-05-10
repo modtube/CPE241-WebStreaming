@@ -45,8 +45,62 @@ export default function Transactions() {
   }, []);
 
   const handleExportCSV = () => {
-    // TODO: เขียน Logic สำหรับดาวน์โหลดไฟล์ CSV
-    message.success('Exporting transactions to CSV...');
+    // ใช้ filteredData (หลัง search) ไม่ใช่ dataSource ดิบ
+    // user อาจกรองข้อมูลก่อนแล้วอยากได้แค่ที่กรอง
+    const rows = filteredData;
+
+    if (rows.length === 0) {
+      message.warning('ไม่มีข้อมูลให้ export');
+      return;
+    }
+
+    // กำหนด header ของ CSV (ตามลำดับ column ในตาราง)
+    const headers = ['ID', 'Name', 'Release Date', 'Amount', 'Payment Method', 'Status'];
+
+    // escape ค่าให้ปลอดภัย: ถ้ามี comma, quote, หรือ newline ต้องครอบด้วย " และ double-quote คู่
+    const escape = (v: string | number) => {
+      const s = String(v);
+      if (/[",\n\r]/.test(s)) {
+        return `"${s.replace(/"/g, '""')}"`;
+      }
+      return s;
+    };
+
+    // สร้าง CSV content
+    const csvLines = [
+      headers.map(escape).join(','),
+      ...rows.map((r) =>
+        [
+          r.transaction_id,
+          r.name,
+          r.release_date,
+          r.amount.toFixed(2),
+          r.payment_method,
+          r.status,
+        ]
+          .map(escape)
+          .join(',')
+      ),
+    ];
+
+    // BOM ทำให้ Excel เปิดได้สวยพร้อม UTF-8 (ภาษาไทยไม่เพี้ยน)
+    const csvContent = '\uFEFF' + csvLines.join('\n');
+
+    // สร้าง blob และ trigger download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    // ใส่วันที่ใน filename เพื่อแยก export แต่ละครั้ง
+    const today = new Date().toISOString().slice(0, 10);
+    link.download = `transactions_${today}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    message.success(`Export ${rows.length} transaction(s) สำเร็จ`);
   };
 
   // กำหนด Columns 
