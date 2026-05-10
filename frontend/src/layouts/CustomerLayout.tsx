@@ -2,9 +2,9 @@ import { Outlet } from "react-router-dom";
 import CustomerSidebar from "../components/customer/CustomerSidebar";
 
 const CustomerLayout = () => (
-  <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100">
-    <main className="p-6 min-h-screen">
-      <CustomerSidebar />
+  <div className="flex min-h-screen bg-[#0d0d0d]">
+    <CustomerSidebar />
+    <main className="flex-1 ml-64 overflow-y-auto">
       <Outlet />
     </main>
   </div>
