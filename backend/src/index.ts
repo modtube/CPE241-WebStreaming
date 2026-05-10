@@ -1,3 +1,6 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import express from "express";
 import countryRoutes from "./routes/countryRoutes.js";
 import personRoutes from "./routes/personRoutes.js";
@@ -6,14 +9,12 @@ import languageRoutes from "./routes/languageRoutes.js";
 import genreRoutes from "./routes/genreRoutes.js";
 import ratingRoutes from "./routes/ratingRoutes.js";
 import cors from "cors";
-import dotenv from "dotenv";
 import movieRoutes from "./routes/movieRoutes.js";
 import crewRoutes from "./routes/crewRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
 import path from "path";
-
-dotenv.config();
 
 const app = express();
 const port = process.env.BACKEND_PORT || 5000;
@@ -24,6 +25,8 @@ app.use(express.json());
 app.get("/", (req, res) => {
   res.send("ยินดีต้อนรับสู่ API ของ ModTube คับ! ลองไปที่ /api/movies ดูนะ");
 });
+
+app.use("/api/auth", authRoutes);
 
 // บอกให้ Express ใช้ movieRoutes สำหรับ URL ที่ขึ้นต้นด้วย /api/movies
 app.use("/api/movies", movieRoutes);
