@@ -1,18 +1,24 @@
-import express from "express";
+import express from 'express';
 import {
   getAllReviews,
+  createReview,
+  updateReviewStatus,
+  deleteReview,
   getTotalMovieReview,
-} from "../controllers/reviewController.js";
+} from '../controllers/reviewController.js'; // อย่าลืม .js
 
 const router = express.Router();
 
-// เมื่อมีคนเรียก GET http://localhost:5000/api/reviews
-// หรือ http://localhost:5000/api/reviews?movie=[...]&user=[...]
-// (movie กับ user จะค้นเป็นเลข ID, ใส่แค่อย่างใดอย่างหนึ่งก็ได้)
-router.get("/", getAllReviews);
+// GET    /api/reviews                   -> ดึง review ทั้งหมด (รองรับ filter, search, sort, pagination)
+// GET    /api/reviews/total?movie=M0001 -> นับจำนวน review + เฉลี่ย rating ของหนังเรื่องนึง
+// POST   /api/reviews                   -> user เพิ่ม review ใหม่ (จากหน้า movie detail)
+// PATCH  /api/reviews/:reviewId/status  -> อัปเดต post_status
+// DELETE /api/reviews/:reviewId         -> ลบ review
 
-// เมื่อมีคนเรียก GET http://localhost:5000/api/reviews/total?movie=[...]
-// (movie เป็นเลข ID)
-router.get("/total", getTotalMovieReview);
+router.get('/', getAllReviews);
+router.get('/total', getTotalMovieReview);
+router.post('/', createReview);
+router.patch('/:reviewId/status', updateReviewStatus);
+router.delete('/:reviewId', deleteReview);
 
 export default router;
