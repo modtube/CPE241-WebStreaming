@@ -1,4 +1,5 @@
 import express from "express";
+import countryRoutes from "./routes/countryRoutes.js";
 import personRoutes from "./routes/personRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 import languageRoutes from "./routes/languageRoutes.js";
@@ -41,6 +42,8 @@ app.use("/api/languages", languageRoutes);
 app.use("/api/genres", genreRoutes);
 
 app.use("/api/ratings", ratingRoutes);
+
+app.use("/api/countries", countryRoutes);
 
 app.get("/api/status", (req, res) => {
   res.json({ message: "Backend is ready!" });

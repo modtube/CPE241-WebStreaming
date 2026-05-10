@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react"; // 💡 เพิ่ม React ตรงนี้
+import React, { useState, useEffect, useCallback } from "react";
 import { Table, Input, Button, message, Dropdown, Space, Modal } from "antd";
 import { SearchOutlined, MoreOutlined } from "@ant-design/icons";
 import { Trash2 } from "lucide-react";
@@ -15,6 +15,12 @@ interface User {
   register_date: string;
   user_status: "active" | "suspended" | "banned";
   user_role: "admin" | "customer";
+  country_code?: string;
+}
+
+// 💡 เพิ่ม Interface สำหรับข้อมูลประเทศ
+interface Country {
+  country_code: string;
   country_name: string;
 }
 
@@ -23,6 +29,7 @@ export default function Users() {
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  const [countries, setCountries] = useState<Country[]>([]); // 💡 State สำหรับเก็บรายชื่อประเทศ
   const [pagination, setPagination] = useState<TablePaginationConfig>({
     current: 1,
     pageSize: 10,
@@ -41,6 +48,19 @@ export default function Users() {
     {},
   );
 
+  // 💡 ฟังก์ชันดึงข้อมูลประเทศทั้งหมด
+  const fetchCountries = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/countries");
+      const result = await response.json();
+      if (response.ok) {
+        setCountries(result.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch countries", error);
+    }
+  };
+
   const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
@@ -55,6 +75,10 @@ export default function Users() {
         }),
         ...(filters.user_role?.[0] && {
           user_role: String(filters.user_role[0]),
+        }),
+        // 💡 ส่ง country_code ไปที่ API
+        ...(filters.country_code?.[0] && {
+          country_code: String(filters.country_code[0]),
         }),
       });
 
@@ -85,6 +109,11 @@ export default function Users() {
     fetchUsers();
   }, [fetchUsers]);
 
+  // 💡 ดึงประเทศเมื่อ Component mount
+  useEffect(() => {
+    fetchCountries();
+  }, []);
+
   const handleTableChange = (
     newPagination: TablePaginationConfig,
     newFilters: Record<string, FilterValue | null>,
@@ -106,7 +135,7 @@ export default function Users() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   const handleDelete = () => {
-    setDeleteModalOpen(true); // แค่เปิด modal
+    setDeleteModalOpen(true);
   };
 
   const confirmDelete = async () => {
@@ -224,7 +253,18 @@ export default function Users() {
         sortParams.field === "email" ? (sortParams.order as any) : null,
       sortDirections: ["ascend", "descend", "ascend"],
     },
-    { title: "Country", dataIndex: "country_name" },
+    {
+      title: "Country",
+      dataIndex: "country_code",
+      // 💡 เพิ่ม Filter โดยดึงค่าจาก State countries
+      filters: countries.map((c) => ({
+        text: c.country_name,
+        value: c.country_code,
+      })),
+      filterMultiple: false,
+      filteredValue: filters.country_code || null,
+      render: (_, record) => record.country_code || "-",
+    },
     {
       title: "Role",
       dataIndex: "user_role",
@@ -315,23 +355,23 @@ export default function Users() {
         );
       },
     },
-    {
-      title: "Actions",
-      key: "actions",
-      width: 80,
-      render: (_, record) => (
-        <Dropdown
-          menu={{
-            items: [
-              { key: "view", label: "View Profile" },
-              { key: "history", label: "Transaction History" },
-            ],
-          }}
-        >
-          <Button type="text" icon={<MoreOutlined />} />
-        </Dropdown>
-      ),
-    },
+    // { // ใน figma มันไม่มีนะ
+    //   title: "Actions",
+    //   key: "actions",
+    //   width: 80,
+    //   render: (_, record) => (
+    //     <Dropdown
+    //       menu={{
+    //         items: [
+    //           { key: "view", label: "View Profile" },
+    //           { key: "history", label: "Transaction History" },
+    //         ],
+    //       }}
+    //     >
+    //       <Button type="text" icon={<MoreOutlined />} />
+    //     </Dropdown>
+    //   ),
+    // },
   ];
 
   return (
