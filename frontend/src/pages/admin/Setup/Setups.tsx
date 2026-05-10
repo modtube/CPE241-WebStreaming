@@ -1,120 +1,64 @@
-import PageContainer from '../../../components/common/PageContainer';
+import { useNavigate } from 'react-router-dom';
+import { Drama, Languages, Globe, Star } from 'lucide-react';
 
 export default function Setups() {
+  const navigate = useNavigate();
+
+  const setupMenus = [
+    {
+      title: 'Genre View',
+      description: 'Manage all genre',
+      icon: <Drama size={26} strokeWidth={1.5} />,
+      colorClass: 'text-pink-500 bg-pink-50 group-hover:bg-pink-500 group-hover:text-white',
+      path: '/admin/setups/genre',
+    },
+    {
+      title: 'Language View',
+      description: 'Manage display and audio languages.',
+      icon: <Languages size={26} strokeWidth={1.5} />,
+      colorClass: 'text-green-500 bg-green-50 group-hover:bg-green-500 group-hover:text-white',
+      path: '/admin/setups/language',
+    },
+    {
+      title: 'Country View',
+      description: 'Manage supported countries and regions.',
+      icon: <Globe size={26} strokeWidth={1.5} />,
+      colorClass: 'text-blue-500 bg-blue-50 group-hover:bg-blue-500 group-hover:text-white',
+      path: '/admin/setups/country',
+    },
+    {
+      title: 'Rating View',
+      description: 'Manage all rating content',
+      icon: <Star size={26} strokeWidth={1.5} />,
+      colorClass: 'text-orange-500 bg-orange-50 group-hover:bg-orange-500 group-hover:text-white',
+      path: '/admin/setups/rating',
+    },
+  ];
+
   return (
-    <PageContainer>
-      <div className="space-y-6">
-        {/* General Settings */}
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900">General Settings</h2>
-            <p className="text-sm text-gray-600 mt-1">Basic system configuration</p>
-          </div>
-          <div className="p-6 space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Site Name</label>
-                <input
-                  type="text"
-                  defaultValue="MODTUBE"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Site URL</label>
-                <input
-                  type="url"
-                  defaultValue="https://modtube.com"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
+    <div className="p-6 md:p-8 w-full"> 
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+        
+        {setupMenus.map((menu, index) => (
+          <div 
+            key={index}
+            onClick={() => navigate(menu.path)}
+            className="group bg-white rounded-xl border-2 border-gray-100 p-8 cursor-pointer shadow-sm hover:shadow-md hover:border-gray-200 hover:-translate-y-1 active:scale-[0.98] transition-all duration-300 flex flex-col justify-center min-h-[220px]"
+          >
+            <div className={`w-14 h-14 rounded-full flex items-center justify-center mb-6 transition-all duration-300 ${menu.colorClass}`}>
+              {menu.icon}
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
-              <textarea
-                rows={3}
-                defaultValue="Your premier streaming platform for movies and entertainment"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
+            
+            <h3 className="text-xl font-bold text-gray-800 mb-2">
+              {menu.title}
+            </h3>
+            <p className="text-gray-500 text-sm">
+              {menu.description}
+            </p>
           </div>
-        </div>
+        ))}
 
-        {/* Email Settings */}
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900">Email Settings</h2>
-            <p className="text-sm text-gray-600 mt-1">Configure email notifications</p>
-          </div>
-          <div className="p-6 space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">SMTP Host</label>
-                <input
-                  type="text"
-                  placeholder="smtp.example.com"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">SMTP Port</label>
-                <input
-                  type="number"
-                  defaultValue="587"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-            </div>
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="email-notifications"
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-              <label htmlFor="email-notifications" className="ml-2 block text-sm text-gray-900">
-                Enable email notifications for new registrations
-              </label>
-            </div>
-          </div>
-        </div>
-
-        {/* Payment Settings */}
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900">Payment Settings</h2>
-            <p className="text-sm text-gray-600 mt-1">Configure payment gateways</p>
-          </div>
-          <div className="p-6 space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Stripe API Key</label>
-                <input
-                  type="password"
-                  placeholder="sk_test_..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Currency</label>
-                <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                  <option value="USD">USD ($)</option>
-                  <option value="EUR">EUR (€)</option>
-                  <option value="GBP">GBP (£)</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex justify-end space-x-3">
-          <button className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
-            Cancel
-          </button>
-          <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
-            Save Changes
-          </button>
-        </div>
       </div>
-    </PageContainer>
+    </div>
   );
 }

@@ -17,7 +17,11 @@ import Home from "./pages/customer/Home";
 import PersonalLibrary from "./pages/customer/PersonalLibrary";
 import Playlists from "./pages/customer/Playlists";
 import TransactionHistory from "./pages/customer/TransactionHistory";
-import EditProfile from "./pages/customer/EditProfile";
+import EditProfile from "./pages/customer/EditProfile"
+import GenreView from "./pages/admin/Setup/Genre";
+import LanguageView from "./pages/admin/Setup/Language";
+import CountryView from "./pages/admin/Setup/Country";
+import RatingView from "./pages/admin/Setup/Rating";
 
 function App() {
   return (
@@ -40,6 +44,10 @@ function App() {
         <Route path="users" element={<UserManagement />} />
         <Route path="transactions" element={<TransactionsView />} />
         <Route path="setups" element={<SetupsView />} />
+        <Route path="setups/genre" element={<GenreView />} />
+        <Route path="setups/language" element={<LanguageView />} />
+        <Route path="setups/country" element={<CountryView />} />
+        <Route path="setups/rating" element={<RatingView />} />
       </Route>
 
       {/* Customer Routes */}

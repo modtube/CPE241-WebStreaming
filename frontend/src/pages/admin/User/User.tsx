@@ -251,7 +251,7 @@ export default function Users() {
             showTotal: (total, range) => (
               <span className="text-gray-400 font-normal">Showing {range[0]} to {range[1]} of {total} results</span>
             )
-            // 💡 ลบ itemRender เพื่อให้กลับไปใช้ปุ่ม Default (< 1 >) ของ Ant Design
+            
           }}
           className="
             [&_.ant-table-thead_th]:bg-white
