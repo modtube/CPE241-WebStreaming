@@ -31,8 +31,8 @@ export default function Crew() {
       // ส่ง query string ไปที่ backend
       const response = await fetch(`http://localhost:5000/api/crew?search=${search}`);
       if (!response.ok) throw new Error('Fetch failed');
-      const data = await response.json();
-      setDataSource(data);
+      const result = await response.json();
+      setDataSource(result.data || result);
     } catch (error) {
       console.error("Fetch Error:", error);
       // กรณี Error หรือหา Backend ไม่เจอ สามารถใส่ Mockup ไว้กันพังได้เหมือนเดิมครับ

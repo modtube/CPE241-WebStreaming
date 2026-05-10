@@ -6,10 +6,10 @@ export const getAllLanguages = async (req: Request, res: Response) => {
     const result = await pool.query("SELECT * FROM language_list");
 
     if (!result || result.rows.length === 0) {
-      return res.status(500).json({ message: "Language Not Found!" });
+      return res.status(200).json({ data: [], message: "No languages found" });
     }
 
-    res.status(200).json(result.rows);
+    res.status(200).json({ data: result.rows });
   } catch (error) {
     console.error("Error: ", error);
     res

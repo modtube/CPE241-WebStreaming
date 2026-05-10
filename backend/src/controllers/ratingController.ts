@@ -6,10 +6,10 @@ export const getAllRatings = async (req: Request, res: Response) => {
     const result = await pool.query("SELECT * FROM movie_rating");
 
     if (!result || result.rows.length === 0) {
-      return res.status(500).json({ message: "Movie Rating Not Found!" });
+      return res.status(200).json({ data: [], message: "No ratings found" });
     }
 
-    res.status(200).json(result.rows);
+    res.status(200).json({ data: result.rows });
   } catch (error) {
     console.error("Error: ", error);
     res.status(500).json({ message: "Getting Ratings: Internal Server Issue" });

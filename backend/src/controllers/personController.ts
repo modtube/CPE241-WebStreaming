@@ -21,10 +21,10 @@ export const getAllPersons = async (req: Request, res: Response) => {
     }
 
     if (!result || result.rows.length === 0) {
-      return res.status(200).json({ message: "No persons found!" });
+      return res.status(200).json({ data: [], message: "No persons found!" });
     }
 
-    res.status(200).json(result.rows);
+    res.status(200).json({ data: result.rows });
   } catch (error) {
     console.error("Error: ", error);
     res.status(500).json({ message: "Getting Persons: Internal Server Issue" });

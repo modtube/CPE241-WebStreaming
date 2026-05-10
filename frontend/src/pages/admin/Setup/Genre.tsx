@@ -20,8 +20,8 @@ export default function GenreSetup() {
     try {
       const response = await fetch(`http://localhost:5000/api/genres?search=${searchText}`); 
       if (!response.ok) throw new Error('Fetch failed');
-      const data = await response.json();
-      setDataSource(data);
+      const result = await response.json();
+      setDataSource(result.data || result);
     } catch (error) {
     // 🚨 MOCKUP DATA: ส่วนนี้จะทำงานเมื่อหา Backend ไม่เจอ (คอมเมนต์ทิ้งได้เลยเมื่อเชื่อม API จริงเสร็จ)
       console.warn("Backend not found. Using Mockup Data instead.");

@@ -56,22 +56,23 @@ export default function Dashboard() {
     fetch('http://localhost:5000/api/dashboard')
       .then(res => res.json())
       .then(json => {
+        const dashData = json.data || json;
         // แปลงข้อมูลสถิติให้เป็น Number และเรียงลำดับข้อมูลก่อนแสดงผล
         const processed = {
-          ...json,
-          revenueTrend: json.revenueTrend?.map((item: any) => ({
+          ...dashData,
+          revenueTrend: dashData.revenueTrend?.map((item: any) => ({
             ...item,
             amount: parseFloat(item.amount) || 0
           })) || [],
-          genreDistribution: json.genreDistribution?.map((item: any) => ({
+          genreDistribution: dashData.genreDistribution?.map((item: any) => ({
             ...item,
             value: parseInt(item.value, 10) || 0
           })).sort((a: any, b: any) => b.value - a.value) || [], 
-          userGrowth: json.userGrowth?.map((item: any) => ({
+          userGrowth: dashData.userGrowth?.map((item: any) => ({
             ...item,
             count: parseInt(item.count, 10) || 0
           })) || [],
-          countryDistribution: json.countryDistribution?.map((item: any) => ({
+          countryDistribution: dashData.countryDistribution?.map((item: any) => ({
             ...item,
             value: parseInt(item.value, 10) || 0
           })).sort((a: any, b: any) => b.value - a.value) || []
