@@ -195,6 +195,105 @@ export const getAllReviews = async (req: Request, res: Response) => {
 };
 
 /* =============================================================================
+ * POST /api/reviews
+ * สำหรับ user ที่หน้า movie detail page (ปุ่ม "Post Review" ใน Figma)
+ * Body: {
+ *   "user_id": "U00001" | 1,       // ใครเป็นคนรีวิว (รับได้ทั้ง format)
+ *   "movie_id": "M00001" | 1,      // หนังเรื่องไหน
+ *   "rating": 4.5,                 // 1.0 - 5.0
+ *   "comment_text": "..."          // optional
+ * }
+ *
+ * ค่า default ที่ backend จะใส่ให้:
+ *   - post_status = 'Published'  (admin เปลี่ยนเป็น Hidden/Removed ได้ทีหลัง)
+ *   - post_time   = CURRENT_TIMESTAMP (DB ใส่ให้เอง)
+ *
+ * Error cases:
+ *   - 400  field หาย / format ผิด / rating เกิน 1.0-5.0
+ *   - 404  user_id หรือ movie_id ที่ส่งมาไม่มีใน DB (FK violation)
+ *   - 409  user คนนี้รีวิวหนังเรื่องนี้ไปแล้ว (UNIQUE constraint)
+ * ===========================================================================*/
+export const createReview = async (req: Request, res: Response) => {
+  try {
+    const { user_id, movie_id, rating, comment_text } = req.body as {
+      user_id?: string | number;
+      movie_id?: string | number;
+      rating?: string | number;
+      comment_text?: string | null;
+    };
+
+    // ----- Validate user_id / movie_id -----
+    const userId = parseId(user_id);
+    const movieId = parseId(movie_id);
+    if (userId === null) {
+      res.status(400).json({ message: 'user_id ไม่ถูกต้อง' });
+      return;
+    }
+    if (movieId === null) {
+      res.status(400).json({ message: 'movie_id ไม่ถูกต้อง' });
+      return;
+    }
+
+    // ----- Validate rating (1.0 - 5.0) -----
+    const ratingNum = typeof rating === 'number' ? rating : parseFloat(String(rating));
+    if (!Number.isFinite(ratingNum) || ratingNum < 1.0 || ratingNum > 5.0) {
+      res.status(400).json({ message: 'rating ต้องเป็นเลขระหว่าง 1.0 ถึง 5.0' });
+      return;
+    }
+
+    // ----- comment_text เป็น optional (schema อนุญาตให้ NULL ได้) -----
+    const commentText =
+      comment_text === undefined || comment_text === null || comment_text === ''
+        ? null
+        : String(comment_text);
+
+    const sql = `
+      INSERT INTO reviews (user_id, movie_id, rating, comment_text, post_status)
+      VALUES ($1, $2, $3, $4, 'Published')
+      RETURNING *;
+    `;
+
+    try {
+      const result = await pool.query(sql, [userId, movieId, ratingNum, commentText]);
+      res.status(201).json({
+        message: 'เพิ่ม review เรียบร้อย',
+        review: formatRow(result.rows[0]),
+      });
+    } catch (dbError) {
+      // จับ error จาก postgres โดยใช้ error code
+      // ดูทั้งหมดได้ที่ https://www.postgresql.org/docs/current/errcodes-appendix.html
+      const code = (dbError as { code?: string }).code;
+
+      if (code === '23505') {
+        // unique_violation — UNIQUE (user_id, movie_id) ในตาราง reviews
+        res.status(409).json({
+          message: 'ผู้ใช้คนนี้ได้รีวิวหนังเรื่องนี้ไปแล้ว',
+        });
+        return;
+      }
+      if (code === '23503') {
+        // foreign_key_violation — user_id หรือ movie_id ไม่มีอยู่จริง
+        res.status(404).json({
+          message: 'ไม่พบ user หรือ movie ที่ระบุ',
+        });
+        return;
+      }
+      if (code === '23514') {
+        // check_violation — rating ไม่ผ่าน CHECK (rating >= 1.0 AND rating <= 5.0)
+        res.status(400).json({
+          message: 'rating ไม่ถูกต้องตามข้อกำหนด',
+        });
+        return;
+      }
+      throw dbError; // ส่งต่อให้ outer catch
+    }
+  } catch (error) {
+    console.error('Error in createReview:', error);
+    res.status(500).json({ message: 'เกิดข้อผิดพลาดในการเพิ่ม review' });
+  }
+};
+
+/* =============================================================================
  * PATCH /api/reviews/:reviewId/status
  * รับ :reviewId เป็น "V00001" หรือ "1" ก็ได้
  * Body: { "post_status": "Published" | "Hidden" | "Removed" }
