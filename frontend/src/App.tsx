@@ -7,6 +7,7 @@ import CustomerLayout from "./layouts/CustomerLayout";
 import Login from "./pages/auth/Login";
 import AdminDashboard from "./pages/admin/Dashboard";
 import MoviesView from "./pages/admin/Movie/Movies";
+import MoviesForm from "./pages/admin/Movie/MovieForm";
 import ReviewsView from "./pages/admin/Review/Reviews";
 import CrewView from "./pages/admin/Crew/Crew";
 import CrewForm from "./pages/admin/Crew/CrewForm";
@@ -33,6 +34,8 @@ function App() {
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="movies" element={<MoviesView />} />
+        <Route path="movies/add" element={<MoviesForm />} />
+        <Route path="movies/edit/:id" element={<MoviesForm />} />
         <Route path="reviews" element={<ReviewsView />} />
         <Route path="crew" element={<CrewView />} />
         <Route path="crew/add" element={<CrewForm />} />
