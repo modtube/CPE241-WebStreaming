@@ -9,7 +9,12 @@ const menuItems = [
   { name: 'Cast and Crew Management', path: '/admin/crew' },
   { name: 'Users Management', path: '/admin/users' },
   { name: 'Transactions Management', path: '/admin/transactions' },
-  { name: 'Setup & Quality Control Overview', path: '/admin/setups' },
+  { name: 'Genre Management', path: '/admin/setups/genre' },
+  { name: 'Language Management', path: '/admin/setups/language' },
+  { name: 'Country Management', path: '/admin/setups/country' },
+  { name: 'Rating Management', path: '/admin/setups/rating' },
+  { name: 'Setup & Quality Control Overview', path: '/admin/setups' }
+
 ];
 
 export default function AdminNavbar() {
@@ -42,11 +47,26 @@ export default function AdminNavbar() {
 
   // 4. Back button function
   const handleBack = () => {
-    if (currentMenuItem) {
-      navigate(currentMenuItem.path);
-    } else {
-      navigate(-1);
+    // กฎข้อที่ 1: ถ้าอยู่หน้าตารางของเมนูย่อย Setups ให้กลับไปหน้า Setups Overview
+    const setupSubPages = [
+      '/admin/setups/genre', 
+      '/admin/setups/language', 
+      '/admin/setups/country', 
+      '/admin/setups/rating'
+    ];
+    if (setupSubPages.includes(location.pathname)) {
+      navigate('/admin/setups');
+      return;
     }
+
+    // กฎข้อที่ 2: ถ้าเป็นหน้า Add / Edit ให้กลับไปที่ตารางของหมวดนั้นๆ
+    if (currentMenuItem && location.pathname !== currentMenuItem.path) {
+      navigate(currentMenuItem.path);
+      return;
+    }
+
+    // กฎข้อที่ 3: เผื่อกรณีอื่นๆ ถอยหลังตามประวัติเบราว์เซอร์
+    navigate(-1);
   };
 
   const handleLogout = () => {

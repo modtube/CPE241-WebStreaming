@@ -7,6 +7,7 @@ import CustomerLayout from "./layouts/CustomerLayout";
 import Login from "./pages/auth/Login";
 import AdminDashboard from "./pages/admin/Dashboard";
 import MoviesView from "./pages/admin/Movie/Movies";
+import MoviesForm from "./pages/admin/Movie/MovieForm";
 import ReviewsView from "./pages/admin/Review/Reviews";
 import CrewView from "./pages/admin/Crew/Crew";
 import CrewForm from "./pages/admin/Crew/CrewForm";
@@ -17,7 +18,11 @@ import Home from "./pages/customer/Home";
 import PersonalLibrary from "./pages/customer/PersonalLibrary";
 import Playlists from "./pages/customer/Playlists";
 import TransactionHistory from "./pages/customer/TransactionHistory";
-import EditProfile from "./pages/customer/EditProfile";
+import EditProfile from "./pages/customer/EditProfile"
+import GenreView from "./pages/admin/Setup/Genre";
+import LanguageView from "./pages/admin/Setup/Language";
+import CountryView from "./pages/admin/Setup/Country";
+import RatingView from "./pages/admin/Setup/Rating";
 
 function App() {
   return (
@@ -33,6 +38,8 @@ function App() {
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="movies" element={<MoviesView />} />
+        <Route path="movies/add" element={<MoviesForm />} />
+        <Route path="movies/edit/:id" element={<MoviesForm />} />
         <Route path="reviews" element={<ReviewsView />} />
         <Route path="crew" element={<CrewView />} />
         <Route path="crew/add" element={<CrewForm />} />
@@ -40,6 +47,10 @@ function App() {
         <Route path="users" element={<UserManagement />} />
         <Route path="transactions" element={<TransactionsView />} />
         <Route path="setups" element={<SetupsView />} />
+        <Route path="setups/genre" element={<GenreView />} />
+        <Route path="setups/language" element={<LanguageView />} />
+        <Route path="setups/country" element={<CountryView />} />
+        <Route path="setups/rating" element={<RatingView />} />
       </Route>
 
       {/* Customer Routes */}
