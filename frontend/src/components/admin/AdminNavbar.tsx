@@ -4,12 +4,12 @@ import { LogOut, ChevronDown } from 'lucide-react';
 
 const menuItems = [
   { name: 'Dashboard', path: '/admin/dashboard' },
-  { name: 'Movies', path: '/admin/movies' },
-  { name: 'Reviews', path: '/admin/reviews' },
-  { name: 'Crew', path: '/admin/crew' },
-  { name: 'Users', path: '/admin/users' },
-  { name: 'Transactions', path: '/admin/transactions' },
-  { name: 'Setups', path: '/admin/setups' },
+  { name: 'Movies Management', path: '/admin/movies' },
+  { name: 'Reviews Management', path: '/admin/reviews' },
+  { name: 'Cast and Crew Management', path: '/admin/crew' },
+  { name: 'Users Management', path: '/admin/users' },
+  { name: 'Transactions Management', path: '/admin/transactions' },
+  { name: 'Setup & Quality Control Overview', path: '/admin/setups' },
 ];
 
 export default function AdminNavbar() {

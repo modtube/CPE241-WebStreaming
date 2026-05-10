@@ -4,11 +4,11 @@ services:
     container_name: streaming_db_container
     restart: always
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: cpe@38Final
-      POSTGRES_DB: streamingDB
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     ports:
-      - "5432:5432"
+      - "${DB_PORT}:5432"
     volumes:
       # This maps the local SQL files to the Postgres auto-init folder
       - ./database/01_schema.sql:/docker-entrypoint-initdb.d/01_schema.sql
@@ -16,21 +16,60 @@ services:
       - postgres_data:/var/lib/postgresql/data
       # Mount the full database folder elsewhere for easy access within the container
       - ./database:/home/database_scripts
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${DB_USER} -d $${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - modtube-network
 
+  # --- pgAdmin ---
   pgadmin:
-    image: dpage/pgadmin4
-    container_name: pgadmin_gui
+    image: dpage/pgadmin4:latest
+    container_name: streaming_pgadmin
     restart: always
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: admin
     ports:
-      - "8080-8081:80" # Added 8081 as a fall-back port
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
+      - "8080:80"
     depends_on:
       - db
+    networks:
+      - modtube-network
+
+      # --- Fill these in pgAdmin when adding a server ---
+      # Host: db
+      # Port: 5432
+      # Username: admin
+      # Password: cpe38Final
+      # Database: modtube_db
+
+  # --- Backend Service (Express) ---
+  backend:
+    build: ./backend
+    container_name: modtube-backend
+    restart: always
+    environment:
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+      PORT: ${BACKEND_PORT}
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    command: yarn dev
+    depends_on:
+      db:
+        condition: service_healthy # รอให้ DB พร้อมใช้งานก่อนค่อยรัน backend
+    networks:
+      - modtube-network
+    ports:
+      - "${BACKEND_PORT}:${BACKEND_PORT}"
+
+# --- Networking & Storage Setup ---
+networks:
+  modtube-network:
+    driver: bridge
 
 volumes:
   postgres_data:
-  pgadmin_data:
