@@ -13,7 +13,6 @@ import CrewView from "./pages/admin/Crew/Crew";
 import CrewForm from "./pages/admin/Crew/CrewForm";
 import UserManagement from "./pages/admin/User/User";
 import TransactionsView from "./pages/admin/Transaction/Transactions";
-import TransactionDetail from "./pages/admin/Transaction/TransactionDetail";
 import SetupsView from "./pages/admin/Setup/Setups";
 import Home from "./pages/customer/Home";
 import PersonalLibrary from "./pages/customer/PersonalLibrary";
@@ -47,7 +46,6 @@ function App() {
         <Route path="crew/edit/:id" element={<CrewForm />} />        
         <Route path="users" element={<UserManagement />} />
         <Route path="transactions" element={<TransactionsView />} />
-        <Route path="transactions/:id" element={<TransactionDetail />} />
         <Route path="setups" element={<SetupsView />} />
         <Route path="setups/genre" element={<GenreView />} />
         <Route path="setups/language" element={<LanguageView />} />
