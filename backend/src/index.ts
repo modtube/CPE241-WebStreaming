@@ -3,10 +3,6 @@ dotenv.config();
 
 import express from "express";
 import cors from "cors";
-import path from "path";
-
-// ===== Auth =====
-import authRoutes from "./routes/authRoutes.js";
 
 // ===== Admin Routes =====
 import movieRoutes from "./routes/movieRoutes.js";
