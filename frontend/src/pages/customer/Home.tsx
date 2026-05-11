@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useCart } from "../../context/Usecart"; // ← เพิ่ม
 
 // ── Types ──────────────────────────────────────────────
 interface Movie {
@@ -8,19 +9,13 @@ interface Movie {
   year: string;
   genre: string;
   language: string;
-  price: string;
+  price: string;       // ยังคง string ไว้เพื่อ display ($0.00)
+  priceNum: number;    // ← เพิ่ม: ตัวเลขจริงสำหรับ cart
   poster: string;
   backdrop: string;
   synopsis: string;
   score: string;
   stars: number;
-}
-
-interface CartItem {
-  id: number;
-  title: string;
-  price: string;
-  poster: string;
 }
 
 interface Review {
@@ -41,7 +36,8 @@ const MOVIES: Movie[] = [
     year: "20XX",
     genre: "Thriller",
     language: "English",
-    price: "$0.00",
+    price: "$4.99",
+    priceNum: 4.99,
     poster: "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=400&q=80",
     backdrop: "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=800&q=80",
     synopsis: "Movie detail / description will appear here once real data is connected.",
@@ -55,7 +51,8 @@ const MOVIES: Movie[] = [
     year: "20XX",
     genre: "Sci-Fi",
     language: "English",
-    price: "$0.00",
+    price: "$5.49",
+    priceNum: 5.49,
     poster: "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=400&q=80",
     backdrop: "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=800&q=80",
     synopsis: "Movie detail / description will appear here once real data is connected.",
@@ -69,7 +66,8 @@ const MOVIES: Movie[] = [
     year: "20XX",
     genre: "Drama",
     language: "English",
-    price: "$0.00",
+    price: "$3.99",
+    priceNum: 3.99,
     poster: "https://images.unsplash.com/photo-1416339306562-f3d12fefd36f?w=400&q=80",
     backdrop: "https://images.unsplash.com/photo-1416339306562-f3d12fefd36f?w=800&q=80",
     synopsis: "Movie detail / description will appear here once real data is connected.",
@@ -83,7 +81,8 @@ const MOVIES: Movie[] = [
     year: "20XX",
     genre: "Romance",
     language: "French",
-    price: "$0.00",
+    price: "$2.99",
+    priceNum: 2.99,
     poster: "https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?w=400&q=80",
     backdrop: "https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?w=800&q=80",
     synopsis: "Movie detail / description will appear here once real data is connected.",
@@ -97,7 +96,8 @@ const MOVIES: Movie[] = [
     year: "20XX",
     genre: "Action",
     language: "English",
-    price: "$0.00",
+    price: "$6.99",
+    priceNum: 6.99,
     poster: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=400&q=80",
     backdrop: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=800&q=80",
     synopsis: "Movie detail / description will appear here once real data is connected.",
@@ -107,12 +107,12 @@ const MOVIES: Movie[] = [
 ];
 
 const PLACEHOLDER_CREW = [
-  { name: "Elena Cross",   role: "Lead Actress",     avatar: "https://i.pravatar.cc/40?img=1"  },
-  { name: "James Harlow",  role: "Lead Actor",       avatar: "https://i.pravatar.cc/40?img=12" },
-  { name: "Sofia Reyes",   role: "Supporting",       avatar: "https://i.pravatar.cc/40?img=5"  },
-  { name: "Marcus Chen",   role: "Director",         avatar: "https://i.pravatar.cc/40?img=8"  },
-  { name: "Anya Petrov",   role: "Cinematographer",  avatar: "https://i.pravatar.cc/40?img=20" },
-  { name: "David Osei",    role: "Composer",         avatar: "https://i.pravatar.cc/40?img=15" },
+  { name: "Elena Cross",  role: "Lead Actress",    avatar: "https://i.pravatar.cc/40?img=1"  },
+  { name: "James Harlow", role: "Lead Actor",      avatar: "https://i.pravatar.cc/40?img=12" },
+  { name: "Sofia Reyes",  role: "Supporting",      avatar: "https://i.pravatar.cc/40?img=5"  },
+  { name: "Marcus Chen",  role: "Director",        avatar: "https://i.pravatar.cc/40?img=8"  },
+  { name: "Anya Petrov",  role: "Cinematographer", avatar: "https://i.pravatar.cc/40?img=20" },
+  { name: "David Osei",   role: "Composer",        avatar: "https://i.pravatar.cc/40?img=15" },
 ];
 
 const PLACEHOLDER_REVIEWS: Review[] = [
@@ -198,7 +198,9 @@ function StarRating({ count, max = 5 }: { count: number; max?: number }) {
   return (
     <span>
       {Array.from({ length: max }).map((_, i) => (
-        <span key={i} style={{ color: i < count ? "#efc8d5" : "#333", fontSize: "14px" }}>★</span>
+        <span key={i} style={{ color: i < count ? "#efc8d5" : "#333", fontSize: "14px" }}>
+          ★
+        </span>
       ))}
     </span>
   );
@@ -259,7 +261,11 @@ function WatchDetailsModal({
       score: (reviewStars * 2).toFixed(1),
       stars: reviewStars,
       text: reviewText.trim(),
-      date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      date: new Date().toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }),
     };
     setReviews((prev) => [newReview, ...prev]);
     setReviewText("");
@@ -297,7 +303,14 @@ function WatchDetailsModal({
         }}
       >
         {/* Backdrop image */}
-        <div style={{ position: "relative", height: "220px", overflow: "hidden", borderRadius: "20px 20px 0 0" }}>
+        <div
+          style={{
+            position: "relative",
+            height: "220px",
+            overflow: "hidden",
+            borderRadius: "20px 20px 0 0",
+          }}
+        >
           <img
             src={movie.backdrop}
             alt=""
@@ -310,7 +323,6 @@ function WatchDetailsModal({
               background: "linear-gradient(to bottom, transparent 20%, #0f0f0f 100%)",
             }}
           />
-          {/* Close button */}
           <button
             onClick={onClose}
             style={{
@@ -330,14 +342,14 @@ function WatchDetailsModal({
             }}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
         </div>
 
         {/* Content */}
         <div style={{ padding: "0 28px 28px", marginTop: "-48px", position: "relative", zIndex: 10 }}>
-          {/* Header row: poster + info */}
           <div style={{ display: "flex", gap: "20px", alignItems: "flex-start" }}>
             <img
               src={movie.poster}
@@ -354,7 +366,15 @@ function WatchDetailsModal({
               <h2 style={{ fontSize: "26px", fontWeight: 800, color: "#fff", margin: "0 0 6px" }}>
                 {movie.title}
               </h2>
-              <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                  gap: "10px",
+                  marginBottom: "10px",
+                }}
+              >
                 <span style={{ color: "#efc8d5", fontWeight: 600, fontSize: "13px" }}>
                   ★ {movie.score}
                 </span>
@@ -378,8 +398,9 @@ function WatchDetailsModal({
               <p style={{ color: "#888", fontSize: "13px", lineHeight: 1.6, margin: "0 0 14px" }}>
                 {movie.synopsis}
               </p>
+              {/* ✅ ใช้ onAddToCart ที่รับมาจาก Home (เชื่อม CartContext แล้ว) */}
               <button
-                onClick={() => { onAddToCart(movie); }}
+                onClick={() => onAddToCart(movie)}
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
@@ -396,7 +417,8 @@ function WatchDetailsModal({
                 }}
               >
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" />
+                  <circle cx="9" cy="21" r="1" />
+                  <circle cx="20" cy="21" r="1" />
                   <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
                 </svg>
                 {inCart ? "Added to Cart ✓" : `Add to Cart · ${movie.price}`}
@@ -406,14 +428,16 @@ function WatchDetailsModal({
 
           {/* Cast & Crew */}
           <div style={{ marginTop: "28px" }}>
-            <h3 style={{
-              fontSize: "11px",
-              fontWeight: 700,
-              color: "#fff",
-              letterSpacing: "0.12em",
-              textTransform: "uppercase",
-              marginBottom: "14px",
-            }}>
+            <h3
+              style={{
+                fontSize: "11px",
+                fontWeight: 700,
+                color: "#fff",
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                marginBottom: "14px",
+              }}
+            >
               Cast &amp; Crew
             </h3>
             <div
@@ -445,7 +469,9 @@ function WatchDetailsModal({
                     style={{ width: "36px", height: "36px", borderRadius: "50%", objectFit: "cover" }}
                   />
                   <div>
-                    <p style={{ color: "#fff", fontSize: "12px", fontWeight: 600, margin: 0 }}>{person.name}</p>
+                    <p style={{ color: "#fff", fontSize: "12px", fontWeight: 600, margin: 0 }}>
+                      {person.name}
+                    </p>
                     <p style={{ color: "#666", fontSize: "11px", margin: 0 }}>{person.role}</p>
                   </div>
                 </div>
@@ -455,17 +481,18 @@ function WatchDetailsModal({
 
           {/* User Reviews */}
           <div style={{ marginTop: "28px" }}>
-            <h3 style={{
-              fontSize: "11px",
-              fontWeight: 700,
-              color: "#fff",
-              letterSpacing: "0.12em",
-              textTransform: "uppercase",
-              marginBottom: "14px",
-            }}>
+            <h3
+              style={{
+                fontSize: "11px",
+                fontWeight: 700,
+                color: "#fff",
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                marginBottom: "14px",
+              }}
+            >
               User Reviews
             </h3>
-
             <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
               {reviews.map((r, i) => (
                 <div
@@ -484,12 +511,23 @@ function WatchDetailsModal({
                       style={{ width: "36px", height: "36px", borderRadius: "50%" }}
                     />
                     <div style={{ flex: 1 }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-                        <p style={{ color: "#fff", fontSize: "13px", fontWeight: 600, margin: 0 }}>{r.username}</p>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                          marginBottom: "4px",
+                        }}
+                      >
+                        <p style={{ color: "#fff", fontSize: "13px", fontWeight: 600, margin: 0 }}>
+                          {r.username}
+                        </p>
                         <StarRating count={r.stars} />
                         <span style={{ color: "#efc8d5", fontSize: "12px" }}>{r.score}</span>
                       </div>
-                      <p style={{ color: "#999", fontSize: "13px", lineHeight: 1.5, margin: "0 0 6px" }}>{r.text}</p>
+                      <p style={{ color: "#999", fontSize: "13px", lineHeight: 1.5, margin: "0 0 6px" }}>
+                        {r.text}
+                      </p>
                       <p style={{ color: "#555", fontSize: "11px", margin: 0 }}>{r.date}</p>
                     </div>
                   </div>
@@ -497,7 +535,7 @@ function WatchDetailsModal({
               ))}
             </div>
 
-            {/* Add Review form */}
+            {/* Add Review */}
             <div
               style={{
                 marginTop: "16px",
@@ -557,29 +595,36 @@ function WatchDetailsModal({
 
 // ── Main Component ─────────────────────────────────────
 export default function Home() {
-  const [search, setSearch]       = useState("");
-  const [language, setLanguage]   = useState("");
-  const [genre, setGenre]         = useState("");
-  const [ageRating, setAgeRating] = useState("");
-  const [cart, setCart]           = useState<CartItem[]>([]);
+  const [search, setSearch]         = useState("");
+  const [language, setLanguage]     = useState("");
+  const [genre, setGenre]           = useState("");
+  const [ageRating, setAgeRating]   = useState("");
   const [detailOpen, setDetailOpen] = useState<Movie | null>(null);
 
-  const addToCart = (movie: Movie) => {
-    setCart((prev) =>
-      prev.find((c) => c.id === movie.id)
-        ? prev
-        : [...prev, { id: movie.id, title: movie.title, price: movie.price, poster: movie.poster }]
-    );
-  };
+  // ✅ แทนที่ local cart state ด้วย CartContext
+  const { addItem, items } = useCart();
 
-  const inCart = (id: number) => cart.some((c) => c.id === id);
+  // ✅ helper: check ว่า movie อยู่ใน global cart แล้วหรือยัง
+  const inCart = (id: number) => items.some((c) => c.id === String(id));
+
+  // ✅ addToCart: แปลง Movie → CartItem ของ Context แล้วเปิด drawer
+  const addToCart = (movie: Movie) => {
+    addItem({
+      id: String(movie.id),
+      title: movie.title,
+      price: movie.priceNum,
+      thumbnail: movie.poster,
+    });
+    // ไม่เปิด CartDrawer เมื่อกด Add to Cart
+    // ให้เปิดเฉพาะเมื่อกดไอคอนมุมขวาบน (CartButton)
+  };
 
   const filtered = MOVIES.filter(
     (m) =>
-      (search     === "" || m.title.toLowerCase().includes(search.toLowerCase())) &&
-      (language   === "" || m.language   === language)  &&
-      (genre      === "" || m.genre      === genre)     &&
-      (ageRating  === "" || m.ageRating  === ageRating)
+      (search    === "" || m.title.toLowerCase().includes(search.toLowerCase())) &&
+      (language  === "" || m.language  === language)  &&
+      (genre     === "" || m.genre     === genre)     &&
+      (ageRating === "" || m.ageRating === ageRating)
   );
 
   return (
@@ -590,21 +635,26 @@ export default function Home() {
         <img src={FEATURED.poster} alt="hero" className="w-full h-full object-cover" />
         <div
           className="absolute inset-0"
-          style={{ background: "linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.45) 60%, transparent 100%)" }}
+          style={{
+            background:
+              "linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.45) 60%, transparent 100%)",
+          }}
         />
 
         <div className="absolute bottom-0 left-0 p-6">
           <span
             className="inline-flex items-center gap-1 mb-2 px-2.5 py-0.5 rounded-full text-[11px] font-semibold text-white"
-            style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.2)", backdropFilter: "blur(6px)" }}
+            style={{
+              background: "rgba(255,255,255,0.12)",
+              border: "1px solid rgba(255,255,255,0.2)",
+              backdropFilter: "blur(6px)",
+            }}
           >
             ⭐ Featured Film
           </span>
 
           <h1 className="text-xl font-black mb-1 text-white">{FEATURED.title}</h1>
-          <p className="text-gray-400 text-xs mb-3 max-w-sm leading-relaxed">
-            {FEATURED.synopsis}
-          </p>
+          <p className="text-gray-400 text-xs mb-3 max-w-sm leading-relaxed">{FEATURED.synopsis}</p>
 
           <div className="flex items-center gap-2 mb-3">
             <button
@@ -614,10 +664,13 @@ export default function Home() {
               onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#835a6c")}
               onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#a3526d")}
             >
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z" /></svg>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M5 3l14 9-14 9V3z" />
+              </svg>
               Watch Details
             </button>
 
+            {/* ✅ ใช้ addToCart ที่เชื่อม Context แล้ว */}
             <button
               onClick={() => addToCart(FEATURED)}
               className="flex items-center gap-1.5 text-white text-xs font-semibold px-4 py-1.5 rounded-lg transition"
@@ -627,7 +680,8 @@ export default function Home() {
               }}
             >
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" />
+                <circle cx="9" cy="21" r="1" />
+                <circle cx="20" cy="21" r="1" />
                 <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
               </svg>
               {inCart(FEATURED.id) ? "Added ✓" : "Add to Cart"}
@@ -638,7 +692,13 @@ export default function Home() {
             <span className="text-yellow-400">★★★★★</span>
             <span>{FEATURED.year}</span>
             {[FEATURED.ageRating, FEATURED.genre, FEATURED.language].map((t) => (
-              <span key={t} className="px-1.5 py-0.5 rounded text-[10px]" style={{ background: "rgba(255,255,255,0.1)" }}>{t}</span>
+              <span
+                key={t}
+                className="px-1.5 py-0.5 rounded text-[10px]"
+                style={{ background: "rgba(255,255,255,0.1)" }}
+              >
+                {t}
+              </span>
             ))}
           </div>
         </div>
@@ -650,9 +710,17 @@ export default function Home() {
         style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}
       >
         <div className="relative flex-1" style={{ minWidth: "160px" }}>
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2" width="13" height="13" viewBox="0 0 24 24"
-            fill="none" stroke="#666" strokeWidth="2">
-            <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+          <svg
+            className="absolute left-3 top-1/2 -translate-y-1/2"
+            width="13"
+            height="13"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#666"
+            strokeWidth="2"
+          >
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
           <input
             type="text"
@@ -674,10 +742,9 @@ export default function Home() {
             }}
           />
         </div>
-
-        <DarkSelect value={language}  onChange={setLanguage}  label="All Languages" options={["English","Thai","Japanese","Korean","French"]} />
-        <DarkSelect value={genre}     onChange={setGenre}     label="All Genres"    options={["Action","Thriller","Drama","Comedy","Horror","Sci-Fi","Romance"]} />
-        <DarkSelect value={ageRating} onChange={setAgeRating} label="All Ratings"   options={["G","PG","PG-13","R","NC-17"]} />
+        <DarkSelect value={language}  onChange={setLanguage}  label="All Languages" options={["English", "Thai", "Japanese", "Korean", "French"]} />
+        <DarkSelect value={genre}     onChange={setGenre}     label="All Genres"    options={["Action", "Thriller", "Drama", "Comedy", "Horror", "Sci-Fi", "Romance"]} />
+        <DarkSelect value={ageRating} onChange={setAgeRating} label="All Ratings"   options={["G", "PG", "PG-13", "R", "NC-17"]} />
       </div>
 
       {/* ── Movie Grid ── */}
@@ -696,7 +763,6 @@ export default function Home() {
               }}
               onClick={() => setDetailOpen(movie)}
             >
-              {/* Poster */}
               <div className="relative">
                 <img
                   src={movie.poster}
@@ -704,7 +770,6 @@ export default function Home() {
                   className="w-full object-cover"
                   style={{ aspectRatio: "3/4" }}
                 />
-                {/* Age Rating Badge */}
                 <span
                   className="absolute top-2 left-2 text-[10px] font-bold text-white px-1.5 py-0.5 rounded-md"
                   style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(4px)" }}
@@ -713,22 +778,20 @@ export default function Home() {
                 </span>
               </div>
 
-              {/* Card Info — LEFT-ALIGNED layout */}
               <div className="p-3">
-                {/* Title */}
                 <h3 className="text-sm font-bold text-white mb-1 truncate">{movie.title}</h3>
-
-                {/* Year · Genre · Star */}
                 <p className="text-[11px] text-gray-500 mb-2">
                   {movie.year} · {movie.genre}&nbsp;
                   <span style={{ color: "#efc8d5" }}>★</span>
                   <span className="text-gray-400 ml-0.5">{movie.stars}</span>
                 </p>
 
-                {/* Price (left) + Cart button circle (right) */}
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-bold" style={{ color: "#efc8d5" }}>{movie.price}</span>
+                  <span className="text-sm font-bold" style={{ color: "#efc8d5" }}>
+                    {movie.price}
+                  </span>
 
+                  {/* ✅ ใช้ addToCart ที่เชื่อม Context แล้ว */}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -747,8 +810,12 @@ export default function Home() {
                       justifyContent: "center",
                       color: "#ffffff",
                     }}
-                    onMouseEnter={(e) => !inCart(movie.id) && (e.currentTarget.style.backgroundColor = "#8f4860")}
-                    onMouseLeave={(e) => !inCart(movie.id) && (e.currentTarget.style.backgroundColor = "#a3526d")}
+                    onMouseEnter={(e) =>
+                      !inCart(movie.id) && (e.currentTarget.style.backgroundColor = "#8f4860")
+                    }
+                    onMouseLeave={(e) =>
+                      !inCart(movie.id) && (e.currentTarget.style.backgroundColor = "#a3526d")
+                    }
                   >
                     {inCart(movie.id) ? (
                       <span style={{ fontSize: "14px", lineHeight: 1 }}>✓</span>
@@ -762,9 +829,7 @@ export default function Home() {
           ))}
 
           {filtered.length === 0 && (
-            <p className="col-span-full text-center text-gray-500 py-12 text-sm">
-              No movies found.
-            </p>
+            <p className="col-span-full text-center text-gray-500 py-12 text-sm">No movies found.</p>
           )}
         </div>
       </div>

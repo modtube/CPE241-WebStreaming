@@ -45,7 +45,7 @@ _You should see `PostgreSQL init process complete; ready for start up.` at the b
 Connect your database tool (DBeaver, pgAdmin, or VS Code SQL Tools) using:
 
 - **Host**: `localhost`
-- **Port**: `5432`
+- **Port**: `5173`
 - **Database**: `streamingDB`
 - **User**: `admin`
 - **Password**: `cpe@38Final`

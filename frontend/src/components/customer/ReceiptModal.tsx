@@ -1,0 +1,156 @@
+import { useEffect } from "react";
+import { X, Download, CheckCircle } from "lucide-react";
+
+export interface ReceiptItem {
+  title: string;
+  price: number;
+}
+ 
+export interface ReceiptData {
+  transactionId: string;
+  items: ReceiptItem[];
+  subtotal: number;
+  discount: number;
+  total: number;
+  date: string;
+  paymentMethod: string;
+  status: "Completed" | "Pending" | "Failed";
+}
+
+interface ReceiptModalProps {
+  receipt: ReceiptData | null;
+  onClose: () => void;
+}
+
+export default function ReceiptModal({ receipt, onClose }: ReceiptModalProps) {
+    // Close on Escape key
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [onClose]);
+ 
+  if (!receipt) return null;
+ 
+  const formatPrice = (amount: number) =>
+    amount === 0 ? "—$0.00" : `$${amount.toFixed(2)}`;
+ 
+  const handleDownloadPDF = () => {
+    // Placeholder: wire up to your PDF generation logic
+    alert(`Downloading receipt ${receipt.transactionId}…`);
+  };
+
+  return (
+    /* Backdrop */
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      {/* Modal card */}
+      <div
+        className="relative w-full max-w-sm mx-4 rounded-2xl bg-[#000000] border border-[#2A2A2A] px-1"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 p-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white/60 hover:text-white"
+          aria-label="Close receipt"
+        >
+          <X size={14} />
+        </button>
+ 
+        {/* Header — success icon + title */}
+        <div className="flex flex-col items-center pt-8 pb-6 px-6 gap-3">
+          <div className="w-14 h-14 rounded-full bg-green-500/20 flex items-center justify-center">
+            <CheckCircle className="text-green-400" size={32} strokeWidth={2} />
+          </div>
+          <div className="text-center">
+            <h2 className="text-white font-semibold text-lg leading-tight">
+              Payment Successful!
+            </h2>
+            <p className="text-white/40 text-sm mt-0.5">Transaction confirmed</p>
+          </div>
+        </div>
+ 
+        {/* Receipt body */}
+        <div className="mx-4 mb-4 rounded-xl bg-[#111111] border border-white/8 px-5 py-4 space-y-4">
+          {/* Transaction ID */}
+          <div className="flex items-center justify-between">
+            <span className="text-white/40 text-xs uppercase tracking-widest">
+              Receipt
+            </span>
+            <span className="bg-[#2a1a2e] text-[#f9d8e4] text-xs font-mono px-3 py-1 rounded-md border border-[#A3526D] bg-[#A3526D]/30">
+              {receipt.transactionId}
+            </span>
+          </div>
+ 
+          {/* Line items */}
+          <div className="space-y-2">
+            {receipt.items.map((item, idx) => (
+              <div key={idx} className="flex justify-between items-center">
+                <span className="text-white/80 text-sm">{item.title}</span>
+                <span className="text-white/80 text-sm">
+                  ${item.price.toFixed(2)}
+                </span>
+              </div>
+            ))}
+          </div>
+ 
+          {/* Divider */}
+          <div className="border-t border-white/8" />
+ 
+          {/* Subtotal / Discount / Total */}
+          <div className="space-y-1.5">
+            <div className="flex justify-between text-sm text-white/50">
+              <span>Subtotal</span>
+              <span>${receipt.subtotal.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-sm text-white/50">
+              <span>Discount</span>
+              <span className="text-green-400">{formatPrice(receipt.discount)}</span>
+            </div>
+            <div className="flex justify-between text-sm font-semibold text-white mt-1">
+              <span>Total Paid</span>
+              <span>${receipt.total.toFixed(2)}</span>
+            </div>
+          </div>
+ 
+          {/* Divider */}
+          <div className="border-t border-white/8" />
+ 
+          {/* Meta info */}
+          <div className="space-y-1.5 text-sm">
+            <div className="flex justify-between">
+              <span className="text-white/40">Date</span>
+              <span className="text-white/70">{receipt.date}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-white/40">Payment Method</span>
+              <span className="text-white/70">{receipt.paymentMethod}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-white/40">Status</span>
+              <span className="text-green-400 font-medium">{receipt.status}</span>
+            </div>
+          </div>
+        </div>
+ 
+        {/* Download button */}
+        <div className="px-4 pb-5">
+          <button
+            onClick={handleDownloadPDF}
+            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-gradient-to-r bg-[#A3526D] hover:bg-[#c28498] transition-all duration-150 text-white font-semibold text-sm"
+          >
+            <Download size={16} />
+            Download PDF Receipt
+          </button>
+        </div>
+      </div>
+ 
+
+    </div>
+  );
+}
