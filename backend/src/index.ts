@@ -14,6 +14,7 @@ import crewRoutes from "./routes/crewRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+import customerRoutes from "./routes/customerRoutes.js";
 import path from "path";
 
 const app = express();
@@ -27,6 +28,8 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+
+app.use("/api/customer", customerRoutes);
 
 // บอกให้ Express ใช้ movieRoutes สำหรับ URL ที่ขึ้นต้นด้วย /api/movies
 app.use("/api/movies", movieRoutes);
