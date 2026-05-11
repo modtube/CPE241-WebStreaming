@@ -33,3 +33,66 @@ export const addRating = async (req: Request, res: Response) => {
     res.status(500).json({ message: `Adding Ratings: ${error}` });
   }
 };
+
+export const updateRating = async (req: Request, res: Response) => {
+  const { rating_id } = req.params;
+  const { rating_label, maturity_level, rating_description } = req.body;
+
+  if (!rating_label) {
+    return res.status(400).json({ message: "กรุณาระบุ Rating Label" });
+  }
+  if (!maturity_level) {
+    return res.status(400).json({ message: "กรุณาระบุ Maturity Level" });
+  }
+
+  if (!rating_description) {
+    return res.status(400).json({ message: "กรุณาระบุ Rating Description" });
+  }
+
+  try {
+    const result = await pool.query(
+      `
+      UPDATE movie_rating
+      SET rating_label = $1, maturity_level = $2, rating_description = $3
+      WHERE rating_id = $4
+      RETURNING *;
+      `,
+      [rating_label, maturity_level, rating_description, rating_id],
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: "Rating Not Found!" });
+    }
+
+    res.status(200).json({
+      message: "Updated Successfully",
+      data: result.rows[0],
+    });
+  } catch (error) {
+    console.error("Error: ", error);
+    res.status(500).json({ message: `Updating Ratings: ${error}` });
+  }
+};
+
+export const deleteRating = async (req: Request, res: Response) => {
+  const { rating_id } = req.params;
+  try {
+    const result = await pool.query(
+      `
+        DELETE FROM movie_rating
+        WHERE rating_id = $1
+        RETURNING *;
+      `,
+      [rating_id],
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: "Rating Not Found!" });
+    }
+
+    res.status(200).json({ message: "Rating Deleted Successfully" });
+  } catch (error) {
+    console.error("Error: ", error);
+    res.status(500).json({ message: `Deleting Rating: ${error}` });
+  }
+};

@@ -2,6 +2,8 @@ import express from "express";
 import {
   getAllLanguages,
   addLanguage,
+  updateLanguage,
+  deleteLanguage,
 } from "../controllers/languageController.js";
 
 const router = express.Router();
@@ -10,5 +12,9 @@ const router = express.Router();
 router.get("/", getAllLanguages);
 
 router.post("/", addLanguage);
+
+router.put("/:language_id", updateLanguage);
+
+router.delete("/:language_id", deleteLanguage);
 
 export default router;

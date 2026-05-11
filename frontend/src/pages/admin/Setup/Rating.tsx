@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Table, Input, Button, Space, message } from "antd";
+import { Table, Input, Button, Space, message, Modal } from "antd";
 import {
   SearchOutlined,
   EditOutlined,
@@ -12,6 +12,7 @@ import type { ColumnsType } from "antd/es/table";
 import GenericAddModal from "../../../components/admin/setup/GenericSetupAdd.tsx";
 
 interface Rating {
+  rating_id: string;
   rating_label: string;
   maturity_level: number;
   rating_description: string;
@@ -24,6 +25,86 @@ export default function RatingSetup() {
   const [loading, setLoading] = useState(false);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingRecord, setEditingRecord] = useState<any>(null);
+
+  // 🟢 1. สร้าง Modal Instance สำหรับใช้จัดการ Popup
+  const [modal, contextHolder] = Modal.useModal();
+
+  // ฟังก์ชันจัดการเปิด-ปิด Modal
+  const handleAdd = () => {
+    setEditingRecord(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEdit = (record: any) => {
+    setEditingRecord(record);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingRecord(null);
+  };
+
+  // 🟢 2. ฟังก์ชัน handleDelete สไตล์โมเดิร์นพร้อมระบุชื่อ Rating Label
+  const handleDelete = (record: Rating) => {
+    modal.confirm({
+      title: null,
+      icon: null,
+      content: (
+        <div className="flex flex-col items-center text-center py-4">
+          <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-4">
+            <DeleteOutlined className="text-red-500 text-3xl" />
+          </div>
+
+          <h3 className="text-xl font-bold text-gray-900 mb-2">
+            ยืนยันการลบข้อมูล
+          </h3>
+
+          <p className="text-gray-500">
+            คุณแน่ใจหรือไม่ว่าต้องการลบระดับเรตติ้ง
+            <span className="font-bold text-gray-800 mx-1">
+              "{record.rating_label}"
+            </span>
+            ออกจากระบบ?
+          </p>
+
+          <p className="text-sm text-red-400 mt-4 bg-red-50 px-4 py-2 rounded-lg border border-red-100">
+            * การดำเนินการนี้ไม่สามารถเรียกคืนข้อมูลกลับมาได้
+          </p>
+        </div>
+      ),
+      okText: `Delete ${record.rating_label}`,
+      okType: "danger",
+      cancelText: "Cancel",
+      centered: true,
+      width: 400,
+      okButtonProps: {
+        className:
+          "h-11 px-6 rounded-lg font-semibold shadow-md shadow-red-200",
+      },
+      cancelButtonProps: {
+        className: "h-11 px-6 rounded-lg font-medium",
+      },
+      async onOk() {
+        try {
+          const response = await fetch(
+            `http://localhost:5000/api/ratings/${record.rating_id}`,
+            { method: "DELETE" },
+          );
+
+          if (!response.ok) throw new Error("Delete failed");
+
+          message.success(`ลบเรตติ้ง ${record.rating_label} เรียบร้อยแล้ว`);
+          fetchRatings(); // รีโหลดตาราง
+        } catch (error) {
+          message.error(
+            "ไม่สามารถลบข้อมูลได้ เนื่องจากมีการเชื่อมโยงกับข้อมูลหนัง",
+          );
+        }
+      },
+    });
+  };
 
   const fetchRatings = async () => {
     setLoading(true);
@@ -35,44 +116,19 @@ export default function RatingSetup() {
       const result = await response.json();
       setDataSource(result.data || result);
     } catch (error) {
-      // 🚨 MOCKUP DATA: ส่วนนี้จะทำงานเมื่อหา Backend ไม่เจอ (คอมเมนต์ทิ้งได้เลยเมื่อเชื่อม API จริงเสร็จ)
       console.warn("Backend not found. Using Mockup Data instead.");
       setDataSource([
         {
+          rating_id: "R001",
           rating_label: "G",
           maturity_level: 1,
-          rating_description: "General Audiences — suitable for all ages.",
+          rating_description: "General Audiences",
         },
         {
+          rating_id: "R002",
           rating_label: "PG",
-          maturity_level: 2,
-          rating_description: "Parental Guidance suggested — some material...",
-        },
-        {
-          rating_label: "PG-13",
-          maturity_level: 3,
-          rating_description: "Parents strongly cautioned — some material...",
-        },
-        {
-          rating_label: "TV-14",
-          maturity_level: 4,
-          rating_description:
-            "Parents strongly cautioned for children under...",
-        },
-        {
-          rating_label: "R",
-          maturity_level: 5,
-          rating_description: "Restricted — under 17 requires accompanying...",
-        },
-        {
-          rating_label: "TV-MA",
-          maturity_level: 5,
-          rating_description: "Mature Audiences Only — may be unsuitable...",
-        },
-        {
-          rating_label: "NC-17",
-          maturity_level: 5,
-          rating_description: "Adults Only — no one 17 and under admitted.",
+          maturity_level: 7,
+          rating_description: "Parental Guidance",
         },
       ]);
     } finally {
@@ -86,77 +142,49 @@ export default function RatingSetup() {
 
   const columns: ColumnsType<Rating> = [
     {
-      title: "rating_label",
+      title: "ID",
+      dataIndex: "rating_id",
+      key: "rating_id",
+      width: "120px",
+      sorter: (a, b) => a.rating_id.localeCompare(b.rating_id),
+    },
+    {
+      title: "LABEL",
       dataIndex: "rating_label",
       key: "rating_label",
-      width: "150px",
-      filters: dataSource.map((entry) => ({
-        text: entry.rating_label,
-        value: entry.rating_label,
-      })),
-      onFilter: (value, record) => record.rating_label === value,
-      filterIcon: (filtered) => (
-        <Funnel
-          size={16}
-          color={filtered ? "#3b82f6" : "#9ca3af"}
-          strokeWidth={filtered ? 3 : 2}
-        />
-      ),
-      render: (text) => (
-        <span className="font-medium text-gray-700">{text}</span>
-      ),
+      width: "120px",
+      render: (text) => <span className="font-bold text-gray-800">{text}</span>,
     },
     {
-      title: "MATURITY-LVL",
+      title: "LEVEL",
       dataIndex: "maturity_level",
       key: "maturity_level",
-      width: "150px",
-      filters: [...new Set(dataSource.map((item) => item.maturity_level))]
-        .sort((a, b) => a - b)
-        .map((level) => ({
-          text: `Level ${level}`,
-          value: level,
-        })),
-      onFilter: (value, record) =>
-        Number(record.maturity_level) === Number(value),
-      filterIcon: (filtered) => (
-        <Funnel
-          size={16}
-          color={filtered ? "#3b82f6" : "#9ca3af"}
-          strokeWidth={filtered ? 3 : 2}
-        />
-      ),
-      render: (lvl) => <span className="text-gray-500">{lvl}</span>,
+      width: "100px",
+      render: (lvl) => <span className="text-gray-500">Lv. {lvl}</span>,
     },
     {
-      title: "rating_description",
+      title: "DESCRIPTION",
       dataIndex: "rating_description",
       key: "rating_description",
-      sorter: (a, b) =>
-        a.rating_description.localeCompare(b.rating_description),
       render: (text) => (
-        <span className="text-gray-500 truncate max-w-sm inline-block">
-          {text}
+        <span className="text-gray-400 truncate max-w-xs block">
+          {text || "-"}
         </span>
       ),
     },
     {
       title: "ACTION",
       key: "action",
-      width: "150px",
+      width: "120px",
       render: (_, record) => (
         <Space size="middle">
           <EditOutlined
             className="text-gray-400 hover:text-blue-600 cursor-pointer text-lg transition-colors"
-            onClick={() =>
-              navigate(`/admin/setups/rating/edit/${record.rating_label}`)
-            }
+            onClick={() => handleEdit(record)}
           />
           <DeleteOutlined
             className="text-gray-400 hover:text-red-500 cursor-pointer text-lg transition-colors"
-            onClick={() =>
-              message.warning(`Delete rating: ${record.rating_label}`)
-            }
+            onClick={() => handleDelete(record)}
           />
         </Space>
       ),
@@ -166,22 +194,24 @@ export default function RatingSetup() {
   const filteredData = dataSource.filter(
     (item) =>
       item.rating_label.toLowerCase().includes(searchText.toLowerCase()) ||
-      item.rating_description
+      (item.rating_description ?? "")
         .toLowerCase()
-        .includes(searchText.toLowerCase()) ||
-      item.maturity_level.toString().includes(searchText.toLowerCase()),
+        .includes(searchText.toLowerCase()),
   );
 
   return (
     <div className="p-4">
+      {/* 🟢 3. contextHolder สำหรับ Popup */}
+      {contextHolder}
+
       <div className="flex justify-between items-center mb-6">
         <div className="w-full max-w-md">
           <Input
-            placeholder="Search by rating-label, maturity-level, or description..."
+            placeholder="Search rating..."
             prefix={<SearchOutlined className="text-gray-400" />}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            onPressEnter={() => fetchRatings()}
+            onPressEnter={fetchRatings}
             className="h-10 rounded-lg border-gray-300 shadow-sm"
           />
         </div>
@@ -189,7 +219,7 @@ export default function RatingSetup() {
           type="primary"
           icon={<PlusOutlined />}
           className="h-10 px-6 rounded-lg bg-blue-600"
-          onClick={() => setIsModalOpen(true)} // เปลี่ยนจาก navigate เป็นเปิด Modal
+          onClick={handleAdd}
         >
           Add Rating
         </Button>
@@ -200,31 +230,37 @@ export default function RatingSetup() {
           columns={columns}
           dataSource={filteredData}
           loading={loading}
-          rowKey="rating_label"
-          pagination={{
-            pageSize: 8,
-            showTotal: (total, range) => (
-              <span className="text-gray-400 font-normal">
-                Showing {range[0]} to {range[1]} of {total} results
-              </span>
-            ),
-          }}
-          className="[&_.ant-table-thead_th]:bg-gray-50/50 [&_.ant-table-thead_th]:border-b [&_.ant-table-thead_th]:text-[12px] [&_.ant-table-thead_th]:text-gray-400 [&_.ant-table-thead_th]:font-semibold [&_.ant-table-thead_th]:py-4 [&_.ant-table-column-sorters]:flex-row-reverse [&_.ant-table-column-sorters]:gap-2 [&_.ant-table-filter-column]:flex-row-reverse [&_.ant-table-filter-column]:justify-end [&_.ant-table-filter-column]:gap-2 [&_.ant-pagination]:!flex [&_.ant-pagination]:!w-full [&_.ant-pagination]:!px-6 [&_.ant-pagination]:!py-5 [&_.ant-pagination-total-text]:!mr-auto"
+          rowKey="rating_id"
+          pagination={{ pageSize: 8 }}
+          className="[&_.ant-table-thead_th]:bg-gray-50/50"
         />
       </div>
+
       <GenericAddModal
-        title="Add Rating"
+        title="Rating"
         open={isModalOpen}
-        onCancel={() => setIsModalOpen(false)}
+        editData={editingRecord}
+        pkField="rating_id"
+        onCancel={handleCloseModal}
         onSuccess={() => {
-          setIsModalOpen(false);
-          fetchRatings(); // รีโหลดตารางเมื่อเพิ่มสำเร็จ
+          handleCloseModal();
+          fetchRatings();
         }}
         apiEndpoint="http://localhost:5000/api/ratings"
         fields={[
           { label: "Rating Label", name: "rating_label", required: true },
-          { label: "Maturity Level", name: "maturity_level", required: true },
-          { label: "Description", name: "rating_description", required: false },
+          {
+            label: "Maturity Level",
+            name: "maturity_level",
+            type: "number",
+            required: true,
+          },
+          {
+            label: "Description",
+            name: "rating_description",
+            type: "textarea",
+            required: false,
+          },
         ]}
       />
     </div>

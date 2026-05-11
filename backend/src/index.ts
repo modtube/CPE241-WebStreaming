@@ -23,7 +23,6 @@ import transactionRoutes from "./routes/transactionRoutes.js";
 
 // ===== User-facing Routes =====
 
-
 const app = express();
 const port = process.env.BACKEND_PORT || 5000;
 
@@ -52,7 +51,6 @@ app.use("/api/countries", countryRoutes);
 app.use("/api/transactions", transactionRoutes);
 
 // ===== User-facing =====
-
 
 app.get("/api/status", (req, res) => {
   res.json({ message: "Backend is ready!" });

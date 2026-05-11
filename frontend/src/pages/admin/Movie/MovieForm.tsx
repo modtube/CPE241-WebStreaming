@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Form, 
@@ -12,7 +12,6 @@ import {
   Card, 
   Row, 
   Col, 
-  Empty, 
   Typography,
   InputNumber,
   Upload 
@@ -20,13 +19,12 @@ import {
 import { 
   PlusOutlined, 
   DeleteOutlined, 
-  ArrowLeftOutlined,
   UploadOutlined 
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 
 const { TextArea } = Input;
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 // --- Types & Interfaces ---
 interface Genre {
@@ -61,6 +59,8 @@ export default function App() {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>('');
   
   // Master Data States
   const [genres, setGenres] = useState<Genre[]>([]);
@@ -125,45 +125,41 @@ export default function App() {
     setInitialLoading(true);
     try {
       const res = await fetch(`http://localhost:5000/api/movies/${id}`);
-      if (!res.ok) throw new Error("Movie not found");
-      const result = await res.json();
-      
-      // สำคัญ: เข้าถึงข้อมูลผ่าน result (เนื่องจาก controller ส่ง { data: ... })
-      // หาก controller ส่งข้อมูลตรงๆ ให้ใช้ result
-      const movieData = result; 
+      const movieData = await res.json();
+
+      // Set image preview from server
+      if (movieData.img_path) {
+        setImagePreview(`http://localhost:5000${movieData.img_path}`);
+      }
 
       form.setFieldsValue({
         ...movieData,
+        // 1. แปลงวันที่ให้เป็น dayjs object (Ant Design DatePicker บังคับ)
         release_date: movieData.release_date ? dayjs(movieData.release_date) : null,
         
-        // ดึง Genre IDs มาใส่ (controller ส่งเป็น Array ของ ID มาให้แล้ว)
-        genres: movieData.genres || [], 
-
-        // ตรวจสอบชื่อฟิลด์ให้ตรงกับ Database Alias ใน controller
-        rating_id: movieData.rating_id,
-        country_code: movieData.country_code,
-
-        // Map Media Files
-        media_files: movieData.media_files?.length > 0 ? movieData.media_files : [{}],
-
-        // Map Resources: ใน controller ใช้ 'type' (จาก lang_type)
-        resources: movieData.resources?.map((r: any) => ({
-          type: r.type, 
-          language_id: r.language_id,
-          file_path: r.file_path,
-          priority: r.priority
-        })) || [{}],
-
-        // Map Cast & Crew: มั่นใจว่าตรงกับฟิลด์ person_id
+        // 2. แปลง IDs ทุกตัวเป็น String เพื่อให้ตรงกับ Interface และ Select options
+        rating_id: String(movieData.rating_id),
+        country_code: String(movieData.country_code),
+        
+        // 3. แปลง Genres ID เป็น String array
+        genres: Array.isArray(movieData.genre_ids) 
+        ? movieData.genre_ids.map((gid: any) => String(gid)) 
+        : [],
+        // 4. จัดการ Cast & Crew (ตรวจสอบชื่อฟิลด์ให้ตรงกับ Interface Person)
         cast_and_crew: movieData.cast_and_crew?.map((p: any) => ({
-          person_id: p.person_id,
+          person_id: String(p.person_id),
           role_type: p.role_type,
           character_name: p.character_name
         })) || [{}],
+
+        // 5. จัดการ Resources
+        resources: movieData.resources?.map((r: any) => ({
+          ...r,
+          language_id: String(r.language_id)
+        })) || [{}],
       });
     } catch (err) {
-      console.error(err);
-      message.error("Error loading movie details.");
+      message.error("Failed to load movie details");
     } finally {
       setInitialLoading(false);
     }
@@ -173,6 +169,15 @@ export default function App() {
   const onFinish = async (values: any) => {
     setLoading(true);
     try {
+      // Create FormData object to send both file and JSON data
+      const formData = new FormData();
+      
+      // Add file if selected (only for new image uploads)
+      if (imageFile) {
+        formData.append('img_path', imageFile);
+      }
+      
+      // Add other form fields as JSON
       const payload = {
         ...values,
         release_date: values.release_date ? values.release_date.format('YYYY-MM-DD') : null,
@@ -182,35 +187,55 @@ export default function App() {
         cast_and_crew: (values.cast_and_crew || []).filter((p: any) => p.person_id && p.role_type)
       };
 
+      // Append all form fields to FormData
+      Object.keys(payload).forEach(key => {
+      if (key === 'img_path') return; // ข้ามเพราะจัดการด้านบนแล้ว
+      
+      // ✅ ถ้าเป็น Array หรือ Object ต้อง JSON.stringify เสมอเมื่อใช้ FormData
+      if (Array.isArray(payload[key]) || typeof payload[key] === 'object') {
+        formData.append(key, JSON.stringify(payload[key]));
+      } else {
+        formData.append(key, payload[key] !== null ? String(payload[key]) : '');
+      }
+    });
+
       const url = id ? `http://localhost:5000/api/movies/${id}` : `http://localhost:5000/api/movies`;
       const method = id ? 'PUT' : 'POST';
       
       const response = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: formData, // ✅ ไม่ต้องเซ็ต Header Content-Type
       });
 
       if (response.ok) {
-        message.success(id ? 'Movie updated successfully' : 'Movie created successfully');
-        navigate('/admin/movies');
+        // ✅ ถ้าสำเร็จ (200 OK) ให้แสดงข้อความและย้ายหน้า
+        message.success(id ? 'อัปเดตหนังสำเร็จ' : 'เพิ่มหนังสำเร็จ');
+        
+        // หน่วงเวลานิดนึงเพื่อให้ User เห็นแจ้งเตือนสีเขียว
+        setTimeout(() => {
+          navigate('/admin/movies'); 
+        }, 1000);
       } else {
+        // ❌ ถ้าไม่สำเร็จ (เช่น 500) ให้โชว์ Error
         const error = await response.json();
-        throw new Error(error.message || 'Operation failed');
+        message.error(error.debug || error.message || 'บันทึกไม่สำเร็จ');
       }
-    } catch (err: any) {
-      message.error(err.message || "An error occurred while saving.");
+    } catch (err) {
+      message.error("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
     } finally {
       setLoading(false);
     }
   };
 
-  const SearchableSelect = ({ options, placeholder, valueKey, labelKey, multiple = false }: any) => (
+  const SearchableSelect = ({ options, placeholder, valueKey, labelKey, multiple = false, value, onChange, onBlur }: any) => (
     <Select
       showSearch
       mode={multiple ? 'multiple' : undefined}
       placeholder={placeholder}
       optionFilterProp="label"
+      value={value} // ผูกค่ากับ Form
+      onChange={onChange} // แจ้ง Form เมื่อค่าเปลี่ยน
+      onBlur={onBlur} // แจ้ง Form เมื่อออกจากช่อง
       filterOption={(input, option) =>
         String(option?.label ?? '').toLowerCase().includes(input.toLowerCase())
       }
@@ -220,12 +245,12 @@ export default function App() {
           ? labelParts.map((part: string) => item[part]).join(' ')
           : item[labelKey];
         return { 
-          // แปลงเป็น String เสมอเพื่อให้ตรงกับข้อมูลที่มักมาจาก Database
           value: String(item[valueKey]), 
           label: labelValue 
         };
       })}
       className="w-full" 
+      allowClear
     />
   );
 
@@ -235,6 +260,24 @@ export default function App() {
       <Text>Loading movie details...</Text>
     </div>
   );
+
+  const handleUpload = async (info: any) => {
+    try {
+      const file = info.file as File;
+      setImageFile(file); // Store the actual file
+      
+      // Create preview from file
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const preview = e.target?.result as string;
+        setImagePreview(preview);
+        message.success("รูปภาพอัปโหลดเรียบร้อย");
+      };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      message.error("ไม่สามารถอ่านไฟล์ภาพได้");
+    }
+  };
 
   return (
     <div className="min-h-screen">
@@ -290,24 +333,33 @@ export default function App() {
             <Col span={8}>
             {/* Media/Poster Upload Card */}
             <Card title="Poster Image">
-              <Form.Item name="img_path" label="Poster URL / Path">
-                <Input placeholder="/img/movies/poster.jpg" />
-              </Form.Item>
-              
+              {/* ปุ่มกดอัปโหลดจากคอม */}
               <div className="mb-4">
                 <Upload 
-                  beforeUpload={() => false} // Prevents actual upload for now
-                  maxCount={1}
-                  listType="picture"
+                  accept="image/*"
+                  showUploadList={false}
+                  beforeUpload={() => false} // ปิด Auto-upload ไป Server
+                  onChange={handleUpload}
                 >
-                  <Button icon={<UploadOutlined />} block size="large">Select File from Machine</Button>
+                  <Button icon={<UploadOutlined />} block size="large">
+                    Select Image from Computer
+                  </Button>
                 </Upload>
               </div>
 
-              <div className="aspect-[2/3] bg-gray-50 rounded-xl flex flex-col items-center justify-center border-2 border-dashed border-gray-200">
-                <Text type="secondary" style={{ fontSize: '11px', textAlign: 'center', padding: '20px' }}>
-                  Preview will appear here<br/>when a valid path is provided
-                </Text>
+              {/* ส่วนแสดง Preview ที่จะเปลี่ยนตามค่าใน Form ตลอดเวลา */}
+              <div className="aspect-[2/3] bg-gray-100 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-200 overflow-hidden">
+                {imagePreview ? (
+                  <img 
+                    src={imagePreview} 
+                    alt="Preview" 
+                    className="w-full h-full object-cover" 
+                  />
+                ) : (
+                  <Text type="secondary" style={{ textAlign: 'center' }}>
+                    Preview will appear here
+                  </Text>
+                )}
               </div>
             </Card>
 
@@ -360,7 +412,10 @@ export default function App() {
                   <Row gutter={[16, 16]}>
                     {genres.map(g => (
                       <Col span={4} key={g.genre_id}>
-                        <Checkbox value={g.genre_id}>{g.genre_name}</Checkbox>
+                        {/* ✅ แก้ไขจุดนี้: บังคับให้ value เป็น String */}
+                        <Checkbox value={String(g.genre_id)}>
+                          {g.genre_name}
+                        </Checkbox>
                       </Col>
                     ))}
                   </Row>

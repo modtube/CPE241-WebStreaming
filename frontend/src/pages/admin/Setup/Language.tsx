@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Table, Input, Button, Space, message } from "antd";
+import { Table, Input, Button, Space, message, Modal } from "antd";
 import {
   SearchOutlined,
   EditOutlined,
@@ -23,6 +23,79 @@ export default function LanguageSetup() {
   const [loading, setLoading] = useState(false);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingRecord, setEditingRecord] = useState<any>(null);
+
+  // 🟢 1. สร้าง Modal Instance สำหรับ Delete
+  const [modal, contextHolder] = Modal.useModal();
+
+  // ฟังก์ชันจัดการเปิด-ปิด Modal แบบล้างค่า
+  const handleAdd = () => {
+    setEditingRecord(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEdit = (record: any) => {
+    setEditingRecord(record);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingRecord(null);
+  };
+
+  // 🟢 2. ฟังก์ชัน handleDelete สไตล์โมเดิร์น
+  const handleDelete = (record: Language) => {
+    modal.confirm({
+      title: null,
+      icon: null,
+      content: (
+        <div className="flex flex-col items-center text-center py-4">
+          <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-4">
+            <DeleteOutlined className="text-red-500 text-3xl" />
+          </div>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">
+            ยืนยันการลบข้อมูล
+          </h3>
+          <p className="text-gray-500">
+            คุณแน่ใจหรือไม่ว่าต้องการลบภาษา
+            <span className="font-bold text-gray-800 mx-1">
+              "{record.language_name}"
+            </span>
+            ออกจากระบบ?
+          </p>
+          <p className="text-sm text-red-400 mt-4 bg-red-50 px-4 py-2 rounded-lg border border-red-100">
+            * การดำเนินการนี้ไม่สามารถเรียกคืนข้อมูลกลับมาได้
+          </p>
+        </div>
+      ),
+      okText: `Delete ${record.language_name}`,
+      okType: "danger",
+      cancelText: "Cancel",
+      centered: true,
+      width: 400,
+      okButtonProps: {
+        className:
+          "h-11 px-6 rounded-lg font-semibold shadow-md shadow-red-200",
+      },
+      cancelButtonProps: { className: "h-11 px-6 rounded-lg font-medium" },
+      async onOk() {
+        try {
+          const response = await fetch(
+            `http://localhost:5000/api/languages/${record.language_id}`,
+            {
+              method: "DELETE",
+            },
+          );
+          if (!response.ok) throw new Error("Delete failed");
+          message.success(`ลบภาษา ${record.language_name} สำเร็จแล้ว`);
+          fetchLanguages();
+        } catch (error) {
+          message.error("ไม่สามารถลบข้อมูลได้เนื่องจากมีการใช้งานอยู่");
+        }
+      },
+    });
+  };
 
   const fetchLanguages = async () => {
     setLoading(true);
@@ -34,12 +107,15 @@ export default function LanguageSetup() {
       const result = await response.json();
       setDataSource(result.data || result);
     } catch (error) {
-      // 🚨 MOCKUP DATA: ส่วนนี้จะทำงานเมื่อหา Backend ไม่เจอ (คอมเมนต์ทิ้งได้เลยเมื่อเชื่อม API จริงเสร็จ)
       console.warn("Backend not found. Using Mockup Data instead.");
       setDataSource([
-        { language_id: "001", english_name: "Thai", native_name: "ไทย" },
-        { language_id: "002", english_name: "English", native_name: "English" },
-        { language_id: "003", english_name: "Chinese", native_name: "中文" },
+        { language_id: "001", language_name: "Thai", native_name: "ไทย" },
+        {
+          language_id: "002",
+          language_name: "English",
+          native_name: "English",
+        },
+        { language_id: "003", language_name: "Chinese", native_name: "中文" },
       ]);
     } finally {
       setLoading(false);
@@ -84,15 +160,11 @@ export default function LanguageSetup() {
         <Space size="middle">
           <EditOutlined
             className="text-gray-400 hover:text-blue-600 cursor-pointer text-lg transition-colors"
-            onClick={() =>
-              navigate(`/admin/setups/language/edit/${record.language_id}`)
-            }
+            onClick={() => handleEdit(record)}
           />
           <DeleteOutlined
             className="text-gray-400 hover:text-red-500 cursor-pointer text-lg transition-colors"
-            onClick={() =>
-              message.warning(`Delete language: ${record.english_name}`)
-            }
+            onClick={() => handleDelete(record)}
           />
         </Space>
       ),
@@ -108,14 +180,17 @@ export default function LanguageSetup() {
 
   return (
     <div className="p-4">
+      {/* 🟢 3. อย่าลืม contextHolder */}
+      {contextHolder}
+
       <div className="flex justify-between items-center mb-6">
         <div className="w-full max-w-md">
           <Input
-            placeholder="Search by id, English-name, or native-name..."
+            placeholder="Search language..."
             prefix={<SearchOutlined className="text-gray-400" />}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            onPressEnter={() => fetchLanguages()}
+            onPressEnter={fetchLanguages}
             className="h-10 rounded-lg border-gray-300 shadow-sm"
           />
         </div>
@@ -123,7 +198,7 @@ export default function LanguageSetup() {
           type="primary"
           icon={<PlusOutlined />}
           className="h-10 px-6 rounded-lg bg-blue-600"
-          onClick={() => setIsModalOpen(true)} // เปลี่ยนจาก navigate เป็นเปิด Modal
+          onClick={handleAdd}
         >
           Add Language
         </Button>
@@ -135,24 +210,20 @@ export default function LanguageSetup() {
           dataSource={filteredData}
           loading={loading}
           rowKey="language_id"
-          pagination={{
-            pageSize: 6,
-            showTotal: (total, range) => (
-              <span className="text-gray-400 font-normal">
-                Showing {range[0]} to {range[1]} of {total} results
-              </span>
-            ),
-          }}
-          className="[&_.ant-table-thead_th]:bg-gray-50/50 [&_.ant-table-thead_th]:border-b [&_.ant-table-thead_th]:text-[12px] [&_.ant-table-thead_th]:text-gray-400 [&_.ant-table-thead_th]:font-semibold [&_.ant-table-thead_th]:py-4 [&_.ant-table-column-sorters]:flex-row-reverse [&_.ant-table-column-sorters]:gap-2 [&_.ant-pagination]:!flex [&_.ant-pagination]:!w-full [&_.ant-pagination]:!px-6 [&_.ant-pagination]:!py-5 [&_.ant-pagination-total-text]:!mr-auto"
+          pagination={{ pageSize: 6 }}
+          className="[&_.ant-table-thead_th]:bg-gray-50/50"
         />
       </div>
+
       <GenericAddModal
-        title="Add Language"
+        title="Language"
         open={isModalOpen}
-        onCancel={() => setIsModalOpen(false)}
+        editData={editingRecord}
+        pkField="language_id"
+        onCancel={handleCloseModal}
         onSuccess={() => {
-          setIsModalOpen(false);
-          fetchLanguages(); // รีโหลดตารางเมื่อเพิ่มสำเร็จ
+          handleCloseModal();
+          fetchLanguages();
         }}
         apiEndpoint="http://localhost:5000/api/languages"
         fields={[
