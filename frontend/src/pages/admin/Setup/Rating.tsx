@@ -153,19 +153,52 @@ export default function RatingSetup() {
       dataIndex: "rating_label",
       key: "rating_label",
       width: "120px",
+      // 🟢 เพิ่ม Filter กลับมาตามกำหนด
+      filters: [...new Set(dataSource.map((item) => item.rating_label))].map(
+        (label) => ({
+          text: label,
+          value: label,
+        }),
+      ),
+      onFilter: (value, record) => record.rating_label === value,
+      filterIcon: (filtered) => (
+        <Funnel
+          size={14}
+          color={filtered ? "#3b82f6" : "#9ca3af"}
+          strokeWidth={filtered ? 3 : 2}
+        />
+      ),
       render: (text) => <span className="font-bold text-gray-800">{text}</span>,
     },
     {
       title: "LEVEL",
       dataIndex: "maturity_level",
       key: "maturity_level",
-      width: "100px",
+      width: "120px",
+      // 🟢 เพิ่ม Filter กลับมาตามกำหนด
+      filters: [...new Set(dataSource.map((item) => item.maturity_level))]
+        .sort((a, b) => a - b)
+        .map((level) => ({
+          text: `Level ${level}`,
+          value: level,
+        })),
+      onFilter: (value, record) => record.maturity_level === value,
+      filterIcon: (filtered) => (
+        <Funnel
+          size={14}
+          color={filtered ? "#3b82f6" : "#9ca3af"}
+          strokeWidth={filtered ? 3 : 2}
+        />
+      ),
       render: (lvl) => <span className="text-gray-500">Lv. {lvl}</span>,
     },
     {
       title: "DESCRIPTION",
       dataIndex: "rating_description",
       key: "rating_description",
+      // 🟢 เพิ่ม Sort ตามกำหนด
+      sorter: (a, b) =>
+        (a.rating_description || "").localeCompare(b.rating_description || ""),
       render: (text) => (
         <span className="text-gray-400 truncate max-w-xs block">
           {text || "-"}
@@ -201,7 +234,7 @@ export default function RatingSetup() {
 
   return (
     <div className="p-4">
-      {/* 🟢 3. contextHolder สำหรับ Popup */}
+      {/* 🟢 contextHolder สำหรับ Popup */}
       {contextHolder}
 
       <div className="flex justify-between items-center mb-6">
