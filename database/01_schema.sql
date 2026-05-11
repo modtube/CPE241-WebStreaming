@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS movie_rating (
 CREATE TABLE IF NOT EXISTS person (
     -- Example: 'P00001'
     person_id   VARCHAR(10) PRIMARY KEY DEFAULT 'P' || LPAD(nextval('person_id_seq')::text, 5, '0'),
-    img_path    VARCHAR(150), -- poster image path
+    img_path    TEXT, -- poster image path
     first_name  VARCHAR(100) NOT NULL, 
     middle_name VARCHAR(100),
     last_name   VARCHAR(100) NOT NULL,

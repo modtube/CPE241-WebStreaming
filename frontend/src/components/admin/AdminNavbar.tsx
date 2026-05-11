@@ -14,7 +14,6 @@ const menuItems = [
   { name: 'Country Management', path: '/admin/setups/country' },
   { name: 'Rating Management', path: '/admin/setups/rating' },
   { name: 'Setup & Quality Control Overview', path: '/admin/setups' }
-
 ];
 
 export default function AdminNavbar() {
@@ -24,12 +23,10 @@ export default function AdminNavbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // 1. Detect if we are in a detail/add/edit page (ตรวจสอบว่าเป็นหน้าย่อยไหม)
   const isDetailView = location.pathname.includes('/add') || 
                        location.pathname.includes('/edit') || 
                        location.pathname.split('/').length > 3;
 
-  // 2. Find the current menu item based on URL
   const currentMenuItem = menuItems.find(item =>
     location.pathname === item.path ||
     (item.path !== '/admin/dashboard' && location.pathname.startsWith(item.path))
@@ -37,17 +34,16 @@ export default function AdminNavbar() {
   
   const currentMenuName = currentMenuItem?.name || 'Dashboard';
 
-  // 3. Dynamic Title Logic (เปลี่ยนชื่อตามสถานะหน้า)
   let displayTitle = currentMenuName;
   if (location.pathname.includes('/add')) {
     displayTitle = `Add New ${currentMenuName.replace(' Management', '')}`;
   } else if (location.pathname.includes('/edit')) {
     displayTitle = `Edit ${currentMenuName.replace(' Management', '')}`;
+  } else if (location.pathname.startsWith('/admin/transactions/') && location.pathname !== '/admin/transactions') {
+    displayTitle = 'Transaction Details';
   }
 
-  // 4. Back button function
   const handleBack = () => {
-    // กฎข้อที่ 1: ถ้าอยู่หน้าตารางของเมนูย่อย Setups ให้กลับไปหน้า Setups Overview
     const setupSubPages = [
       '/admin/setups/genre', 
       '/admin/setups/language', 
@@ -59,22 +55,18 @@ export default function AdminNavbar() {
       return;
     }
 
-    // กฎข้อที่ 2: ถ้าเป็นหน้า Add / Edit ให้กลับไปที่ตารางของหมวดนั้นๆ
     if (currentMenuItem && location.pathname !== currentMenuItem.path) {
       navigate(currentMenuItem.path);
       return;
     }
 
-    // กฎข้อที่ 3: เผื่อกรณีอื่นๆ ถอยหลังตามประวัติเบราว์เซอร์
     navigate(-1);
   };
 
   const handleLogout = () => {
-    console.log("User logged out");
     navigate('/login');
   };
 
-  // Close menu when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -88,8 +80,6 @@ export default function AdminNavbar() {
   return (
     <div className="bg-white border-b border-gray-200 px-8 py-2 sticky top-0 z-10 shadow-sm">
       <div className="flex items-center justify-between">
-
-        {/* Left Side: Back Button + Dynamic Title */}
         <div className="flex items-center gap-2">
           {isDetailView && (
             <button 
@@ -100,13 +90,11 @@ export default function AdminNavbar() {
               <ChevronLeft size={28} />
             </button>
           )}
-          
           <h1 className="text-xl font-bold text-gray-800 tracking-tight">
             {displayTitle}
           </h1>
         </div>
 
-        {/* Right Side: Profile Menu */}
         <div className="relative" ref={menuRef}>
           <button 
             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -122,13 +110,11 @@ export default function AdminNavbar() {
             <ChevronDown size={16} className={`text-gray-400 transition-transform duration-200 ${isMenuOpen ? 'rotate-180' : ''}`} />
           </button>
 
-          {/* Dropdown Menu */}
           {isMenuOpen && (
             <div className="absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 overflow-hidden animate-in fade-in zoom-in duration-200">
               <div className="px-4 py-3 border-b border-gray-50 mb-1">
                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Account Settings</p>
               </div>
-              
               <button 
                 onClick={handleLogout}
                 className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 bg-white hover:bg-red-50 hover:border-red-50 transition-colors font-semibold text-left"

@@ -5,6 +5,7 @@ import {
   getMovieDetailById,
   createMovie,
   updateMovie,
+  upload,
 } from "../controllers/movieController.js"; // อย่าลืม .js
 
 const router = express.Router();
@@ -19,7 +20,8 @@ router.get("/:id", getMovieDetailById);
 router.delete("/:id", deleteMovieById);
 
 // เมื่อมีคนเรียก POST  http://localhost:5000/api/movies
-router.post("/", createMovie);
+// upload.single('img_path') - รับไฟล์จาก field ชื่อ 'img_path'
+router.post("/", upload.single('img_path'), createMovie);
 
 /* ตัวอย่างโครงสร้างตอนสร้างหนังใหม่
 
@@ -71,8 +73,8 @@ router.post("/", createMovie);
 }
 */
 
-// เมื่อมีคนเรียก PUT  http://localhost:5000/api/movies
-router.put("/:id", updateMovie);
+// เมื่อมีคนเรียก PUT  http://localhost:5000/api/movies/:id
+router.put("/:id", upload.single('img_path'), updateMovie);
 
 /* ตัวอย่างโครงสร้างตอนอัปเดทหนังจะเหมือนกับ POST เลย */
 
