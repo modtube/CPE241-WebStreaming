@@ -6,7 +6,6 @@ import Login from "./pages/auth/Login";
 import AdminDashboard from "./pages/admin/Dashboard";
 import MoviesView from "./pages/admin/Movie/Movies";
 import MoviesForm from "./pages/admin/Movie/MovieForm";
-import MoviesDetail from "./pages/admin/Movie/MovieDetail";
 import ReviewsView from "./pages/admin/Review/Reviews";
 import CrewView from "./pages/admin/Crew/Crew";
 import CrewForm from "./pages/admin/Crew/CrewForm";
@@ -39,7 +38,6 @@ function App() {
         <Route path="dashboard" element={<AdminDashboard />} />
 
         <Route path="movies" element={<MoviesView />} />
-        <Route path="movies/view/:id" element={<MoviesDetail />} />
         <Route path="movies/add" element={<MoviesForm />} />
         <Route path="movies/edit/:id" element={<MoviesForm />} />
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Table, Input, Button, message, Dropdown, Space, Modal } from "antd";
-import { SearchOutlined, MoreOutlined } from "@ant-design/icons";
-import { Trash2 } from "lucide-react";
+import { SearchOutlined } from "@ant-design/icons";
+import { Trash2, Funnel } from "lucide-react";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import type { FilterValue, SorterResult } from "antd/es/table/interface";
 import StatusBadge from "../../../components/admin/user/UserStatus";
@@ -18,7 +18,6 @@ interface User {
   country_code?: string;
 }
 
-// 💡 เพิ่ม Interface สำหรับข้อมูลประเทศ
 interface Country {
   country_code: string;
   country_name: string;
@@ -29,7 +28,7 @@ export default function Users() {
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-  const [countries, setCountries] = useState<Country[]>([]); // 💡 State สำหรับเก็บรายชื่อประเทศ
+  const [countries, setCountries] = useState<Country[]>([]);
   const [pagination, setPagination] = useState<TablePaginationConfig>({
     current: 1,
     pageSize: 10,
@@ -44,11 +43,8 @@ export default function Users() {
     order: "ascend",
   });
 
-  const [filters, setFilters] = useState<Record<string, FilterValue | null>>(
-    {},
-  );
+  const [filters, setFilters] = useState<Record<string, FilterValue | null>>({});
 
-  // 💡 ฟังก์ชันดึงข้อมูลประเทศทั้งหมด
   const fetchCountries = async () => {
     try {
       const response = await fetch("http://localhost:5000/api/countries");
@@ -76,7 +72,6 @@ export default function Users() {
         ...(filters.user_role?.[0] && {
           user_role: String(filters.user_role[0]),
         }),
-        // 💡 ส่ง country_code ไปที่ API
         ...(filters.country_code?.[0] && {
           country_code: String(filters.country_code[0]),
         }),
@@ -109,7 +104,6 @@ export default function Users() {
     fetchUsers();
   }, [fetchUsers]);
 
-  // 💡 ดึงประเทศเมื่อ Component mount
   useEffect(() => {
     fetchCountries();
   }, []);
@@ -222,8 +216,7 @@ export default function Users() {
       title: "User ID",
       dataIndex: "user_id",
       sorter: true,
-      sortOrder:
-        sortParams.field === "user_id" ? (sortParams.order as any) : null,
+      sortOrder: sortParams.field === "user_id" ? (sortParams.order as any) : null,
       sortDirections: ["ascend", "descend", "ascend"],
       width: 120,
     },
@@ -231,8 +224,7 @@ export default function Users() {
       title: "Username",
       dataIndex: "username",
       sorter: true,
-      sortOrder:
-        sortParams.field === "username" ? (sortParams.order as any) : null,
+      sortOrder: sortParams.field === "username" ? (sortParams.order as any) : null,
       sortDirections: ["ascend", "descend", "ascend"],
       render: (text, record) => (
         <Space>
@@ -249,20 +241,25 @@ export default function Users() {
       title: "Email",
       dataIndex: "email",
       sorter: true,
-      sortOrder:
-        sortParams.field === "email" ? (sortParams.order as any) : null,
+      sortOrder: sortParams.field === "email" ? (sortParams.order as any) : null,
       sortDirections: ["ascend", "descend", "ascend"],
     },
     {
       title: "Country",
       dataIndex: "country_code",
-      // 💡 เพิ่ม Filter โดยดึงค่าจาก State countries
       filters: countries.map((c) => ({
         text: c.country_name,
         value: c.country_code,
       })),
       filterMultiple: false,
       filteredValue: filters.country_code || null,
+      filterIcon: (filtered) => (
+        <Funnel
+          size={16}
+          color={filtered ? "#3b82f6" : "#9ca3af"}
+          strokeWidth={filtered ? 3 : 2}
+        />
+      ),
       render: (_, record) => record.country_code || "-",
     },
     {
@@ -274,33 +271,26 @@ export default function Users() {
       ],
       filterMultiple: false,
       filteredValue: filters.user_role || null,
+      filterIcon: (filtered) => (
+        <Funnel
+          size={16}
+          color={filtered ? "#3b82f6" : "#9ca3af"}
+          strokeWidth={filtered ? 3 : 2}
+        />
+      ),
       render: (role, record) => (
         <Dropdown
           disabled={role?.toLowerCase() === "admin"}
           menu={{
             items: [
-              {
-                key: "admin",
-                label: "Make Admin",
-                disabled: role?.toLowerCase() === "admin",
-              },
-              {
-                key: "customer",
-                label: "Make Customer",
-                disabled: role?.toLowerCase() === "customer",
-              },
+              { key: "admin", label: "Make Admin", disabled: role?.toLowerCase() === "admin" },
+              { key: "customer", label: "Make Customer", disabled: role?.toLowerCase() === "customer" },
             ],
             onClick: ({ key }) => handleUpdateRole(record.user_id, key),
           }}
           trigger={["click"]}
         >
-          <div
-            className={
-              role?.toLowerCase() === "admin"
-                ? "cursor-not-allowed opacity-60"
-                : "cursor-pointer"
-            }
-          >
+          <div className={role?.toLowerCase() === "admin" ? "cursor-not-allowed opacity-60" : "cursor-pointer"}>
             <RoleBadge role={role} />
           </div>
         </Dropdown>
@@ -316,6 +306,13 @@ export default function Users() {
       ],
       filterMultiple: false,
       filteredValue: filters.user_status || null,
+      filterIcon: (filtered) => (
+        <Funnel
+          size={16}
+          color={filtered ? "#3b82f6" : "#9ca3af"}
+          strokeWidth={filtered ? 3 : 2}
+        />
+      ),
       render: (status, record) => {
         const isAdmin = record.user_role?.toLowerCase() === "admin";
         return (
@@ -323,55 +320,21 @@ export default function Users() {
             disabled={isAdmin}
             menu={{
               items: [
-                {
-                  key: "active",
-                  label: "Set Active",
-                  disabled: status === "active",
-                },
-                {
-                  key: "suspended",
-                  label: "Suspend",
-                  disabled: status === "suspended",
-                },
-                {
-                  key: "banned",
-                  label: "Ban User",
-                  danger: true,
-                  disabled: status === "banned",
-                },
+                { key: "active", label: "Set Active", disabled: status === "active" },
+                { key: "suspended", label: "Suspend", disabled: status === "suspended" },
+                { key: "banned", label: "Ban User", danger: true, disabled: status === "banned" },
               ],
               onClick: ({ key }) => handleUpdateStatus(record.user_id, key),
             }}
             trigger={["click"]}
           >
-            <div
-              className={
-                isAdmin ? "cursor-not-allowed opacity-60" : "cursor-pointer"
-              }
-            >
+            <div className={isAdmin ? "cursor-not-allowed opacity-60" : "cursor-pointer"}>
               <StatusBadge status={status} />
             </div>
           </Dropdown>
         );
       },
     },
-    // { // ใน figma มันไม่มีนะ
-    //   title: "Actions",
-    //   key: "actions",
-    //   width: 80,
-    //   render: (_, record) => (
-    //     <Dropdown
-    //       menu={{
-    //         items: [
-    //           { key: "view", label: "View Profile" },
-    //           { key: "history", label: "Transaction History" },
-    //         ],
-    //       }}
-    //     >
-    //       <Button type="text" icon={<MoreOutlined />} />
-    //     </Dropdown>
-    //   ),
-    // },
   ];
 
   return (
@@ -415,7 +378,7 @@ export default function Users() {
             `Showing ${range[0]}-${range[1]} of ${total} users`,
         }}
         onChange={handleTableChange}
-        className="border border-gray-100 rounded-lg overflow-hidden"
+        className="border border-gray-100 rounded-lg overflow-hidden [&_.ant-table-filter-column]:flex-row-reverse [&_.ant-table-filter-column]:justify-end [&_.ant-table-filter-column]:gap-2"
       />
       <Modal
         open={deleteModalOpen}
