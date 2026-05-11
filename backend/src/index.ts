@@ -3,6 +3,7 @@ dotenv.config();
 
 import express from "express";
 import cors from "cors";
+import path from "path";
 
 // ===== Admin Routes =====
 import movieRoutes from "./routes/movieRoutes.js";
@@ -11,7 +12,6 @@ import dashboardRoutes from "./routes/dashboardRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import customerRoutes from "./routes/customerRoutes.js";
-import path from "path";
 import personRoutes from "./routes/personRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 import languageRoutes from "./routes/languageRoutes.js";
