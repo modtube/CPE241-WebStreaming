@@ -43,9 +43,7 @@ export default function AdminNavbar() {
     displayTitle = `Add New ${currentMenuName.replace(' Management', '')}`;
   } else if (location.pathname.includes('/edit')) {
     displayTitle = `Edit ${currentMenuName.replace(' Management', '')}`;
-  } else if (location.pathname.startsWith('/admin/transactions/') && location.pathname !== '/admin/transactions') {
-  displayTitle = 'Transaction Details';
-}
+  }
 
   // 4. Back button function
   const handleBack = () => {
