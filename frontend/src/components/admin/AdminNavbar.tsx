@@ -9,15 +9,12 @@ const menuItems = [
   { name: 'Cast and Crew Management', path: '/admin/crew' },
   { name: 'Users Management', path: '/admin/users' },
   { name: 'Transactions Management', path: '/admin/transactions' },
-<<<<<<< Updated upstream
-  { name: 'Setup & Quality Control Overview', path: '/admin/setups' },
-=======
   { name: 'Genre Management', path: '/admin/setups/genre' },
   { name: 'Language Management', path: '/admin/setups/language' },
   { name: 'Country Management', path: '/admin/setups/country' },
   { name: 'Rating Management', path: '/admin/setups/rating' },
   { name: 'Setup & Quality Control Overview', path: '/admin/setups' }
->>>>>>> Stashed changes
+
 ];
 
 export default function AdminNavbar() {
@@ -27,12 +24,12 @@ export default function AdminNavbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // 1. ตรวจสอบว่าเป็นหน้าย่อยไหม (มี /add, /edit หรือมี path ลึกกว่า 3 ชั้น เช่น /transactions/123)
+  // 1. Detect if we are in a detail/add/edit page (ตรวจสอบว่าเป็นหน้าย่อยไหม)
   const isDetailView = location.pathname.includes('/add') || 
                        location.pathname.includes('/edit') || 
                        location.pathname.split('/').length > 3;
 
-  // 2. หาเมนูหลักที่กำลังใช้งานอยู่
+  // 2. Find the current menu item based on URL
   const currentMenuItem = menuItems.find(item =>
     location.pathname === item.path ||
     (item.path !== '/admin/dashboard' && location.pathname.startsWith(item.path))
@@ -47,14 +44,12 @@ export default function AdminNavbar() {
   } else if (location.pathname.includes('/edit')) {
     displayTitle = `Edit ${currentMenuName.replace(' Management', '')}`;
   } else if (location.pathname.startsWith('/admin/transactions/') && location.pathname !== '/admin/transactions') {
-    displayTitle = 'Transaction Details';
-  }
+  displayTitle = 'Transaction Details';
+}
 
   // 4. Back button function
   const handleBack = () => {
-<<<<<<< Updated upstream
-    if (currentMenuItem) {
-=======
+    // กฎข้อที่ 1: ถ้าอยู่หน้าตารางของเมนูย่อย Setups ให้กลับไปหน้า Setups Overview
     const setupSubPages = [
       '/admin/setups/genre', 
       '/admin/setups/language', 
@@ -66,17 +61,14 @@ export default function AdminNavbar() {
       return;
     }
 
+    // กฎข้อที่ 2: ถ้าเป็นหน้า Add / Edit ให้กลับไปที่ตารางของหมวดนั้นๆ
     if (currentMenuItem && location.pathname !== currentMenuItem.path) {
->>>>>>> Stashed changes
       navigate(currentMenuItem.path);
-    } else {
-      navigate(-1);
+      return;
     }
-<<<<<<< Updated upstream
-=======
 
+    // กฎข้อที่ 3: เผื่อกรณีอื่นๆ ถอยหลังตามประวัติเบราว์เซอร์
     navigate(-1);
->>>>>>> Stashed changes
   };
 
   const handleLogout = () => {

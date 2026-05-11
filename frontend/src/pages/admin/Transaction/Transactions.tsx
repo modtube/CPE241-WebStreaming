@@ -119,12 +119,8 @@ export default function Transactions() {
   };
 
   const handleExportCSV = () => {
-<<<<<<< Updated upstream
     // TODO: เขียน Logic สำหรับดาวน์โหลดไฟล์ CSV
     message.success('Exporting transactions to CSV...');
-=======
-    // ส่งออกข้อมูลที่มีอยู่ในตารางตอนนี้
-    const rows = dataSource;
 
     if (rows.length === 0) {
       message.warning('ไม่มีข้อมูลให้ export');
@@ -172,7 +168,6 @@ export default function Transactions() {
     URL.revokeObjectURL(url);
 
     message.success(`Export ${rows.length} transaction(s) สำเร็จ`);
->>>>>>> Stashed changes
   };
 
   const columns: ColumnsType<Transaction> = [

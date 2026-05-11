@@ -1,4 +1,4 @@
-import type { FormEvent, ReactNode } from "react";
+import { useState, type FormEvent, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 
 function FormHeader() {
@@ -35,19 +35,43 @@ function AuthField({
 
 export default function LoginForm() {
   const navigate = useNavigate();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleRealLogin = async (event: FormEvent) => {
     event.preventDefault();
-    navigate("/admin/dashboard");
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("userRole", data.user.role);
+
+        if (data.user.role === "admin") {
+          navigate("/admin/dashboard");
+        } else {
+          navigate("/customer/home");
+        }
+      } else {
+        alert(data.message);
+      }
+    } catch (error) {
+      alert("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้");
+    }
   };
 
   return (
     <form
-      onSubmit={handleSubmit}
+      onSubmit={handleRealLogin}
       className="w-full max-w-md bg-white border border-gray-200 rounded-3xl p-8 flex flex-col gap-6 shadow-large"
     >
       <FormHeader />
-
       <div className="grid gap-6">
         <AuthField htmlFor="username" label="Username or Email">
           <input
@@ -55,6 +79,9 @@ export default function LoginForm() {
             type="text"
             placeholder="Enter your username"
             className="input-field"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
           />
         </AuthField>
 
@@ -64,47 +91,34 @@ export default function LoginForm() {
             type="password"
             placeholder="••••••••"
             className="input-field"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
           />
         </AuthField>
 
-        <div className="flex justify-between items-center gap-2 text-sm text-slate-600">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
-            />
-            Remember me
-          </label>
-          <a href="#" className="text-blue-600 hover:text-blue-800 font-medium">
-            Forgot password?
-          </a>
-        </div>
-
         <button
           type="submit"
-          className="bg-brand-maroon btn-primary w-full py-3 text-lg font-semibold"
-          id="admin"
+          className="bg-blue-600 btn-primary w-full py-3 text-lg font-semibold text-white hover:bg-blue-700"
         >
-          Sign In
+          Real Sign In
         </button>
 
-        {/* Dumb-Button to /customer/*/}
-        <button
-          type="button"
-          onClick={() => navigate("/customer/home")}
-          className="bg-gray-500 btn-primary w-full py-3 text-lg font-semibold text-white hover:bg-gray-600"
-        >
-          Dummy Customer Btn
-        </button>
-
-        <div className="text-center text-sm text-gray-600 mt-2">
-          Don't have an account?{" "}
-          <a
-            href="#"
-            className="text-brand-maroon hover:text-brand-maroon font-semibold"
+        <div className="flex flex-col gap-2">
+          <button
+            type="button"
+            onClick={() => navigate("/admin/dashboard")}
+            className="bg-gray-500 btn-primary w-full py-2 text-sm text-white"
           >
-            Sign up
-          </a>
+            Dummy Admin Btn
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate("/customer/home")}
+            className="bg-gray-500 btn-primary w-full py-2 text-sm text-white"
+          >
+            Dummy Customer Btn
+          </button>
         </div>
       </div>
     </form>

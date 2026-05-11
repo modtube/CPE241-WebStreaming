@@ -49,6 +49,8 @@ services:
   # --- Backend Service (Express) ---
   backend:
     build: ./backend
+    env_file:
+      - .env
     container_name: modtube-backend
     restart: always
     environment:

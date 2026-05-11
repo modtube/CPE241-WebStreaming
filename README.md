@@ -1,4 +1,4 @@
-# 🎬 CPE241-WebStreaming
+# 🎬 CPE241-WebStreaming  HAHAHAHAHAHAHA
 
 A PostgreSQL-based streaming platform database designed for high-performance analytics and user engagement tracking.
 
@@ -45,7 +45,7 @@ _You should see `PostgreSQL init process complete; ready for start up.` at the b
 Connect your database tool (DBeaver, pgAdmin, or VS Code SQL Tools) using:
 
 - **Host**: `localhost`
-- **Port**: `5432`
+- **Port**: `5173`
 - **Database**: `streamingDB`
 - **User**: `admin`
 - **Password**: `cpe@38Final`
