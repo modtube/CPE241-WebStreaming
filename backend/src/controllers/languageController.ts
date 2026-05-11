@@ -35,3 +35,62 @@ export const addLanguage = async (req: Request, res: Response) => {
     res.status(500).json({ message: `Adding Languages: ${error}` });
   }
 };
+
+export const updateLanguage = async (req: Request, res: Response) => {
+  const { language_id } = req.params;
+  const { language_name, native_name } = req.body;
+
+  if (!language_name) {
+    return res.status(400).json({ message: "กรุณาระบุ Language Name" });
+  }
+  if (!native_name) {
+    return res.status(400).json({ message: "กรุณาระบุ Native Name" });
+  }
+
+  try {
+    const result = await pool.query(
+      `
+      UPDATE language_list
+      SET language_name = $1, native_name = $2
+      WHERE language_id = $3
+      RETURNING *;
+      `,
+      [language_name, native_name, language_id],
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: "Language Not Found!" });
+    }
+
+    res.status(200).json({
+      message: "Updated Successfully",
+      data: result.rows[0],
+    });
+  } catch (error) {
+    console.error("Error: ", error);
+    res.status(500).json({ message: `Updating Language: ${error}` });
+  }
+};
+
+export const deleteLanguage = async (req: Request, res: Response) => {
+  const { language_id } = req.params;
+  try {
+    const result = await pool.query(
+      `
+        DELETE FROM language_list
+        WHERE language_id = $1
+        RETURNING *;
+      `,
+      [language_id],
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: "Language Not Found!" });
+    }
+
+    res.status(200).json({ message: "Language Deleted Successfully" });
+  } catch (error) {
+    console.error("Error: ", error);
+    res.status(500).json({ message: `Deleting Language: ${error}` });
+  }
+};
