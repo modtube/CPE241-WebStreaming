@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Table, Space, message, Popconfirm } from "antd";
-import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { EditOutlined, DeleteOutlined, EyeOutlined } from "@ant-design/icons";
 import { Funnel } from "lucide-react";
-import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
+import type { ColumnsType } from "antd/es/table";
 import ManagementHeader from "../../../components/admin/ManagementHeader";
 import GenreBadge from "../../../components/admin/setup/GenreComponent";
 
@@ -259,13 +259,19 @@ export default function Movies() {
       title: "ACTION",
       key: "action",
       fixed: "right",
-      width: "100px",
+      width: "140px", // เพิ่มความกว้างนิดหน่อยเพื่อให้วาง 3 ปุ่มได้สวยๆ
       render: (_, record: Movie) => (
         <Space size="middle">
+          <EyeOutlined
+            className="text-gray-400 hover:text-green-600 cursor-pointer text-lg"
+            onClick={() => navigate(`/admin/movies/view/${record.movie_id}`)}
+          />
+          
           <EditOutlined
             className="text-gray-400 hover:text-blue-600 cursor-pointer text-lg"
             onClick={() => navigate(`/admin/movies/edit/${record.movie_id}`)}
           />
+
           <Popconfirm
             title="Delete this movie?"
             description={`Are you sure to delete "${record.title}"?`}

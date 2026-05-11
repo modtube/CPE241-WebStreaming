@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Table, Input, Button, Space, message } from "antd";
+import { Table, Input, Button, Space, message, Modal } from "antd";
 import {
   SearchOutlined,
   EditOutlined,
@@ -22,6 +22,10 @@ export default function CountrySetup() {
   const [loading, setLoading] = useState(false);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingRecord, setEditingRecord] = useState<Country | null>(null);
+
+  // 🟢 1. สร้าง Modal Instance และ ContextHolder
+  const [modal, contextHolder] = Modal.useModal();
 
   const fetchCountries = async () => {
     setLoading(true);
@@ -33,7 +37,6 @@ export default function CountrySetup() {
       const result = await response.json();
       setDataSource(result.data || result);
     } catch (error) {
-      // 🚨 MOCKUP DATA: ส่วนนี้จะทำงานเมื่อหา Backend ไม่เจอ (คอมเมนต์ทิ้งได้เลยเมื่อเชื่อม API จริงเสร็จ)
       console.warn("Backend not found. Using Mockup Data instead.");
       setDataSource([
         { country_code: "TH", country_name: "Thailand" },
@@ -48,6 +51,79 @@ export default function CountrySetup() {
   useEffect(() => {
     fetchCountries();
   }, []);
+
+  // 🟢 2. ฟังก์ชันจัดการการเปิด-ปิด Modal (แบบล้างค่า)
+  const handleAdd = () => {
+    setEditingRecord(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEdit = (record: Country) => {
+    setEditingRecord(record);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingRecord(null);
+  };
+
+  const handleDelete = (record: Country) => {
+    modal.confirm({
+      title: null, // เราจะใส่ title เองข้างใน content เพื่อความอิสระในการจัด style
+      icon: null, // ปิดไอคอนเริ่มต้นของ antd
+      content: (
+        <div className="flex flex-col items-center text-center py-4">
+          {/* ไอคอนถังขยะในวงกลมสีแดง */}
+          <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-4">
+            <DeleteOutlined className="text-red-500 text-3xl" />
+          </div>
+
+          <h3 className="text-xl font-bold text-gray-900 mb-2">
+            ยืนยันการลบข้อมูล
+          </h3>
+
+          <p className="text-gray-500">
+            คุณแน่ใจหรือไม่ว่าต้องการลบประเทศ
+            <span className="font-bold text-gray-800 mx-1">
+              "{record.country_name}"
+            </span>
+            ออกจากระบบ?
+          </p>
+
+          <p className="text-sm text-red-400 mt-4 bg-red-50 px-4 py-2 rounded-lg border border-red-100">
+            * การดำเนินการนี้ไม่สามารถเรียกคืนข้อมูลกลับมาได้
+          </p>
+        </div>
+      ),
+      okText: `Delete ${record.country_name}`, // เปลี่ยนข้อความปุ่มตามชื่อประเทศ
+      okType: "danger",
+      cancelText: "Cancel",
+      centered: true,
+      width: 400,
+      // ตกแต่งปุ่มผ่าน okButtonProps
+      okButtonProps: {
+        className:
+          "h-11 px-6 rounded-lg font-semibold shadow-md shadow-red-200",
+      },
+      cancelButtonProps: {
+        className: "h-11 px-6 rounded-lg font-medium",
+      },
+      async onOk() {
+        try {
+          const response = await fetch(
+            `http://localhost:5000/api/countries/${record.country_code}`,
+            { method: "DELETE" },
+          );
+          if (!response.ok) throw new Error("Delete failed");
+          message.success(`ลบประเทศ ${record.country_name} สำเร็จแล้ว`);
+          fetchCountries();
+        } catch (error) {
+          message.error("ไม่สามารถลบข้อมูลได้ เนื่องจากมีการใช้งานอยู่");
+        }
+      },
+    });
+  };
 
   const columns: ColumnsType<Country> = [
     {
@@ -74,15 +150,11 @@ export default function CountrySetup() {
         <Space size="middle">
           <EditOutlined
             className="text-gray-400 hover:text-blue-600 cursor-pointer text-lg transition-colors"
-            onClick={() =>
-              navigate(`/admin/setups/country/edit/${record.country_code}`)
-            }
+            onClick={() => handleEdit(record)}
           />
           <DeleteOutlined
             className="text-gray-400 hover:text-red-500 cursor-pointer text-lg transition-colors"
-            onClick={() =>
-              message.warning(`Delete country: ${record.country_name}`)
-            }
+            onClick={() => handleDelete(record)}
           />
         </Space>
       ),
@@ -97,14 +169,17 @@ export default function CountrySetup() {
 
   return (
     <div className="p-4">
+      {/* 🟢 4. วาง contextHolder ไว้ที่นี่เพื่อให้ Modal เด้งออกมาได้ */}
+      {contextHolder}
+
       <div className="flex justify-between items-center mb-6">
         <div className="w-full max-w-md">
           <Input
-            placeholder="Search by country-code or country-name..."
+            placeholder="Search country..."
             prefix={<SearchOutlined className="text-gray-400" />}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            onPressEnter={() => fetchCountries()}
+            onPressEnter={fetchCountries}
             className="h-10 rounded-lg border-gray-300 shadow-sm"
           />
         </div>
@@ -112,7 +187,7 @@ export default function CountrySetup() {
           type="primary"
           icon={<PlusOutlined />}
           className="h-10 px-6 rounded-lg bg-blue-600"
-          onClick={() => setIsModalOpen(true)} // เปลี่ยนจาก navigate เป็นเปิด Modal
+          onClick={handleAdd}
         >
           Add Country
         </Button>
@@ -124,24 +199,20 @@ export default function CountrySetup() {
           dataSource={filteredData}
           loading={loading}
           rowKey="country_code"
-          pagination={{
-            pageSize: 6,
-            showTotal: (total, range) => (
-              <span className="text-gray-400 font-normal">
-                Showing {range[0]} to {range[1]} of {total} results
-              </span>
-            ),
-          }}
-          className="[&_.ant-table-thead_th]:bg-gray-50/50 [&_.ant-table-thead_th]:border-b [&_.ant-table-thead_th]:text-[12px] [&_.ant-table-thead_th]:text-gray-400 [&_.ant-table-thead_th]:font-semibold [&_.ant-table-thead_th]:py-4 [&_.ant-table-column-sorters]:flex-row-reverse [&_.ant-table-column-sorters]:gap-2 [&_.ant-pagination]:!flex [&_.ant-pagination]:!w-full [&_.ant-pagination]:!px-6 [&_.ant-pagination]:!py-5 [&_.ant-pagination-total-text]:!mr-auto"
+          pagination={{ pageSize: 6 }}
+          className="[&_.ant-table-thead_th]:bg-gray-50/50"
         />
       </div>
+
       <GenericAddModal
-        title="Add Country"
+        title="Country"
         open={isModalOpen}
-        onCancel={() => setIsModalOpen(false)}
+        editData={editingRecord}
+        pkField="country_code"
+        onCancel={handleCloseModal}
         onSuccess={() => {
-          setIsModalOpen(false);
-          fetchCountries(); // รีโหลดตารางเมื่อเพิ่มสำเร็จ
+          handleCloseModal();
+          fetchCountries();
         }}
         apiEndpoint="http://localhost:5000/api/countries"
         fields={[
