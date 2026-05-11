@@ -1,36 +1,32 @@
 import { FileText, ChevronDown, Check } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
-import ReceiptModal, { type ReceiptData } from "./ReceiptModal";
- 
+import ReceiptModal from "./ReceiptModal";
+import type { ReceiptData } from "./ReceiptModal";
+// ✅ import TransactionRecord จาก CartContext แทนการนิยาม type ซ้ำ
+import type { TransactionRecord } from "../../context/CartContext";
+
+// ─── Re-export ให้หน้าอื่น import ได้เหมือนเดิม ─────────────────────────────
+export type { TransactionRecord };
+
 // ─── Types ────────────────────────────────────────────────────────────────────
- 
+
 export type TransactionStatus = "Completed" | "Pending" | "Failed";
 type SortOrder = "newest" | "oldest";
 type FilterOption = "All Transactions" | TransactionStatus;
- 
-export type TransactionRecord = {
-  transactionId: string;
-  date: string;
-  movieTitle: string;
-  amount: string;
-  payment: string;
-  status: TransactionStatus;
-  receipt: ReceiptData;
-};
- 
+
 type TransactionHistoryTableProps = {
   data: TransactionRecord[];
 };
- 
+
 // ─── Utilities ────────────────────────────────────────────────────────────────
- 
+
 const FILTER_OPTIONS: FilterOption[] = [
   "All Transactions",
   "Completed",
   "Pending",
   "Failed",
 ];
- 
+
 function sortByDate(items: TransactionRecord[], order: SortOrder): TransactionRecord[] {
   return [...items].sort((a, b) => {
     const da = new Date(a.date).getTime();
@@ -38,21 +34,15 @@ function sortByDate(items: TransactionRecord[], order: SortOrder): TransactionRe
     return order === "newest" ? db - da : da - db;
   });
 }
- 
+
 function filterByStatus(items: TransactionRecord[], filter: FilterOption): TransactionRecord[] {
   if (filter === "All Transactions") return items;
   return items.filter((item) => item.status === filter);
 }
- 
+
 // ─── SortOrderButton ──────────────────────────────────────────────────────────
- 
-function SortOrderButton({
-  order,
-  onToggle,
-}: {
-  order: SortOrder;
-  onToggle: () => void;
-}) {
+
+function SortOrderButton({ order, onToggle }: { order: SortOrder; onToggle: () => void }) {
   return (
     <button
       onClick={onToggle}
@@ -63,36 +53,28 @@ function SortOrderButton({
     </button>
   );
 }
- 
+
 // ─── FilterDropdown ───────────────────────────────────────────────────────────
- 
-function FilterDropdown({
-  value,
-  onChange,
-}: {
-  value: FilterOption;
-  onChange: (v: FilterOption) => void;
-}) {
+
+function FilterDropdown({ value, onChange }: { value: FilterOption; onChange: (v: FilterOption) => void }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
- 
+
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
- 
+
   const statusDot: Record<FilterOption, string> = {
     "All Transactions": "bg-white/40",
     Completed: "bg-green-400",
     Pending: "bg-yellow-400",
     Failed: "bg-red-400",
   };
- 
+
   return (
     <div ref={ref} className="relative">
       <button
@@ -106,7 +88,7 @@ function FilterDropdown({
           className={"text-white/50 transition-transform duration-200 " + (open ? "rotate-180" : "")}
         />
       </button>
- 
+
       {open && (
         <div className="absolute right-0 mt-2 w-48 rounded-xl bg-[#1a1a1a] border border-white/10 shadow-xl z-20 overflow-hidden py-1">
           {FILTER_OPTIONS.map((option) => (
@@ -127,9 +109,9 @@ function FilterDropdown({
     </div>
   );
 }
- 
+
 // ─── StatusBadge ──────────────────────────────────────────────────────────────
- 
+
 function StatusBadge({ status }: { status: TransactionStatus }) {
   const styles: Record<TransactionStatus, string> = {
     Completed: "bg-[#14532D] text-[#4ADE80]",
@@ -142,29 +124,27 @@ function StatusBadge({ status }: { status: TransactionStatus }) {
     </span>
   );
 }
- 
+
 // ─── Main component ───────────────────────────────────────────────────────────
- 
+
 const TransactionHistoryTable = ({ data }: TransactionHistoryTableProps) => {
   const [activeReceipt, setActiveReceipt] = useState<ReceiptData | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
   const [filter, setFilter] = useState<FilterOption>("All Transactions");
- 
+
   const processed = sortByDate(filterByStatus(data, filter), sortOrder);
- 
+
   return (
     <>
       {/* Controls */}
       <div className="flex items-center gap-3 justify-end mb-4">
         <SortOrderButton
           order={sortOrder}
-          onToggle={() =>
-            setSortOrder((prev) => (prev === "newest" ? "oldest" : "newest"))
-          }
+          onToggle={() => setSortOrder((prev) => (prev === "newest" ? "oldest" : "newest"))}
         />
         <FilterDropdown value={filter} onChange={setFilter} />
       </div>
- 
+
       {/* Table */}
       <table className="w-full bg-customer-sidebar-bg-secondary rounded-2xl">
         <thead className="text-[#6B7280]">
@@ -198,7 +178,7 @@ const TransactionHistoryTable = ({ data }: TransactionHistoryTableProps) => {
               </td>
             </tr>
           ))}
- 
+
           {processed.length === 0 && (
             <tr>
               <td colSpan={6} className="px-6 py-12 text-center text-white/30 text-sm">
@@ -208,14 +188,10 @@ const TransactionHistoryTable = ({ data }: TransactionHistoryTableProps) => {
           )}
         </tbody>
       </table>
- 
-      <ReceiptModal
-        receipt={activeReceipt}
-        onClose={() => setActiveReceipt(null)}
-      />
+
+      <ReceiptModal receipt={activeReceipt} onClose={() => setActiveReceipt(null)} />
     </>
   );
 };
- 
+
 export default TransactionHistoryTable;
- 
