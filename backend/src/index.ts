@@ -13,6 +13,9 @@ import movieRoutes from "./routes/movieRoutes.js";
 import crewRoutes from "./routes/crewRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
+import customerRoutes from "./routes/customerRoutes.js";
+import path from "path";
 import personRoutes from "./routes/personRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 import languageRoutes from "./routes/languageRoutes.js";
@@ -37,7 +40,7 @@ app.get("/", (req, res) => {
 // ===== Auth =====
 app.use("/api/auth", authRoutes);
 
-// ===== Admin =====
+app.use("/api/customer", customerRoutes);
 app.use("/api/movies", movieRoutes);
 app.use("/api/crew", crewRoutes);
 app.use("/api/dashboard", dashboardRoutes);
