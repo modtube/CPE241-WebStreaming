@@ -9,7 +9,15 @@ const menuItems = [
   { name: 'Cast and Crew Management', path: '/admin/crew' },
   { name: 'Users Management', path: '/admin/users' },
   { name: 'Transactions Management', path: '/admin/transactions' },
+<<<<<<< Updated upstream
   { name: 'Setup & Quality Control Overview', path: '/admin/setups' },
+=======
+  { name: 'Genre Management', path: '/admin/setups/genre' },
+  { name: 'Language Management', path: '/admin/setups/language' },
+  { name: 'Country Management', path: '/admin/setups/country' },
+  { name: 'Rating Management', path: '/admin/setups/rating' },
+  { name: 'Setup & Quality Control Overview', path: '/admin/setups' }
+>>>>>>> Stashed changes
 ];
 
 export default function AdminNavbar() {
@@ -19,12 +27,12 @@ export default function AdminNavbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // 1. Detect if we are in a detail/add/edit page (ตรวจสอบว่าเป็นหน้าย่อยไหม)
+  // 1. ตรวจสอบว่าเป็นหน้าย่อยไหม (มี /add, /edit หรือมี path ลึกกว่า 3 ชั้น เช่น /transactions/123)
   const isDetailView = location.pathname.includes('/add') || 
                        location.pathname.includes('/edit') || 
                        location.pathname.split('/').length > 3;
 
-  // 2. Find the current menu item based on URL
+  // 2. หาเมนูหลักที่กำลังใช้งานอยู่
   const currentMenuItem = menuItems.find(item =>
     location.pathname === item.path ||
     (item.path !== '/admin/dashboard' && location.pathname.startsWith(item.path))
@@ -38,15 +46,37 @@ export default function AdminNavbar() {
     displayTitle = `Add New ${currentMenuName.replace(' Management', '')}`;
   } else if (location.pathname.includes('/edit')) {
     displayTitle = `Edit ${currentMenuName.replace(' Management', '')}`;
+  } else if (location.pathname.startsWith('/admin/transactions/') && location.pathname !== '/admin/transactions') {
+    displayTitle = 'Transaction Details';
   }
 
   // 4. Back button function
   const handleBack = () => {
+<<<<<<< Updated upstream
     if (currentMenuItem) {
+=======
+    const setupSubPages = [
+      '/admin/setups/genre', 
+      '/admin/setups/language', 
+      '/admin/setups/country', 
+      '/admin/setups/rating'
+    ];
+    if (setupSubPages.includes(location.pathname)) {
+      navigate('/admin/setups');
+      return;
+    }
+
+    if (currentMenuItem && location.pathname !== currentMenuItem.path) {
+>>>>>>> Stashed changes
       navigate(currentMenuItem.path);
     } else {
       navigate(-1);
     }
+<<<<<<< Updated upstream
+=======
+
+    navigate(-1);
+>>>>>>> Stashed changes
   };
 
   const handleLogout = () => {

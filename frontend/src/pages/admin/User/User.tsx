@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import { useState, useEffect } from 'react';
 import { Table, Input, Button, message, Dropdown } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
@@ -6,20 +7,44 @@ import type { ColumnsType } from 'antd/es/table';
 import type { MenuProps } from 'antd'; 
 import StatusBadge from '../../../components/admin/user/UserStatus';
 import RoleBadge from '../../../components/admin/user/Role';
+=======
+import React, { useState, useEffect, useCallback } from "react";
+import { Table, Input, Button, message, Dropdown, Space, Modal } from "antd";
+import { SearchOutlined, MoreOutlined } from "@ant-design/icons";
+import { Trash2, Funnel } from "lucide-react";
+import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
+import type { FilterValue, SorterResult } from "antd/es/table/interface";
+import StatusBadge from "../../../components/admin/user/UserStatus";
+import RoleBadge from "../../../components/admin/user/Role";
+>>>>>>> Stashed changes
 
 interface User {
   user_id: string; 
   username: string;
   email: string;
+<<<<<<< Updated upstream
   country: string;
   status: 'Active' | 'Banned' | 'Suspended';
   role: 'Admin' | 'Customer';
+=======
+  img_path: string | null;
+  register_date: string;
+  user_status: "active" | "suspended" | "banned";
+  user_role: "admin" | "customer";
+  country_code?: string;
+}
+
+interface Country {
+  country_code: string;
+  country_name: string;
+>>>>>>> Stashed changes
 }
 
 export default function Users() {
   const [searchText, setSearchText] = useState('');
   const [dataSource, setDataSource] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
+<<<<<<< Updated upstream
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]); 
 
   const fetchUsers = async () => {
@@ -30,6 +55,71 @@ export default function Users() {
       if (!response.ok) throw new Error('Fetch failed');
       const data = await response.json();
       setDataSource(data);
+=======
+  const [searchText, setSearchText] = useState("");
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  const [countries, setCountries] = useState<Country[]>([]);
+  const [pagination, setPagination] = useState<TablePaginationConfig>({
+    current: 1,
+    pageSize: 10,
+    total: 0,
+  });
+
+  const [sortParams, setSortParams] = useState<{
+    field: string;
+    order: string;
+  }>({
+    field: "user_id",
+    order: "ascend",
+  });
+
+  const [filters, setFilters] = useState<Record<string, FilterValue | null>>(
+    {},
+  );
+
+  const fetchCountries = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/countries");
+      const result = await response.json();
+      if (response.ok) {
+        setCountries(result.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch countries", error);
+    }
+  };
+
+  const fetchUsers = useCallback(async () => {
+    setLoading(true);
+    try {
+      const query = new URLSearchParams({
+        page: String(pagination.current),
+        limit: String(pagination.pageSize),
+        sort_by: sortParams.field,
+        order: sortParams.order === "ascend" ? "ASC" : "DESC",
+        ...(searchText && { search: searchText }),
+        ...(filters.user_status?.[0] && {
+          user_status: String(filters.user_status[0]),
+        }),
+        ...(filters.user_role?.[0] && {
+          user_role: String(filters.user_role[0]),
+        }),
+        ...(filters.country_code?.[0] && {
+          country_code: String(filters.country_code[0]),
+        }),
+      });
+
+      const response = await fetch(`http://localhost:5000/api/users?${query}`);
+      const result = await response.json();
+
+      if (response.ok) {
+        setDataSource(result.data);
+        setPagination((prev) => ({
+          ...prev,
+          total: result.pagination.total_items,
+        }));
+      }
+>>>>>>> Stashed changes
     } catch (error) {
       // 🚨 MOCKUP DATA: ส่วนนี้จะทำงานเมื่อหา Backend ไม่เจอ (คอมเมนต์ทิ้งได้เลยเมื่อเชื่อม API จริงเสร็จ)
       console.warn("Backend not found. Using Users Mockup Data instead.");
@@ -47,6 +137,13 @@ export default function Users() {
 
   useEffect(() => {
     fetchUsers();
+<<<<<<< Updated upstream
+=======
+  }, [fetchUsers]);
+
+  useEffect(() => {
+    fetchCountries();
+>>>>>>> Stashed changes
   }, []);
 
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
@@ -140,15 +237,48 @@ export default function Users() {
       ),
       render: (text) => <span className="text-gray-500">{text}</span>
     },
+<<<<<<< Updated upstream
     { 
       title: 'STATUS', 
       dataIndex: 'status', 
       key: 'status',
+=======
+    {
+      title: "Email",
+      dataIndex: "email",
+      sorter: true,
+      sortOrder:
+        sortParams.field === "email" ? (sortParams.order as any) : null,
+      sortDirections: ["ascend", "descend", "ascend"],
+    },
+    {
+      title: "Country",
+      dataIndex: "country_code",
+      filters: countries.map((c) => ({
+        text: c.country_name,
+        value: c.country_code,
+      })),
+      filterMultiple: false,
+      filteredValue: filters.country_code || null,
+      filterIcon: (filtered) => (
+        <Funnel
+          size={16}
+          color={filtered ? "#3b82f6" : "#9ca3af"}
+          strokeWidth={filtered ? 3 : 2}
+        />
+      ),
+      render: (_, record) => record.country_code || "-",
+    },
+    {
+      title: "Role",
+      dataIndex: "user_role",
+>>>>>>> Stashed changes
       filters: [
         { text: 'Active', value: 'Active' }, 
         { text: 'Banned', value: 'Banned' },
         { text: 'Suspended', value: 'Suspended' }
       ],
+<<<<<<< Updated upstream
       onFilter: (value, record) => record.status === value,
       filterIcon: (filtered) => (
         <Funnel 
@@ -157,6 +287,66 @@ export default function Users() {
           strokeWidth={filtered ? 3 : 2} 
         />
       ),
+=======
+      filterMultiple: false,
+      filteredValue: filters.user_role || null,
+      filterIcon: (filtered) => (
+        <Funnel
+          size={16}
+          color={filtered ? "#3b82f6" : "#9ca3af"}
+          strokeWidth={filtered ? 3 : 2}
+        />
+      ),
+      render: (role, record) => (
+        <Dropdown
+          disabled={role?.toLowerCase() === "admin"}
+          menu={{
+            items: [
+              {
+                key: "admin",
+                label: "Make Admin",
+                disabled: role?.toLowerCase() === "admin",
+              },
+              {
+                key: "customer",
+                label: "Make Customer",
+                disabled: role?.toLowerCase() === "customer",
+              },
+            ],
+            onClick: ({ key }) => handleUpdateRole(record.user_id, key),
+          }}
+          trigger={["click"]}
+        >
+          <div
+            className={
+              role?.toLowerCase() === "admin"
+                ? "cursor-not-allowed opacity-60"
+                : "cursor-pointer"
+            }
+          >
+            <RoleBadge role={role} />
+          </div>
+        </Dropdown>
+      ),
+    },
+    {
+      title: "Status",
+      dataIndex: "user_status",
+      filters: [
+        { text: "Active", value: "active" },
+        { text: "Suspended", value: "suspended" },
+        { text: "Banned", value: "banned" },
+      ],
+      filterMultiple: false,
+      filteredValue: filters.user_status || null,
+      filterIcon: (filtered) => (
+        <Funnel
+          size={16}
+          color={filtered ? "#3b82f6" : "#9ca3af"}
+          strokeWidth={filtered ? 3 : 2}
+        />
+      ),
+>>>>>>> Stashed changes
       render: (status, record) => {
         const items: MenuProps['items'] = [
           { key: 'Active', label: 'Active' },
@@ -277,6 +467,37 @@ export default function Users() {
           "
         />
       </div>
+<<<<<<< Updated upstream
+=======
+
+      <Table
+        rowSelection={rowSelection}
+        columns={columns}
+        dataSource={dataSource}
+        loading={loading}
+        rowKey="user_id"
+        pagination={{
+          ...pagination,
+          showSizeChanger: true,
+          showTotal: (total, range) =>
+            `Showing ${range[0]}-${range[1]} of ${total} users`,
+        }}
+        onChange={handleTableChange}
+        className="border border-gray-100 rounded-lg overflow-hidden [&_.ant-table-filter-column]:flex-row-reverse [&_.ant-table-filter-column]:justify-end [&_.ant-table-filter-column]:gap-2"
+      />
+      <Modal
+        open={deleteModalOpen}
+        title="Confirm Deletion"
+        okText="Delete"
+        okButtonProps={{ danger: true }}
+        cancelText="Cancel"
+        onOk={confirmDelete}
+        onCancel={() => setDeleteModalOpen(false)}
+      >
+        Are you sure you want to delete {selectedRowKeys.length} selected users?
+        This action cannot be undone.
+      </Modal>
+>>>>>>> Stashed changes
     </div>
   );
 }
