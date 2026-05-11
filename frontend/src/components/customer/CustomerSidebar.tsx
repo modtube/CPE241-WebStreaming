@@ -50,7 +50,7 @@ export default function CustomerSidebar() {
         username: storedUsername,
         // เนื่องจาก API ไม่ได้คืน Email มา เราสามารถจำลองขึ้นมา
         // หรือถ้าในอนาคต API มี email ก็แค่เก็บเพิ่มแล้วดึงมาใช้ตรงนี้ครับ
-        email: storedEmail,
+        email: storedEmail || "unknown@modtube.com",
       });
       console.log(
         `ID: ${storedId}, Username: ${storedUsername}, Email: ${storedEmail}`,

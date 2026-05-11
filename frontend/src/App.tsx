@@ -13,7 +13,7 @@ import UserManagement from "./pages/admin/User/User";
 import TransactionsView from "./pages/admin/Transaction/Transactions";
 import TransactionDetail from "./pages/admin/Transaction/TransactionDetail";
 import SetupsView from "./pages/admin/Setup/Setups";
-import Home from "./pages/customer/Home";
+import Home from "./pages/customer/Home/Home";
 import PersonalLibrary from "./pages/customer/PersonalLibrary";
 import Playlists from "./pages/customer/Playlists";
 import TransactionHistory from "./pages/customer/TransactionHistory";

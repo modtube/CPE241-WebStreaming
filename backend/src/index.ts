@@ -19,6 +19,8 @@ import genreRoutes from "./routes/genreRoutes.js";
 import ratingRoutes from "./routes/ratingRoutes.js";
 import countryRoutes from "./routes/countryRoutes.js";
 import transactionRoutes from "./routes/transactionRoutes.js";
+import homeRoutes from "./routes/homeRoutes.js";
+import customerReviewRoutes from "./routes/customerReviewRoutes.js";
 
 // ===== User-facing Routes =====
 
@@ -48,6 +50,8 @@ app.use("/api/genres", genreRoutes);
 app.use("/api/ratings", ratingRoutes);
 app.use("/api/countries", countryRoutes);
 app.use("/api/transactions", transactionRoutes);
+app.use("/api/home", homeRoutes);
+app.use("/api/customer-reviews", customerReviewRoutes);
 
 // ===== User-facing =====
 
