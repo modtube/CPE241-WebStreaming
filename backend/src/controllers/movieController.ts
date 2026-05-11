@@ -47,14 +47,14 @@ export const getAllMovies = async (req: Request, res: Response) => {
     // ระบบ Sorting (เรียงลำดับจากข้อมูลทั้งหมดใน DB)
     let orderBySql = " ORDER BY m.movie_id ASC"; // ค่าเริ่มต้น
     if (sortBy) {
-      const order = sortOrder === 'descend' ? 'DESC' : 'ASC';
+      const order = sortOrder === "descend" ? "DESC" : "ASC";
       // Map ชื่อฟิลด์จาก Frontend ให้ตรงกับคอลัมน์ในฐานข้อมูล
       const sortMap: Record<string, string> = {
-        movie_id: 'm.movie_id',
-        title: 'm.title',
-        release_date: 'm.release_date',
-        price: 'm.price',
-        average_rating: 'average_rating'
+        movie_id: "m.movie_id",
+        title: "m.title",
+        release_date: "m.release_date",
+        price: "m.price",
+        average_rating: "average_rating",
       };
       if (sortMap[sortBy as string]) {
         orderBySql = ` ORDER BY ${sortMap[sortBy as string]} ${order}`;
@@ -63,8 +63,8 @@ export const getAllMovies = async (req: Request, res: Response) => {
 
     // Query เพื่อนับจำนวนรายการทั้งหมดภายใต้เงื่อนไข Filter
     const countResult = await pool.query(
-      `SELECT COUNT(*) FROM movie m LEFT JOIN movie_rating mr ON m.rating_id = mr.rating_id ${filterSql}`, 
-      queryParams
+      `SELECT COUNT(*) FROM movie m LEFT JOIN movie_rating mr ON m.rating_id = mr.rating_id ${filterSql}`,
+      queryParams,
     );
     const totalItems = parseInt(countResult.rows[0].count);
 
@@ -148,7 +148,8 @@ export const getMovieDetailById = async (req: Request, res: Response) => {
       WHERE m.movie_id = $1;
     `;
     const result = await pool.query(sql, [id]);
-    if (result.rows.length === 0) return res.status(404).json({ message: "ไม่พบข้อมูลหนัง" });
+    if (result.rows.length === 0)
+      return res.status(404).json({ message: "ไม่พบข้อมูลหนัง" });
     res.status(200).json(result.rows[0]);
   } catch (err: any) {
     console.error("Detail Error:", err);
@@ -169,32 +170,46 @@ export const createMovie = async (req: Request, res: Response) => {
       VALUES ($1, $2, $3, $4, $5, $6, $7) 
       RETURNING movie_id`;
     const movieRes = await client.query(movieQuery, [
-      movieData.title, movieData.img_path, movieData.movie_description, 
-      movieData.release_date, movieData.price, movieData.rating_id, movieData.country_code
+      movieData.title,
+      movieData.img_path,
+      movieData.movie_description,
+      movieData.release_date,
+      movieData.price,
+      movieData.rating_id,
+      movieData.country_code,
     ]);
     const newMovieId = movieRes.rows[0].movie_id;
 
     if (movieData.genres) {
       for (const gid of movieData.genres) {
-        await client.query("INSERT INTO movie_genre (movie_id, genre_id) VALUES ($1, $2)", [newMovieId, gid]);
+        await client.query(
+          "INSERT INTO movie_genre (movie_id, genre_id) VALUES ($1, $2)",
+          [newMovieId, gid],
+        );
       }
     }
     if (movieData.media_files) {
       for (const f of movieData.media_files) {
-        await client.query("INSERT INTO media_path (movie_id, quality, file_path, priority) VALUES ($1, $2, $3, $4)", 
-        [newMovieId, f.quality, f.file_path, f.priority || 1]);
+        await client.query(
+          "INSERT INTO media_path (movie_id, quality, file_path, priority) VALUES ($1, $2, $3, $4)",
+          [newMovieId, f.quality, f.file_path, f.priority || 1],
+        );
       }
     }
     if (movieData.resources) {
       for (const r of movieData.resources) {
-        await client.query("INSERT INTO movie_resource (movie_id, language_id, lang_type, file_path, priority) VALUES ($1, $2, $3, $4, $5)", 
-        [newMovieId, r.language_id, r.type, r.file_path, r.priority || 1]);
+        await client.query(
+          "INSERT INTO movie_resource (movie_id, language_id, lang_type, file_path, priority) VALUES ($1, $2, $3, $4, $5)",
+          [newMovieId, r.language_id, r.type, r.file_path, r.priority || 1],
+        );
       }
     }
     if (movieData.cast_and_crew) {
       for (const p of movieData.cast_and_crew) {
-        await client.query("INSERT INTO movie_role (movie_id, person_id, role_type, character_name) VALUES ($1, $2, $3, $4)", 
-        [newMovieId, p.person_id, p.role_type, p.character_name]);
+        await client.query(
+          "INSERT INTO movie_role (movie_id, person_id, role_type, character_name) VALUES ($1, $2, $3, $4)",
+          [newMovieId, p.person_id, p.role_type, p.character_name],
+        );
       }
     }
 
@@ -203,7 +218,9 @@ export const createMovie = async (req: Request, res: Response) => {
   } catch (error: any) {
     await client.query("ROLLBACK");
     res.status(500).json({ message: "บันทึกล้มเหลว", debug: error.message });
-  } finally { client.release(); }
+  } finally {
+    client.release();
+  }
 };
 
 /**
@@ -216,8 +233,17 @@ export const updateMovie = async (req: Request, res: Response) => {
   try {
     await client.query("BEGIN");
     await client.query(
-      `UPDATE movie SET title=$1, img_path=$2, movie_description=$3, release_date=$4, price=$5, rating_id=$6, country_code=$7, update_date=CURRENT_TIMESTAMP WHERE movie_id=$8`, 
-      [movieData.title, movieData.img_path, movieData.movie_description, movieData.release_date, movieData.price, movieData.rating_id, movieData.country_code, id]
+      `UPDATE movie SET title=$1, img_path=$2, movie_description=$3, release_date=$4, price=$5, rating_id=$6, country_code=$7, update_date=CURRENT_TIMESTAMP WHERE movie_id=$8`,
+      [
+        movieData.title,
+        movieData.img_path,
+        movieData.movie_description,
+        movieData.release_date,
+        movieData.price,
+        movieData.rating_id,
+        movieData.country_code,
+        id,
+      ],
     );
 
     // ล้างข้อมูลความสัมพันธ์เก่า
@@ -228,16 +254,32 @@ export const updateMovie = async (req: Request, res: Response) => {
 
     // บันทึกข้อมูลใหม่
     if (movieData.genres) {
-      for (const gid of movieData.genres) await client.query("INSERT INTO movie_genre (movie_id, genre_id) VALUES ($1, $2)", [id, gid]);
+      for (const gid of movieData.genres)
+        await client.query(
+          "INSERT INTO movie_genre (movie_id, genre_id) VALUES ($1, $2)",
+          [id, gid],
+        );
     }
     if (movieData.media_files) {
-      for (const f of movieData.media_files) await client.query("INSERT INTO media_path (movie_id, quality, file_path, priority) VALUES ($1, $2, $3, $4)", [id, f.quality, f.file_path, f.priority || 1]);
+      for (const f of movieData.media_files)
+        await client.query(
+          "INSERT INTO media_path (movie_id, quality, file_path, priority) VALUES ($1, $2, $3, $4)",
+          [id, f.quality, f.file_path, f.priority || 1],
+        );
     }
     if (movieData.resources) {
-      for (const r of movieData.resources) await client.query("INSERT INTO movie_resource (movie_id, language_id, lang_type, file_path, priority) VALUES ($1, $2, $3, $4, $5)", [id, r.language_id, r.type, r.file_path, r.priority || 1]);
+      for (const r of movieData.resources)
+        await client.query(
+          "INSERT INTO movie_resource (movie_id, language_id, lang_type, file_path, priority) VALUES ($1, $2, $3, $4, $5)",
+          [id, r.language_id, r.type, r.file_path, r.priority || 1],
+        );
     }
     if (movieData.cast_and_crew) {
-      for (const p of movieData.cast_and_crew) await client.query("INSERT INTO movie_role (movie_id, person_id, role_type, character_name) VALUES ($1, $2, $3, $4)", [id, p.person_id, p.role_type, p.character_name]);
+      for (const p of movieData.cast_and_crew)
+        await client.query(
+          "INSERT INTO movie_role (movie_id, person_id, role_type, character_name) VALUES ($1, $2, $3, $4)",
+          [id, p.person_id, p.role_type, p.character_name],
+        );
     }
 
     await client.query("COMMIT");
@@ -245,7 +287,9 @@ export const updateMovie = async (req: Request, res: Response) => {
   } catch (error: any) {
     await client.query("ROLLBACK");
     res.status(500).json({ message: "อัปเดตล้มเหลว", debug: error.message });
-  } finally { client.release(); }
+  } finally {
+    client.release();
+  }
 };
 
 /**
@@ -259,5 +303,29 @@ export const deleteMovieById = async (req: Request, res: Response) => {
     res.status(200).json({ message: "ลบสำเร็จ" });
   } catch (error: any) {
     res.status(500).json({ message: "ลบล้มเหลว", debug: error.message });
+  }
+};
+
+export const getMyMovies = async (req: any, res: Response) => {
+  try {
+    // ดึง userId ออกมาจาก req.user (ที่ฝากมาจาก middleware)
+    const userId = req.user.userId;
+
+    const result = await pool.query(
+      `SELECT 
+    m.movie_id, 
+    m.title, 
+    m.img_path,
+    p.purchase_date
+FROM personal_library p
+JOIN movie m ON p.movie_id = m.movie_id
+WHERE p.user_id = $1
+ORDER BY p.purchase_date DESC;`,
+      [userId],
+    );
+
+    res.status(200).json(result.rows);
+  } catch (error) {
+    res.status(500).json({ message: `Server Error: ${error}` });
   }
 };

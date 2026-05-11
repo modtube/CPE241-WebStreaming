@@ -11,7 +11,7 @@ export const login = async (req: Request, res: Response) => {
 
   try {
     const userResult = await pool.query(
-      "SELECT user_id, username, user_password, user_role FROM app_user WHERE username = $1",
+      "SELECT user_id, email, username, user_password, user_role FROM app_user WHERE username = $1",
       [username],
     );
 
@@ -43,6 +43,7 @@ export const login = async (req: Request, res: Response) => {
       user: {
         id: user.user_id,
         username: user.username,
+        email: user.email,
         role: user.user_role,
       },
     });
