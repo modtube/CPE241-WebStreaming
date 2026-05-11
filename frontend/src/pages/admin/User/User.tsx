@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Table, Input, Button, message, Dropdown, Space, Modal } from "antd";
-import { SearchOutlined, MoreOutlined } from "@ant-design/icons";
-import { Trash2 } from "lucide-react";
+import { SearchOutlined, Trash2 } from "@ant-design/icons";
+import { Funnel } from "lucide-react";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import type { FilterValue, SorterResult } from "antd/es/table/interface";
 import StatusBadge from "../../../components/admin/user/UserStatus";
@@ -18,7 +18,6 @@ interface User {
   country_code?: string;
 }
 
-// 💡 เพิ่ม Interface สำหรับข้อมูลประเทศ
 interface Country {
   country_code: string;
   country_name: string;
@@ -29,7 +28,10 @@ export default function Users() {
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-  const [countries, setCountries] = useState<Country[]>([]); // 💡 State สำหรับเก็บรายชื่อประเทศ
+  const [countries, setCountries] = useState<Country[]>([]);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+
+  // State สำหรับ Server-side Pagination & Sorting
   const [pagination, setPagination] = useState<TablePaginationConfig>({
     current: 1,
     pageSize: 10,
@@ -44,11 +46,9 @@ export default function Users() {
     order: "ascend",
   });
 
-  const [filters, setFilters] = useState<Record<string, FilterValue | null>>(
-    {},
-  );
+  const [filters, setFilters] = useState<Record<string, FilterValue | null>>({});
 
-  // 💡 ฟังก์ชันดึงข้อมูลประเทศทั้งหมด
+  // ดึงข้อมูลประเทศสำหรับ Filter
   const fetchCountries = async () => {
     try {
       const response = await fetch("http://localhost:5000/api/countries");
@@ -61,6 +61,7 @@ export default function Users() {
     }
   };
 
+  // ดึงข้อมูล User แบบ Server-side
   const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
@@ -76,7 +77,6 @@ export default function Users() {
         ...(filters.user_role?.[0] && {
           user_role: String(filters.user_role[0]),
         }),
-        // 💡 ส่ง country_code ไปที่ API
         ...(filters.country_code?.[0] && {
           country_code: String(filters.country_code[0]),
         }),
@@ -97,19 +97,12 @@ export default function Users() {
     } finally {
       setLoading(false);
     }
-  }, [
-    pagination.current,
-    pagination.pageSize,
-    searchText,
-    sortParams,
-    filters,
-  ]);
+  }, [pagination.current, pagination.pageSize, searchText, sortParams, filters]);
 
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
 
-  // 💡 ดึงประเทศเมื่อ Component mount
   useEffect(() => {
     fetchCountries();
   }, []);
@@ -123,19 +116,12 @@ export default function Users() {
     setFilters(newFilters);
 
     if (!Array.isArray(sorter)) {
-      const nextOrder =
-        sorter.order || (sortParams.order === "ascend" ? "descend" : "ascend");
+      const nextOrder = sorter.order || (sortParams.order === "ascend" ? "descend" : "ascend");
       setSortParams({
         field: (sorter.field as string) || sortParams.field,
         order: nextOrder,
       });
     }
-  };
-
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-
-  const handleDelete = () => {
-    setDeleteModalOpen(true);
   };
 
   const confirmDelete = async () => {
@@ -160,29 +146,13 @@ export default function Users() {
     }
   };
 
-  const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
-    setSelectedRowKeys(newSelectedRowKeys);
-  };
-
-  const rowSelection = {
-    selectedRowKeys,
-    onChange: onSelectChange,
-    getCheckboxProps: (record: User) => ({
-      disabled: record.user_role?.toLowerCase() === "admin",
-      name: record.username,
-    }),
-  };
-
   const handleUpdateStatus = async (id: string, newStatus: string) => {
     try {
-      const response = await fetch(
-        `http://localhost:5000/api/users/${id}/status`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status: newStatus }),
-        },
-      );
+      const response = await fetch(`http://localhost:5000/api/users/${id}/status`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
       const resData = await response.json();
       if (response.ok) {
         message.success(resData.message);
@@ -197,14 +167,11 @@ export default function Users() {
 
   const handleUpdateRole = async (id: string, newRole: string) => {
     try {
-      const response = await fetch(
-        `http://localhost:5000/api/users/${id}/role`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ role: newRole }),
-        },
-      );
+      const response = await fetch(`http://localhost:5000/api/users/${id}/role`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role: newRole }),
+      });
       const resData = await response.json();
       if (response.ok) {
         message.success(resData.message);
@@ -222,18 +189,14 @@ export default function Users() {
       title: "User ID",
       dataIndex: "user_id",
       sorter: true,
-      sortOrder:
-        sortParams.field === "user_id" ? (sortParams.order as any) : null,
-      sortDirections: ["ascend", "descend", "ascend"],
+      sortOrder: sortParams.field === "user_id" ? (sortParams.order as any) : null,
       width: 120,
     },
     {
       title: "Username",
       dataIndex: "username",
       sorter: true,
-      sortOrder:
-        sortParams.field === "username" ? (sortParams.order as any) : null,
-      sortDirections: ["ascend", "descend", "ascend"],
+      sortOrder: sortParams.field === "username" ? (sortParams.order as any) : null,
       render: (text, record) => (
         <Space>
           <img
@@ -249,20 +212,20 @@ export default function Users() {
       title: "Email",
       dataIndex: "email",
       sorter: true,
-      sortOrder:
-        sortParams.field === "email" ? (sortParams.order as any) : null,
-      sortDirections: ["ascend", "descend", "ascend"],
+      sortOrder: sortParams.field === "email" ? (sortParams.order as any) : null,
     },
     {
       title: "Country",
       dataIndex: "country_code",
-      // 💡 เพิ่ม Filter โดยดึงค่าจาก State countries
       filters: countries.map((c) => ({
         text: c.country_name,
         value: c.country_code,
       })),
       filterMultiple: false,
       filteredValue: filters.country_code || null,
+      filterIcon: (filtered) => (
+        <Funnel size={16} color={filtered ? "#3b82f6" : "#9ca3af"} strokeWidth={filtered ? 3 : 2} />
+      ),
       render: (_, record) => record.country_code || "-",
     },
     {
@@ -279,28 +242,14 @@ export default function Users() {
           disabled={role?.toLowerCase() === "admin"}
           menu={{
             items: [
-              {
-                key: "admin",
-                label: "Make Admin",
-                disabled: role?.toLowerCase() === "admin",
-              },
-              {
-                key: "customer",
-                label: "Make Customer",
-                disabled: role?.toLowerCase() === "customer",
-              },
+              { key: "admin", label: "Make Admin", disabled: role === "admin" },
+              { key: "customer", label: "Make Customer", disabled: role === "customer" },
             ],
             onClick: ({ key }) => handleUpdateRole(record.user_id, key),
           }}
           trigger={["click"]}
         >
-          <div
-            className={
-              role?.toLowerCase() === "admin"
-                ? "cursor-not-allowed opacity-60"
-                : "cursor-pointer"
-            }
-          >
+          <div className={role === "admin" ? "cursor-not-allowed opacity-60" : "cursor-pointer"}>
             <RoleBadge role={role} />
           </div>
         </Dropdown>
@@ -317,71 +266,37 @@ export default function Users() {
       filterMultiple: false,
       filteredValue: filters.user_status || null,
       render: (status, record) => {
-        const isAdmin = record.user_role?.toLowerCase() === "admin";
+        const isAdmin = record.user_role === "admin";
         return (
           <Dropdown
             disabled={isAdmin}
             menu={{
               items: [
-                {
-                  key: "active",
-                  label: "Set Active",
-                  disabled: status === "active",
-                },
-                {
-                  key: "suspended",
-                  label: "Suspend",
-                  disabled: status === "suspended",
-                },
-                {
-                  key: "banned",
-                  label: "Ban User",
-                  danger: true,
-                  disabled: status === "banned",
-                },
+                { key: "active", label: "Set Active", disabled: status === "active" },
+                { key: "suspended", label: "Suspend", disabled: status === "suspended" },
+                { key: "banned", label: "Ban User", danger: true, disabled: status === "banned" },
               ],
               onClick: ({ key }) => handleUpdateStatus(record.user_id, key),
             }}
             trigger={["click"]}
           >
-            <div
-              className={
-                isAdmin ? "cursor-not-allowed opacity-60" : "cursor-pointer"
-              }
-            >
+            <div className={isAdmin ? "cursor-not-allowed opacity-60" : "cursor-pointer"}>
               <StatusBadge status={status} />
             </div>
           </Dropdown>
         );
       },
     },
-    // { // ใน figma มันไม่มีนะ
-    //   title: "Actions",
-    //   key: "actions",
-    //   width: 80,
-    //   render: (_, record) => (
-    //     <Dropdown
-    //       menu={{
-    //         items: [
-    //           { key: "view", label: "View Profile" },
-    //           { key: "history", label: "Transaction History" },
-    //         ],
-    //       }}
-    //     >
-    //       <Button type="text" icon={<MoreOutlined />} />
-    //     </Dropdown>
-    //   ),
-    // },
   ];
 
   return (
     <div className="p-6 bg-white rounded-xl shadow-sm border border-gray-100">
       <div className="flex justify-between items-center mb-6">
-        <div className="flex justify-between items-center gap-4 w-full">
+        <div className="flex gap-4 w-full">
           <Input
             placeholder="Search ID, Name, or Email..."
             prefix={<SearchOutlined className="text-gray-400" />}
-            className="w-72 h-10 rounded-lg max-w-xl"
+            className="w-72 h-10 rounded-lg"
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             onPressEnter={() => {
@@ -394,7 +309,7 @@ export default function Users() {
             type="primary"
             icon={<Trash2 size={18} />}
             disabled={selectedRowKeys.length === 0}
-            onClick={handleDelete}
+            onClick={() => setDeleteModalOpen(true)}
             className="flex items-center gap-2"
           >
             Delete {selectedRowKeys.length > 0 && `(${selectedRowKeys.length})`}
@@ -403,7 +318,13 @@ export default function Users() {
       </div>
 
       <Table
-        rowSelection={rowSelection}
+        rowSelection={{
+          selectedRowKeys,
+          onChange: (keys) => setSelectedRowKeys(keys),
+          getCheckboxProps: (record) => ({
+            disabled: record.user_role === "admin",
+          }),
+        }}
         columns={columns}
         dataSource={dataSource}
         loading={loading}
@@ -411,23 +332,21 @@ export default function Users() {
         pagination={{
           ...pagination,
           showSizeChanger: true,
-          showTotal: (total, range) =>
-            `Showing ${range[0]}-${range[1]} of ${total} users`,
+          showTotal: (total, range) => `Showing ${range[0]}-${range[1]} of ${total} users`,
         }}
         onChange={handleTableChange}
-        className="border border-gray-100 rounded-lg overflow-hidden"
+        className="border border-gray-100 rounded-lg overflow-hidden [&_.ant-table-filter-column]:flex-row-reverse [&_.ant-table-filter-column]:justify-end [&_.ant-table-filter-column]:gap-2"
       />
+
       <Modal
         open={deleteModalOpen}
         title="Confirm Deletion"
         okText="Delete"
         okButtonProps={{ danger: true }}
-        cancelText="Cancel"
         onOk={confirmDelete}
         onCancel={() => setDeleteModalOpen(false)}
       >
-        Are you sure you want to delete {selectedRowKeys.length} selected users?
-        This action cannot be undone.
+        Are you sure you want to delete {selectedRowKeys.length} selected users? This action cannot be undone.
       </Modal>
     </div>
   );
