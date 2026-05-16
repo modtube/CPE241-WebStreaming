@@ -1,11 +1,12 @@
-import express from 'express';
+import express from "express";
 import {
   getAllReviews,
   createReview,
   updateReviewStatus,
   deleteReview,
   getTotalMovieReview,
-} from '../controllers/reviewController.js'; // อย่าลืม .js
+  getReviewByMovieId,
+} from "../controllers/reviewController.js"; // อย่าลืม .js
 
 const router = express.Router();
 
@@ -15,10 +16,12 @@ const router = express.Router();
 // PATCH  /api/reviews/:reviewId/status  -> อัปเดต post_status
 // DELETE /api/reviews/:reviewId         -> ลบ review
 
-router.get('/', getAllReviews);
-router.get('/total', getTotalMovieReview);
-router.post('/', createReview);
-router.patch('/:reviewId/status', updateReviewStatus);
-router.delete('/:reviewId', deleteReview);
+router.get("/", getAllReviews);
+router.get("/total", getTotalMovieReview);
+router.post("/", createReview);
+router.patch("/:reviewId/status", updateReviewStatus);
+router.delete("/:reviewId", deleteReview);
+// ในไฟล์ที่จัดการ route ของ /api/home
+router.get("/:id/reviews", getReviewByMovieId);
 
 export default router;

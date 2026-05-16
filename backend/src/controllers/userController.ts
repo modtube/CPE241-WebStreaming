@@ -213,3 +213,288 @@ export const deleteUsers = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const getUserData = async (req: Request, res: Response) => {
+  try {
+    // 🟢 รับ id จาก params (เนื่องจากเป็น GET request)
+    // แต่ยังคงใช้ authenticateToken ในการตรวจสอบสิทธิ์การเข้าถึง
+    const { id } = req.params;
+
+    if (!id) {
+      return res
+        .status(400)
+        .json({ success: false, message: "User ID is required" });
+    }
+
+    const query = `
+      SELECT 
+        u.user_id, 
+        u.username, 
+        u.email, 
+        u.img_path, 
+        u.user_status, 
+        u.user_role, 
+        u.country_code,
+        c.country_name
+      FROM app_user u
+      LEFT JOIN country c ON u.country_code = c.country_code
+      WHERE u.user_id = $1;
+    `;
+
+    const result = await pool.query(query, [id]);
+
+    if (result.rows.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: result.rows[0],
+    });
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+export const updateUserData = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params; // รับ User ID จาก URL
+    const { username, img_path, country_code } = req.body;
+
+    // 1. ตรวจสอบข้อมูลเบื้องต้น
+    if (!username) {
+      return res.status(400).json({
+        success: false,
+        message: "Username is required",
+      });
+    }
+
+    // 2. คำสั่ง UPDATE (ไม่รวม password และ email ตามที่ตกลงกัน)
+    const query = `
+      UPDATE app_user
+      SET 
+        username = $1,
+        img_path = $2,
+        country_code = $3
+      WHERE user_id = $4
+      RETURNING user_id, username, img_path, country_code;
+    `;
+
+    const values = [username, img_path, country_code, id];
+    const result = await pool.query(query, values);
+
+    if (result.rows.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      data: result.rows[0],
+    });
+  } catch (error: any) {
+    console.error("Error updating user data:", error);
+
+    // 🟢 Error Handling: เช็คกรณี Username ซ้ำ (Unique Violation - Code 23505)
+    if (error.code === "23505") {
+      return res.status(409).json({
+        success: false,
+        message: "This username is already taken. Please choose another one.",
+      });
+    }
+
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+export const updatePassword = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { current_password, new_password, confirm_password } = req.body;
+
+    // 1. ตรวจสอบว่าส่งข้อมูลมาครบหรือไม่
+    if (!current_password || !new_password || !confirm_password) {
+      return res.status(400).json({
+        success: false,
+        message: "กรุณากรอกข้อมูลรหัสผ่านให้ครบทุกช่อง",
+      });
+    }
+
+    // 2. ดึงรหัสผ่านปัจจุบันจากฐานข้อมูลมาเช็ค
+    const userQuery = await pool.query(
+      "SELECT user_password FROM app_user WHERE user_id = $1",
+      [id],
+    );
+    if (userQuery.rows.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "ไม่พบข้อมูลผู้ใช้งาน" });
+    }
+
+    const dbPassword = userQuery.rows[0].user_password;
+
+    // 3. STEP 1: เช็คว่ารหัสเดิมที่กรอกมา ถูกต้องตรงกับใน DB หรือไม่ (เทียบ String ตรงๆ)
+    if (current_password !== dbPassword) {
+      return res
+        .status(401)
+        .json({ success: false, message: "รหัสผ่านปัจจุบันไม่ถูกต้อง" });
+    }
+
+    // 4. STEP 2: เช็คว่ารหัสใหม่ซ้ำกับรหัสเดิมหรือไม่
+    if (new_password === current_password) {
+      return res.status(400).json({
+        success: false,
+        message: "รหัสผ่านใหม่ต้องไม่ซ้ำกับรหัสผ่านเดิม",
+      });
+    }
+
+    // 5. STEP 3: เช็คว่ารหัสใหม่กับการยืนยันรหัสผ่านตรงกันหรือไม่
+    if (new_password !== confirm_password) {
+      return res
+        .status(400)
+        .json({ success: false, message: "รหัสผ่านใหม่และการยืนยันไม่ตรงกัน" });
+    }
+
+    // 6. อัปเดตรหัสผ่านใหม่ลงฐานข้อมูล
+    await pool.query(
+      "UPDATE app_user SET user_password = $1 WHERE user_id = $2",
+      [new_password, id],
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "เปลี่ยนรหัสผ่านเรียบร้อยแล้ว",
+    });
+  } catch (error) {
+    console.error("Update password error:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์" });
+  }
+};
+
+export const createUser = async (req: Request, res: Response) => {
+  try {
+    const {
+      username,
+      email,
+      password,
+      confirm_password,
+      img_path,
+      country_code,
+    } = req.body;
+
+    // 1. ตรวจสอบว่ากรอกข้อมูลครบถ้วนหรือไม่
+    if (!username || !email || !password || !confirm_password) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน (Username, Email, Password)",
+      });
+    }
+
+    // 2. เช็คว่ารหัสผ่านและการยืนยันรหัสผ่านตรงกันหรือไม่
+    if (password !== confirm_password) {
+      return res.status(400).json({
+        success: false,
+        message: "รหัสผ่านและการยืนยันรหัสผ่านไม่ตรงกัน",
+      });
+    }
+
+    // 3. ตรวจสอบว่า Username หรือ Email เคยมีในระบบแล้วหรือไม่
+    const checkUserQuery = `
+      SELECT username, email FROM app_user 
+      WHERE username = $1 OR email = $2
+    `;
+    const existingUser = await pool.query(checkUserQuery, [username, email]);
+
+    if (existingUser.rows.length > 0) {
+      const found = existingUser.rows[0];
+      if (found.username === username) {
+        return res
+          .status(409)
+          .json({ success: false, message: "ชื่อผู้ใช้นี้ถูกใช้งานไปแล้ว" });
+      }
+      if (found.email === email) {
+        return res
+          .status(409)
+          .json({ success: false, message: "อีเมลนี้ถูกใช้งานไปแล้ว" });
+      }
+    }
+
+    // 4. ทำการบันทึกข้อมูลผู้ใช้ใหม่ (ใช้ค่า Default สำหรับ status และ role)
+    const insertQuery = `
+      INSERT INTO app_user (username, email, user_password, img_path, country_code, user_status, user_role)
+      VALUES ($1, $2, $3, $4, $5, 'active', 'customer')
+      RETURNING user_id, username, email;
+    `;
+
+    const result = await pool.query(insertQuery, [
+      username,
+      email,
+      password, // เก็บแบบ Plain text ตามที่ต้องการครับ
+      img_path || null,
+      country_code || null,
+    ]);
+
+    res.status(201).json({
+      success: true,
+      message: "ลงทะเบียนผู้ใช้สำเร็จ!",
+      user: result.rows[0],
+    });
+  } catch (error) {
+    console.error("Register Error:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์" });
+  }
+};
+
+export const resetPassword = async (req: Request, res: Response) => {
+  try {
+    const { identifier, new_password, confirm_password } = req.body;
+
+    if (!identifier || !new_password || !confirm_password) {
+      return res
+        .status(400)
+        .json({ success: false, message: "กรุณากรอกข้อมูลให้ครบถ้วน" });
+    }
+
+    if (new_password !== confirm_password) {
+      return res
+        .status(400)
+        .json({ success: false, message: "รหัสผ่านใหม่ไม่ตรงกัน" });
+    }
+
+    // อัปเดตรหัสผ่านโดยเช็คจาก username หรือ email (ใช้รหัสผ่านแบบข้อความตรงๆ)
+    const query = `
+      UPDATE app_user 
+      SET user_password = $1 
+      WHERE username = $2 OR email = $2
+      RETURNING user_id;
+    `;
+
+    const result = await pool.query(query, [new_password, identifier]);
+
+    if (result.rowCount === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "ไม่พบบัญชีผู้ใช้งานที่ระบุ" });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "เปลี่ยนรหัสผ่านใหม่สำเร็จแล้ว!",
+    });
+  } catch (error) {
+    console.error("Reset Password Error:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์" });
+  }
+};

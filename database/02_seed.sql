@@ -83,7 +83,7 @@ INSERT INTO genre (genre_id, genre_name) VALUES
 ('G11', 'Crime'),
 ('G12', 'Documentary'),
 ('G13', 'Animation'),
-('G14', 'Family'),
+('G14', 'Family'),+
 ('G15', 'Musical'),
 ('G16', 'War'),
 ('G17', 'Western'),
@@ -91,8 +91,7 @@ INSERT INTO genre (genre_id, genre_name) VALUES
 ('G19', 'History'),
 ('G20', 'Sport'),
 ('G21', 'Superhero'),
-('G22', 'Noir'),
-('G23', 'Anime');
+('G22', 'Noir');
 
 SELECT setval('genre_id_seq', 23);
 

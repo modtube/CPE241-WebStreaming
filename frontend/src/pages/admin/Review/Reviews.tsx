@@ -1,16 +1,16 @@
-import { useState, useEffect, useMemo } from 'react';
-import { Table, Input, Button, message, Dropdown } from 'antd';
-import { SearchOutlined } from '@ant-design/icons';
-import { Funnel } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import type { ColumnsType } from 'antd/es/table';
-import type { MenuProps } from 'antd';
-import ReviewStatus from '../../../components/admin/review/ReviewStatus';
+import { useState, useEffect, useMemo } from "react";
+import { Table, Input, Button, message, Dropdown } from "antd";
+import { SearchOutlined } from "@ant-design/icons";
+import { Funnel } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import type { ColumnsType } from "antd/es/table";
+import type { MenuProps } from "antd";
+import ReviewStatus from "../../../components/admin/review/ReviewStatus";
 
-const API_BASE = 'http://localhost:5000';
+const API_BASE = "http://localhost:5000";
 
 // Status ต้องตรงกับ CHECK constraint ใน schema
-type PostStatus = 'Published' | 'Hidden' | 'Removed';
+type PostStatus = "Published" | "Hidden" | "Removed";
 
 // Type ที่ backend ส่งกลับมาจาก GET /api/reviews
 interface ReviewRow {
@@ -38,7 +38,7 @@ interface Review {
 
 export default function Reviews() {
   const navigate = useNavigate();
-  const [searchText, setSearchText] = useState('');
+  const [searchText, setSearchText] = useState("");
   const [dataSource, setDataSource] = useState<Review[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
@@ -54,22 +54,46 @@ export default function Reviews() {
 
       const mapped: Review[] = json.data.map((r) => ({
         review_id: r.review_id,
-        user_id: r.user_id ?? '-',
+        user_id: r.user_id ?? "-",
         movie_id: r.movie_id,
         rating: parseFloat(r.rating),
         status: r.post_status,
         post_time: r.post_time.slice(0, 10), // YYYY-MM-DD
-        comment: r.comment_text ?? '',
+        comment: r.comment_text ?? "",
       }));
       setDataSource(mapped);
     } catch (error) {
-      console.error('Failed to load reviews:', error);
-      message.error('โหลด reviews ไม่สำเร็จ — ตรวจสอบว่า backend รันอยู่');
+      console.error("Failed to load reviews:", error);
+      message.error("โหลด reviews ไม่สำเร็จ — ตรวจสอบว่า backend รันอยู่");
       // Mockup data — fallback ถ้า backend ไม่ตอบ
       setDataSource([
-        { review_id: 'V00001', user_id: 'U00001', movie_id: 'M00001', rating: 4.5, status: 'Published', post_time: '2024-01-20', comment: 'เนื้อเรื่องดี สนุกมาก' },
-        { review_id: 'V00002', user_id: 'U00002', movie_id: 'M00002', rating: 4.5, status: 'Hidden', post_time: '2024-02-10', comment: 'ฉากตัวเอกออกตอนแรกเท่ห์มาก' },
-        { review_id: 'V00003', user_id: 'U00003', movie_id: 'M00003', rating: 4.5, status: 'Removed', post_time: '2024-02-25', comment: 'ห่วยแตก ไม่แนะนำ' },
+        {
+          review_id: "V00001",
+          user_id: "U00001",
+          movie_id: "M00001",
+          rating: 4.5,
+          status: "Published",
+          post_time: "2024-01-20",
+          comment: "เนื้อเรื่องดี สนุกมาก",
+        },
+        {
+          review_id: "V00002",
+          user_id: "U00002",
+          movie_id: "M00002",
+          rating: 4.5,
+          status: "Hidden",
+          post_time: "2024-02-10",
+          comment: "ฉากตัวเอกออกตอนแรกเท่ห์มาก",
+        },
+        {
+          review_id: "V00003",
+          user_id: "U00003",
+          movie_id: "M00003",
+          rating: 4.5,
+          status: "Removed",
+          post_time: "2024-02-25",
+          comment: "ห่วยแตก ไม่แนะนำ",
+        },
       ]);
     } finally {
       setLoading(false);
@@ -90,23 +114,28 @@ export default function Reviews() {
   };
 
   // เปลี่ยน status (Published / Hidden / Removed)
-  const handleStatusChange = async (reviewId: string, newStatus: PostStatus) => {
+  const handleStatusChange = async (
+    reviewId: string,
+    newStatus: PostStatus,
+  ) => {
     try {
       const res = await fetch(`${API_BASE}/api/reviews/${reviewId}/status`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ post_status: newStatus }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
       // อัปเดตใน table ทันที
       setDataSource((prev) =>
-        prev.map((r) => (r.review_id === reviewId ? { ...r, status: newStatus } : r))
+        prev.map((r) =>
+          r.review_id === reviewId ? { ...r, status: newStatus } : r,
+        ),
       );
       message.success(`Status updated to ${newStatus}`);
     } catch (error) {
-      console.error('Update status failed:', error);
-      message.error('Failed to update status');
+      console.error("Update status failed:", error);
+      message.error("Failed to update status");
     }
   };
 
@@ -118,67 +147,71 @@ export default function Reviews() {
     try {
       await Promise.all(
         selectedRowKeys.map((id) =>
-          fetch(`${API_BASE}/api/reviews/${id}`, { method: 'DELETE' })
-        )
+          fetch(`${API_BASE}/api/reviews/${id}`, { method: "DELETE" }),
+        ),
       );
       message.success(`Deleted ${selectedRowKeys.length} reviews`);
       setSelectedRowKeys([]);
       fetchReviews();
     } catch (error) {
-      console.error('Delete failed:', error);
-      message.error('ลบไม่สำเร็จ');
+      console.error("Delete failed:", error);
+      message.error("ลบไม่สำเร็จ");
     }
   };
 
   // ตัวเลือก rating สำหรับ funnel filter — สร้างจากข้อมูลจริงที่มี
   const ratingFilterOptions = useMemo(() => {
-    const uniqueRatings = Array.from(new Set(dataSource.map((r) => r.rating))).sort(
-      (a, b) => b - a
-    );
+    const uniqueRatings = Array.from(
+      new Set(dataSource.map((r) => r.rating)),
+    ).sort((a, b) => b - a);
     return uniqueRatings.map((v) => ({ text: v.toFixed(1), value: v }));
   }, [dataSource]);
 
   const columns: ColumnsType<Review> = [
     {
-      title: 'ID',
-      dataIndex: 'review_id',
-      key: 'review_id',
-      defaultSortOrder: 'ascend', // default: sort น้อย→มาก ที่ ID column ตอนเปิดหน้า
+      title: "ID",
+      dataIndex: "review_id",
+      key: "review_id",
+      defaultSortOrder: "ascend", // default: sort น้อย→มาก ที่ ID column ตอนเปิดหน้า
       sorter: (a, b) => a.review_id.localeCompare(b.review_id),
     },
     {
-      title: 'USER ID',
-      dataIndex: 'user_id',
-      key: 'user_id',
+      title: "USER ID",
+      dataIndex: "user_id",
+      key: "user_id",
       sorter: (a, b) => a.user_id.localeCompare(b.user_id),
-      render: (text) => <span className="font-medium text-gray-800">{text}</span>,
+      render: (text) => (
+        <span className="font-medium text-gray-800">{text}</span>
+      ),
     },
     {
-      title: 'MOVIE ID',
-      dataIndex: 'movie_id',
-      key: 'movie_id',
+      title: "MOVIE ID",
+      dataIndex: "movie_id",
+      key: "movie_id",
       sorter: (a, b) => a.movie_id.localeCompare(b.movie_id),
       render: (text) => <span className="text-gray-500">{text}</span>,
     },
     {
-      title: 'REVIEW RATING',
-      dataIndex: 'rating',
-      key: 'rating',
+      title: "REVIEW RATING",
+      dataIndex: "rating",
+      key: "rating",
       filters: ratingFilterOptions,
       onFilter: (value, record) => record.rating === value,
       filterIcon: (filtered) => (
         <Funnel
           size={16}
-          color={filtered ? '#3b82f6' : '#9ca3af'}
+          color={filtered ? "#3b82f6" : "#9ca3af"}
           strokeWidth={filtered ? 3 : 2}
         />
       ),
-      render: (rating: number) => <span className="text-gray-600">{rating.toFixed(1)}</span>,
+      render: (rating: number) => (
+        <span className="text-gray-600">{rating.toFixed(1)}</span>
+      ),
     },
     {
-      title: 'STATUS',
-      dataIndex: 'status',
-      key: 'status',
+      title: "STATUS",
+      dataIndex: "status",
+      key: "status",
       // กำหนดลำดับ status เอง: Published(0) < Hidden(1) < Removed(2)
       // asc → Published → Hidden → Removed
       // desc → Removed → Hidden → Published
@@ -191,18 +224,19 @@ export default function Reviews() {
         return order[a.status] - order[b.status];
       },
       render: (status: PostStatus, record) => {
-        const items: MenuProps['items'] = [
-          { key: 'Published', label: 'Published' },
-          { key: 'Hidden', label: 'Hidden' },
-          { key: 'Removed', label: 'Removed' },
+        const items: MenuProps["items"] = [
+          { key: "Published", label: "Published" },
+          { key: "Hidden", label: "Hidden" },
+          { key: "Removed", label: "Removed" },
         ];
         return (
           <Dropdown
             menu={{
               items,
-              onClick: ({ key }) => handleStatusChange(record.review_id, key as PostStatus),
+              onClick: ({ key }) =>
+                handleStatusChange(record.review_id, key as PostStatus),
             }}
-            trigger={['click']}
+            trigger={["click"]}
           >
             <div className="cursor-pointer hover:opacity-80 transition-opacity inline-block">
               <ReviewStatus status={status} />
@@ -212,30 +246,22 @@ export default function Reviews() {
       },
     },
     {
-      title: 'POST TIME',
-      dataIndex: 'post_time',
-      key: 'post_time',
-      sorter: (a, b) => new Date(a.post_time).getTime() - new Date(b.post_time).getTime(),
+      title: "POST TIME",
+      dataIndex: "post_time",
+      key: "post_time",
+      sorter: (a, b) =>
+        new Date(a.post_time).getTime() - new Date(b.post_time).getTime(),
     },
     {
-      title: 'COMMENT',
-      dataIndex: 'comment',
-      key: 'comment',
+      title: "COMMENT",
+      dataIndex: "comment",
+      key: "comment",
       sorter: (a, b) => a.comment.localeCompare(b.comment),
       render: (text) => (
-        <span className="text-gray-500 truncate max-w-[200px] inline-block">{text}</span>
-      ),
-    },
-    {
-      title: 'ACTION',
-      key: 'action',
-      render: (_, record) => (
-        <span
-          className="text-blue-600 font-semibold cursor-pointer hover:text-blue-800 transition-colors"
-          onClick={() => navigate(`/admin/reviews/${record.review_id}`)}
-        >
-          View Detail
-        </span>
+        /* แก้ไขจาก span เป็น div และปรับ class ตามด้านล่างนี้ */
+        <div className="text-gray-500 max-h-[80px] max-w-[300px] overflow-y-auto pr-2 text-[12px] leading-relaxed break-words scrollbar-thin scrollbar-thumb-gray-200">
+          {text}
+        </div>
       ),
     },
   ];
@@ -245,7 +271,7 @@ export default function Reviews() {
     (review) =>
       review.review_id.toLowerCase().includes(searchText.toLowerCase()) ||
       review.user_id.toLowerCase().includes(searchText.toLowerCase()) ||
-      review.movie_id.toLowerCase().includes(searchText.toLowerCase())
+      review.movie_id.toLowerCase().includes(searchText.toLowerCase()),
   );
 
   return (

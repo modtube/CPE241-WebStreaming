@@ -1,10 +1,10 @@
-import type { Request, Response } from 'express';
-import pool from '../config/db.js';
+// controllers/dashboardController.ts
+import type { Request, Response } from "express";
+import pool from "../config/db.js";
 
 export const getDashboardStats = async (req: Request, res: Response) => {
   try {
-    // 1. Quick Stats: ข้อมูลสรุปเบื้องต้น
-    // ใช้ total_amount จาก transaction_list และ rating จาก reviews ตาม schema
+    // 1. Quick Stats
     const quickStatsQuery = `
       SELECT 
         (SELECT COUNT(*) FROM movie) as total_movies,
@@ -13,21 +13,18 @@ export const getDashboardStats = async (req: Request, res: Response) => {
         (SELECT AVG(rating) FROM reviews) as avg_rating
     `;
 
-    // 2. Revenue Trend: รายได้รายเดือน
-    // ใช้ transaction_date และ total_amount
+    // 2. Revenue Trend: เพิ่มปีเข้าไปในชื่อเดือนเพื่อแยกข้อมูลแต่ละปี
     const revenueTrendQuery = `
       SELECT 
-        TO_CHAR(transaction_date, 'Mon') as month,
+        TO_CHAR(transaction_date, 'Mon YYYY') as month,
         SUM(total_amount) as amount
       FROM transaction_list
-      GROUP BY TO_CHAR(transaction_date, 'Mon'), DATE_TRUNC('month', transaction_date)
+      GROUP BY DATE_TRUNC('month', transaction_date), TO_CHAR(transaction_date, 'Mon YYYY')
       ORDER BY DATE_TRUNC('month', transaction_date)
       LIMIT 12
     `;
 
-    // 3. Top 5 Best Sellers: หนังขายดี
-    // Join transaction_detail (td) กับ movie (m) โดยใช้ movie_id
-    // ใช้ m.title และ td.sold_price ตาม schema คับ
+    // 3. Top 5 Best Sellers
     const topSellersQuery = `
       SELECT 
         m.movie_id as id,
@@ -41,8 +38,7 @@ export const getDashboardStats = async (req: Request, res: Response) => {
       LIMIT 5
     `;
 
-    // 4. Movie by Genre: สถิติแยกตามประเภท
-    // Join movie_genre (mg) และ genre (g)
+    // 4. Movie by Genre
     const genreDistributionQuery = `
       SELECT 
         g.genre_name as name,
@@ -52,19 +48,18 @@ export const getDashboardStats = async (req: Request, res: Response) => {
       GROUP BY g.genre_name
     `;
 
-    // 5. User Growth: จำนวน User ใหม่ตามเดือน
-    // ใช้ register_date จากตาราง app_user
+    // 5. User Growth (Cumulative): ใช้ Window Function คำนวณยอดสะสม
+
     const userGrowthQuery = `
       SELECT 
-        TO_CHAR(register_date, 'Mon') as month,
-        COUNT(user_id) as count
+        TO_CHAR(register_date, 'Mon YYYY') as month,
+        SUM(COUNT(user_id)) OVER (ORDER BY DATE_TRUNC('month', register_date)) as count
       FROM app_user
-      GROUP BY TO_CHAR(register_date, 'Mon'), DATE_TRUNC('month', register_date)
+      GROUP BY DATE_TRUNC('month', register_date), TO_CHAR(register_date, 'Mon YYYY')
       ORDER BY DATE_TRUNC('month', register_date)
     `;
 
-    // 6. User Distribution by Country: ผู้ใช้แยกตามประเทศ
-    // Join app_user (u) และ country (c) โดยใช้ country_code
+    // 6. User Distribution by Country
     const countryDistQuery = `
       SELECT 
         c.country_name as name,
@@ -74,21 +69,20 @@ export const getDashboardStats = async (req: Request, res: Response) => {
       GROUP BY c.country_name
     `;
 
-    // Execution: รันพร้อมกันทุก Query
     const [
-      quickStats, 
-      revenueTrend, 
-      topSellers, 
-      genres, 
-      userGrowth, 
-      countries
+      quickStats,
+      revenueTrend,
+      topSellers,
+      genres,
+      userGrowth,
+      countries,
     ] = await Promise.all([
       pool.query(quickStatsQuery),
       pool.query(revenueTrendQuery),
       pool.query(topSellersQuery),
       pool.query(genreDistributionQuery),
       pool.query(userGrowthQuery),
-      pool.query(countryDistQuery)
+      pool.query(countryDistQuery),
     ]);
 
     res.status(200).json({
@@ -98,12 +92,11 @@ export const getDashboardStats = async (req: Request, res: Response) => {
         topSellers: topSellers.rows,
         genreDistribution: genres.rows,
         userGrowth: userGrowth.rows,
-        countryDistribution: countries.rows
-      }
+        countryDistribution: countries.rows,
+      },
     });
-
   } catch (error: any) {
-    console.error('Dashboard Fetching Error:', error.message);
-    res.status(500).json({ message: 'Internal Server Error' });
+    console.error("Dashboard Error:", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };

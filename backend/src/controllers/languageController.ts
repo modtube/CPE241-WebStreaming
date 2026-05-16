@@ -94,3 +94,31 @@ export const deleteLanguage = async (req: Request, res: Response) => {
     res.status(500).json({ message: `Deleting Language: ${error}` });
   }
 };
+
+export const getLanguageById = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params; // รับค่า L001 จาก URL path
+
+    const query = `
+      SELECT 
+        language_id,
+        language_name,
+        native_name
+      FROM language_list
+      WHERE language_id = $1
+    `;
+
+    const result = await pool.query(query, [id]);
+
+    // ตรวจสอบว่าพบข้อมูลหรือไม่
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Language not found" });
+    }
+
+    // ส่งข้อมูลภาษาแรกที่พบกลับไป
+    res.status(200).json(result.rows[0]);
+  } catch (error) {
+    console.error("Error fetching language:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};

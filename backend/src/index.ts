@@ -19,6 +19,8 @@ import genreRoutes from "./routes/genreRoutes.js";
 import ratingRoutes from "./routes/ratingRoutes.js";
 import countryRoutes from "./routes/countryRoutes.js";
 import transactionRoutes from "./routes/transactionRoutes.js";
+import playlistRoutes from "./routes/playlistRoutes.js";
+import homeRoutes from "./routes/homeRoutes.js";
 
 // ===== User-facing Routes =====
 
@@ -37,6 +39,8 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 
 app.use("/api/customer", customerRoutes);
+app.use("/api/home", homeRoutes);
+app.use("/api/playlist", playlistRoutes);
 app.use("/api/movies", movieRoutes);
 app.use("/api/crew", crewRoutes);
 app.use("/api/dashboard", dashboardRoutes);

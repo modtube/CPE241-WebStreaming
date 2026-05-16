@@ -1,5 +1,8 @@
 import express from "express";
-import { getAllPersons } from "../controllers/personController.js";
+import {
+  getAllPersons,
+  getPersonById,
+} from "../controllers/personController.js";
 
 const router = express.Router();
 
@@ -7,5 +10,7 @@ const router = express.Router();
 // หรือ GET http://localhost:5000/api/persons?movie=[...]
 // (movie_id)
 router.get("/", getAllPersons);
+
+router.get("/:id", getPersonById);
 
 export default router;

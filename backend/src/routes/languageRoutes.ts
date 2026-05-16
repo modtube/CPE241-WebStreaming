@@ -4,6 +4,7 @@ import {
   addLanguage,
   updateLanguage,
   deleteLanguage,
+  getLanguageById,
 } from "../controllers/languageController.js";
 
 const router = express.Router();
@@ -16,5 +17,7 @@ router.post("/", addLanguage);
 router.put("/:language_id", updateLanguage);
 
 router.delete("/:language_id", deleteLanguage);
+
+router.get("/:id", getLanguageById);
 
 export default router;

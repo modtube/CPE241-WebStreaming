@@ -1,9 +1,15 @@
 import express from "express";
+import { authenticateToken } from "../middlewares/authMiddleware.js"; // 🟢 นำเข้า Middleware
 import {
   getAllUsers,
   updateUserStatus,
   updateUserRole,
   deleteUsers,
+  getUserData,
+  updateUserData,
+  updatePassword,
+  createUser,
+  resetPassword,
 } from "../controllers/userController.js";
 
 const router = express.Router();
@@ -28,5 +34,11 @@ router.put("/:id/role", updateUserRole);
 { "userIds": ["U00001", "U00002"] }
 */
 router.delete("/", deleteUsers);
+
+router.get("/profile/:id", authenticateToken, getUserData);
+router.put("/profile/:id", authenticateToken, updateUserData);
+router.put("/profile/:id/password", authenticateToken, updatePassword);
+router.post("/register", createUser);
+router.put("/reset-password", resetPassword);
 
 export default router;

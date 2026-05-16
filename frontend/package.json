@@ -12,6 +12,8 @@
   "dependencies": {
     "@ant-design/icons": "6.x",
     "antd": "^5.0.0",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.7",
     "lucide-react": "^1.3.0",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
